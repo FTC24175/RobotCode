@@ -147,13 +147,13 @@ public class teamTeleOpCode extends OpMode {
         {
             iRobot.liftMotor1.setDirection(DcMotor.Direction.FORWARD);
             iRobot.liftMotor1.setPower(motorPower);
-            iRobot.liftMotor2.setDirection(DcMotor.Direction.FORWARD);
+            iRobot.liftMotor2.setDirection(DcMotor.Direction.REVERSE);
             iRobot.liftMotor2.setPower(motorPower);
         }
         else if(ry < -0.1) {
             iRobot.liftMotor1.setDirection(DcMotor.Direction.REVERSE);
             iRobot.liftMotor1.setPower(motorPower);
-            iRobot.liftMotor2.setDirection(DcMotor.Direction.REVERSE);
+            iRobot.liftMotor2.setDirection(DcMotor.Direction.FORWARD);
             iRobot.liftMotor2.setPower(motorPower);
         }
         else
