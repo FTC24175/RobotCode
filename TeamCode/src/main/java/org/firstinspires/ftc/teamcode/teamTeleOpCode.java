@@ -71,16 +71,16 @@ public class teamTeleOpCode extends OpMode {
         int cycleLift1Pos = 0;
 
         /*
-            Move forward or backwards
+            Turn left or right
          */
-        if(ly > 0.1)
+        if(lx > 0.1)
         {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.rightDriveMotor.setPower(motorPower);
         }
-        else if(ly < -0.1) {
+        else if(lx < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -93,16 +93,16 @@ public class teamTeleOpCode extends OpMode {
         }
 
         /*
-            Turn left or right
+            Move forward or backward
          */
-        if(lx > 0.1)
+        if(ly > 0.1)
         {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.rightDriveMotor.setPower(motorPower);
         }
-        else if(lx < -0.1) {
+        else if(ly < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
