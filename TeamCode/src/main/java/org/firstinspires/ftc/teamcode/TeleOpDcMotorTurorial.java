@@ -21,7 +21,7 @@ public class TeleOpDcMotorTurorial extends OpMode {
 
     @Override
     public void loop() {
-        float motorPower = 0.3f;
+        float motorPower = 0.6f;
 
         if(gamepad2.left_stick_y > 0.1)
         {
