@@ -35,6 +35,8 @@ public class teamTeleOpCode extends OpMode {
     @Override
     public void init() {
         iRobot.initialize(hardwareMap);
+        iRobot.armServo.setPosition(0.85);
+        //arm position at startup ^^
         //currentClawPosition = iRobot.clawServo.getPosition();
         //currentArmPosition = iRobot.armServo.getPosition();
         // Tell the driver that initialization is complete.
