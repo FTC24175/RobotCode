@@ -89,10 +89,10 @@ public class Attachments {
     public void pickUp() {
         armPosition = Constants.armIn;
         armServo.setPosition(armPosition);
-        sleep(200);
+        sleep(2000);
         clawPosition = Constants.clawClose;
         iRobot.clawServo.setPosition(clawPosition);
-        sleep(200);
+        sleep(2000);
         armPosition = Constants.armOut;
         armServo.setPosition(armPosition);
     }
