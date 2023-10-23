@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import static android.os.SystemClock.sleep;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.armPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
+
+
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -20,7 +26,8 @@ public class Attachments {
     private Telemetry telemetry;
     private ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveMotor, rightDriveMotor, liftMotor1, liftMotor2;
-    public Servo clawServo, armServo; //, camServo;
+    public Servo clawServo;
+    public static Servo armServo; //, camServo;
     public Rev2mDistanceSensor rightDistance, leftDistance, clawRightDistance, clawLeftDistance, clawDistance;
 
     public void initialize(HardwareMap hardwareMap) {
@@ -73,7 +80,23 @@ public class Attachments {
         liftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-
+    public void armDown() {
+        armPosition = Constants.armOut;
+        armServo.setPosition(armPosition);
+        clawPosition = Constants.clawOpen;
+        clawServo.setPosition(clawPosition);
+        setLiftMotor(0.3, 0);
+    }
+    public void pickUp() {
+        armPosition = Constants.armIn;
+        armServo.setPosition(armPosition);
+        sleep(200);
+        clawPosition = Constants.clawClose;
+        clawServo.setPosition(clawPosition);
+        sleep(500);
+        armPosition = Constants.armOut;
+        armServo.setPosition(armPosition);
+    }
 
     public void setClawServo (double position) {clawServo.setPosition(position);}
     //    public void setCamServo (double position) {camServo.setPosition(position);}
