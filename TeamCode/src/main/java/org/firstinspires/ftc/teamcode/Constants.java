@@ -13,7 +13,7 @@ public class Constants {
 
     public static double clawOpen = 0;
 
-    public static double clawClose = 0.5;
+    public static double clawClose = 0.8;
 
 
 
