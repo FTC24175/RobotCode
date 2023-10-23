@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import static android.os.SystemClock.sleep;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.armPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
+
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -74,7 +79,23 @@ public class Attachments {
         liftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-
+    public void armDown() {
+        armPosition = Constants.armOut;
+        armServo.setPosition(armPosition);
+        clawPosition = Constants.clawOpen;
+        iRobot.clawServo.setPosition(clawPosition);
+        setLiftMotor(0.3,0);
+    }
+    public void pickUp() {
+        armPosition = Constants.armIn;
+        armServo.setPosition(armPosition);
+        sleep(200);
+        clawPosition = Constants.clawClose;
+        iRobot.clawServo.setPosition(clawPosition);
+        sleep(200);
+        armPosition = Constants.armOut;
+        armServo.setPosition(armPosition);
+    }
 
     public void setClawServo (double position) {clawServo.setPosition(position);}
     //    public void setCamServo (double position) {camServo.setPosition(position);}

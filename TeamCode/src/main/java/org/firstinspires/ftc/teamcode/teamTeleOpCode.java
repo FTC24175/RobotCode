@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOp", group = "Iterative Opmode")
 public class teamTeleOpCode extends OpMode {
-    
-    private Attachments iRobot = new Attachments();
+
+    public static Attachments iRobot = new Attachments();
 
 
     private double currentLift1Position = 0;
@@ -24,8 +24,8 @@ public class teamTeleOpCode extends OpMode {
 
     // Servos
 
-    private double armPosition = Constants.armIn;
-    private double clawPosition = Constants.clawOpen;
+    public static double armPosition = Constants.armIn;
+    public static double clawPosition = Constants.clawOpen;
 
 
     /*
@@ -44,7 +44,6 @@ public class teamTeleOpCode extends OpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
-
 
 
     /*
@@ -75,21 +74,17 @@ public class teamTeleOpCode extends OpMode {
         /*
             Move forward or backwards
          */
-        if(ly > 0.1)
-        {
+        if (ly > 0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else if(ly < -0.1) {
+        } else if (ly < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else
-        {
+        } else {
             iRobot.leftDriveMotor.setPower(0);
             iRobot.rightDriveMotor.setPower(0);
         }
@@ -97,36 +92,30 @@ public class teamTeleOpCode extends OpMode {
         /*
             Turn left or right
          */
-        if(lx > 0.1)
-        {
+        if (lx > 0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else if(lx < -0.1) {
+        } else if (lx < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else
-        {
+        } else {
             iRobot.leftDriveMotor.setPower(0);
             iRobot.rightDriveMotor.setPower(0);
         }
 
 
         /*
-            arm control
+            arm/wrist control
         */
-        if (gamepad1.y)
-        {
+        if (gamepad1.y) {
             armPosition = Constants.armIn;
             iRobot.armServo.setPosition(armPosition);
         }
-        if (gamepad1.x)
-        {
+        if (gamepad1.x) {
             armPosition = Constants.armOut;
             iRobot.armServo.setPosition(armPosition);
         }
@@ -145,21 +134,17 @@ public class teamTeleOpCode extends OpMode {
         /*
             lift control
         */
-        if(ry > 0.1)
-        {
+        if (ry > 0.1) {
             iRobot.liftMotor1.setDirection(DcMotor.Direction.FORWARD);
             iRobot.liftMotor1.setPower(motorPower);
             iRobot.liftMotor2.setDirection(DcMotor.Direction.REVERSE);
             iRobot.liftMotor2.setPower(motorPower);
-        }
-        else if(ry < -0.1) {
+        } else if (ry < -0.1) {
             iRobot.liftMotor1.setDirection(DcMotor.Direction.REVERSE);
             iRobot.liftMotor1.setPower(motorPower);
             iRobot.liftMotor2.setDirection(DcMotor.Direction.FORWARD);
             iRobot.liftMotor2.setPower(motorPower);
-        }
-        else
-        {
+        } else {
             iRobot.liftMotor1.setPower(0);
             iRobot.liftMotor2.setPower(0);
         }
@@ -170,9 +155,13 @@ public class teamTeleOpCode extends OpMode {
         //iRobot.setArmServo(armPosition);
 
 
-
-
-
+        /* ------------------------------------ Arm Down ------------------------------------- */
+        if (gamepad1.left_trigger > 0.1) {
+            iRobot.armDown();
+        }
+        if (gamepad1.left_bumper) {
+            iRobot.pickUp();
+        }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
 
@@ -182,13 +171,4 @@ public class teamTeleOpCode extends OpMode {
         telemetry.update();
 
     }
-
-    @Override
-    public void stop() {
-    }
-
-
-
-
-
 }
