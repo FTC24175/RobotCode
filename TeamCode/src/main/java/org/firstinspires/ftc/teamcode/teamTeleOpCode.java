@@ -11,8 +11,8 @@ public class teamTeleOpCode extends OpMode {
     
     public static Attachments iRobot = new Attachments();
 
-    private double leftArmPosition = 0;
-    private double rightArmPosition = 0;
+    private static double leftArmPosition = 0;
+    private static double rightArmPosition = 0;
 
     // Servos
     public static double wristPosition = Constants.wristIn;
@@ -38,11 +38,11 @@ public class teamTeleOpCode extends OpMode {
     @Override
     public void loop() {
         /* ------------------------------------ Drive ------------------------------------ */
-        // Position constants
-        //leftArmPosition = iRobot.getLeftArmPosition();
-        //rightArmPosition = iRobot.getRightArmPosition();
-        //wristPosition  = iRobot.getWristPosition();
-        //clawPosition = iRobot.getClawPosition();
+        // Get Position constants
+        leftArmPosition = iRobot.getLeftArmPosition();
+        rightArmPosition = iRobot.getRightArmPosition();
+        wristPosition  = iRobot.getWristPosition();
+        clawPosition = iRobot.getClawPosition();
 
         // Motors
         double lx = gamepad1.left_stick_x;
@@ -160,8 +160,10 @@ public class teamTeleOpCode extends OpMode {
 
         /* ------------------------------------ Telemetry ------------------------------------ */
         // Telemetry is for debugging
-        telemetry.addData("arm position", wristPosition);
+        telemetry.addData("left arm position", leftArmPosition);
+        telemetry.addData("right arm position", rightArmPosition);
         telemetry.addData("claw position", clawPosition);
+        telemetry.addData("wrist position", wristPosition);
         telemetry.update();
     }
 
