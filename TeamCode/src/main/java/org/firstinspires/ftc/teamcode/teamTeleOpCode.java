@@ -1,63 +1,48 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOp", group = "Iterative Opmode")
 public class teamTeleOpCode extends OpMode {
     
     public static Attachments iRobot = new Attachments();
 
-
-    private double currentLift1Position = 0;
-
-    private double currentLift2Position = 0;
-
+    private double leftArmPosition = 0;
+    private double rightArmPosition = 0;
 
     // Servos
-
-    public static double armPosition = Constants.armIn;
+    public static double wristPosition = Constants.wristIn;
     public static double clawPosition = Constants.clawOpen;
-
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
-
     @Override
     public void init() {
         iRobot.initialize(hardwareMap);
-        //currentClawPosition = iRobot.clawServo.getPosition();
-        //currentArmPosition = iRobot.armServo.getPosition();
+
         // Tell the driver that initialization is complete.
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
-
-
     /*
      * Code to run after the driver hits PLAY but before they hit STOP
+     * This is a continuous loop that responds to buttons being pressed on the game pad
      */
     @Override
     public void loop() {
         /* ------------------------------------ Drive ------------------------------------ */
         // Position constants
-        /*
-        currentLift1Position = iRobot.getLiftMotor1Position();
-        currentLift2Position = iRobot.getLiftMotor2Position();
-        currentArmPosition = iRobot.getArmPosition();
-        currentClawPosition = iRobot.getClawPosition();
-         */
+        //leftArmPosition = iRobot.getLeftArmPosition();
+        //rightArmPosition = iRobot.getRightArmPosition();
+        //wristPosition  = iRobot.getWristPosition();
+        //clawPosition = iRobot.getClawPosition();
 
         // Motors
         double lx = gamepad1.left_stick_x;
@@ -65,13 +50,13 @@ public class teamTeleOpCode extends OpMode {
         double rx = gamepad1.right_stick_x;
         double ry = gamepad1.right_stick_y;
 
-        float motorPower = 1.0f;
+        float motorPower = 0.3f;
         int liftMax = -1175;
         int liftMin = 0;
         int cycleLift1Pos = 0;
 
         /*
-            Turn left or right
+            Turn left or right when when left_stick is moved in x direction
          */
         if(lx > 0.1)
         {
@@ -93,7 +78,7 @@ public class teamTeleOpCode extends OpMode {
         }
 
         /*
-            Move forward or backward
+            Move forward or backward when left_stick is moved in y direction
          */
         if(ly > 0.1)
         {
@@ -114,23 +99,22 @@ public class teamTeleOpCode extends OpMode {
             iRobot.rightDriveMotor.setPower(0);
         }
 
-
         /*
-            arm control
+            move wrist up and down when X & Y buttons are pressed
         */
         if (gamepad1.y)
         {
-            armPosition = Constants.armIn;
-            iRobot.armServo.setPosition(armPosition);
+            wristPosition = Constants.wristIn;
+            iRobot.wristServo.setPosition(wristPosition);
         }
         if (gamepad1.x)
         {
-            armPosition = Constants.armOut;
-            iRobot.armServo.setPosition(armPosition);
+            wristPosition = Constants.wristOut;
+            iRobot.wristServo.setPosition(wristPosition);
         }
 
         /*
-            claw control
+            open and close claw when A and B buttons are pressed
         */
         if (gamepad1.a) {
             clawPosition = Constants.clawOpen;
@@ -141,33 +125,30 @@ public class teamTeleOpCode extends OpMode {
         }
 
         /*
-            lift control
+            Move arm up and down when right_stick is moved in y direction
         */
         if(ry > 0.1)
         {
-            iRobot.liftMotor1.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.liftMotor1.setPower(motorPower);
-            iRobot.liftMotor2.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.liftMotor2.setPower(motorPower);
+            iRobot.leftArmMotor.setDirection(DcMotor.Direction.FORWARD);
+            iRobot.leftArmMotor.setPower(motorPower);
+            iRobot.rightArmMotor.setDirection(DcMotor.Direction.REVERSE);
+            iRobot.rightArmMotor.setPower(motorPower);
         }
         else if(ry < -0.1) {
-            iRobot.liftMotor1.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.liftMotor1.setPower(motorPower);
-            iRobot.liftMotor2.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.liftMotor2.setPower(motorPower);
+            iRobot.leftArmMotor.setDirection(DcMotor.Direction.REVERSE);
+            iRobot.leftArmMotor.setPower(motorPower);
+            iRobot.rightArmMotor.setDirection(DcMotor.Direction.FORWARD);
+            iRobot.rightArmMotor.setPower(motorPower);
         }
         else
         {
-            iRobot.liftMotor1.setPower(0);
-            iRobot.liftMotor2.setPower(0);
+            iRobot.leftArmMotor.setPower(0);
+            iRobot.rightArmMotor.setPower(0);
         }
-
 
         // Actually moves the claw and extension
         //iRobot.setClawServo(clawPosition);
         //iRobot.setArmServo(armPosition);
-
-
 
         /* ------------------------------------Arm Down ----------------------------------------*/
         if(gamepad1.left_trigger > 0.1) {
@@ -178,20 +159,13 @@ public class teamTeleOpCode extends OpMode {
         }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
-
         // Telemetry is for debugging
-        telemetry.addData("arm position", armPosition);
+        telemetry.addData("arm position", wristPosition);
         telemetry.addData("claw position", clawPosition);
         telemetry.update();
-
     }
 
     @Override
     public void stop() {
     }
-
-
-
-
-
 }

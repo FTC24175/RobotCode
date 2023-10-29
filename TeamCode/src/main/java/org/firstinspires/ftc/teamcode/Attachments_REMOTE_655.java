@@ -1,12 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static android.os.SystemClock.sleep;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
-
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,8 +15,7 @@ public class Attachments {
     private Telemetry telemetry;
     private ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveMotor, rightDriveMotor, leftArmMotor, rightArmMotor;
-    public Servo clawServo;
-    public static Servo  wristServo; //, camServo;
+    public Servo clawServo, wristServo; //, camServo;
     public Rev2mDistanceSensor rightDistance, leftDistance, clawRightDistance, clawLeftDistance, clawDistance;
 
     public void initialize(HardwareMap hardwareMap) {
@@ -76,24 +68,6 @@ public class Attachments {
         rightArmMotor.setPower(power);
         rightArmMotor.setTargetPosition(position);
         rightArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void armDown() {
-        wristPosition = Constants.wristOut;
-        wristServo.setPosition(wristPosition);
-        clawPosition = Constants.clawOpen;
-        clawServo.setPosition(clawPosition);
-        setArmMotors(0.3, 0);
-    }
-    public void pickUp() {
-        wristPosition = Constants.wristIn;
-        wristServo.setPosition(wristPosition);
-        sleep(200);
-        clawPosition = Constants.clawClose;
-        clawServo.setPosition(clawPosition);
-        sleep(500);
-        wristPosition = Constants.wristOut;
-        wristServo.setPosition(wristPosition);
     }
 
     public void setClawServo (double position) {

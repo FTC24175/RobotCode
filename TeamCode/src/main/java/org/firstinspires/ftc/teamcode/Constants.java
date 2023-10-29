@@ -7,9 +7,9 @@ import com.acmerobotics.dashboard.config.Config;
 public class Constants {
 
 
-    public static double armIn = 0;
+    public static double wristIn = 0;
 
-    public static double armOut = 1;
+    public static double wristOut = 1;
 
     public static double clawOpen = 0;
 
