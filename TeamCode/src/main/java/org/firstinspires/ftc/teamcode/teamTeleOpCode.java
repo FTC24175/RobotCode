@@ -8,9 +8,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
 Issues to fix:
-Robot to fast: Add pressure sensitivity.
+Remap Controls
+Add brake mode to motors so gravity doesnt affect the arm
+Robot too fast: Add pressure sensitivity.
 Simplify Buttons
+Arm not moving up all the way
+Make wrist move by hold the button instead of one press
+
+Harware problems:
+Attach control hub and other electronics to base
+Labl Wires
+add weight to front so it doesnt tip over when arm is out
+Research Gear Ratio
+zip ties are too long - cut off tails
+
+
+Also scissor lift and lead screw should be use in case we ever plan on making the robot hang off a bar
  */
+
 @TeleOp(name = "TeleOp", group = "Iterative Opmode")
 public class teamTeleOpCode extends OpMode {
     
