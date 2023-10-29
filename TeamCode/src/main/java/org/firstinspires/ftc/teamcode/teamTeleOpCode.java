@@ -7,21 +7,23 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
-Issues to fix:
-Remap Controls
+Software problems:
+Remap Controls - each joystick controls it's respective wheel
 Add brake mode to motors so gravity doesnt affect the arm
 Robot too fast: Add pressure sensitivity.
 Simplify Buttons
-Arm not moving up all the way
 Make wrist move by hold the button instead of one press
-
+Slow down pickup function
+Set limit to how far the arm can go
 Harware problems:
 Attach control hub and other electronics to base
-Labl Wires
+Label Wires
+Wire Management
 add weight to front so it doesnt tip over when arm is out
 Research Gear Ratio
 zip ties are too long - cut off tails
-
+Claw is too tight
+Two gamepad - one for move and one for claw, wrist, and arm
 
 Also scissor lift and lead screw should be use in case we ever plan on making the robot hang off a bar
  */
