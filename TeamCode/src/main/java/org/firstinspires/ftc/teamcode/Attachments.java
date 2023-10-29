@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import static android.os.SystemClock.sleep;
 import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
 import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
-
-import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -78,7 +75,7 @@ public class Attachments {
         rightArmMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void armDown() {
+    public void wristDown() {
         wristPosition = Constants.wristOut;
         wristServo.setPosition(wristPosition);
         clawPosition = Constants.clawOpen;

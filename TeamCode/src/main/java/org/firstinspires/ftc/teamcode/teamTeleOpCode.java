@@ -152,7 +152,7 @@ public class teamTeleOpCode extends OpMode {
 
         /* ------------------------------------Arm Down ----------------------------------------*/
         if(gamepad1.left_trigger > 0.1) {
-            iRobot.armDown();
+            iRobot.wristDown();
         }
         if(gamepad1.left_bumper) {
             iRobot.pickUp();
