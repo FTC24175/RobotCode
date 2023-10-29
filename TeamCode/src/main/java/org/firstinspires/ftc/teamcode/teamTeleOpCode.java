@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOp", group = "Iterative Opmode")
 public class teamTeleOpCode extends OpMode {
-    
-    private Attachments iRobot = new Attachments();
+
+    public static Attachments iRobot = new Attachments();
 
 
     private double currentLift1Position = 0;
@@ -24,8 +24,8 @@ public class teamTeleOpCode extends OpMode {
 
     // Servos
 
-    private double armPosition = Constants.armIn;
-    private double clawPosition = Constants.clawOpen;
+    public static double armPosition = Constants.wristUp;
+    public static double clawPosition = Constants.clawOpen;
 
 
     /*
@@ -120,12 +120,12 @@ public class teamTeleOpCode extends OpMode {
         */
         if (gamepad1.y)
         {
-            armPosition = Constants.armIn;
+            armPosition = Constants.wristUp;
             iRobot.armServo.setPosition(armPosition);
         }
         if (gamepad1.x)
         {
-            armPosition = Constants.armOut;
+            armPosition = Constants.wristDown;
             iRobot.armServo.setPosition(armPosition);
         }
 
@@ -169,8 +169,17 @@ public class teamTeleOpCode extends OpMode {
 
 
 
+        /* ------------------------------------Arm Down ----------------------------------------*/
+        if(gamepad1.left_trigger > 0.1) {
+            iRobot.armDown();
+        }
+        if(gamepad1.left_bumper) {
+            iRobot.pickUp();
+        }
 
-
+        if(gamepad1.right_bumper) {
+            iRobot.release();
+        }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
 
