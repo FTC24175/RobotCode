@@ -155,7 +155,7 @@ public class teamTeleOpCode extends OpMode {
             iRobot.wristDown();
         }
         if(gamepad1.left_bumper) {
-            iRobot.pickUp();
+            iRobot.pickUpPixel();
         }
 
         /* ------------------------------------ Telemetry ------------------------------------ */

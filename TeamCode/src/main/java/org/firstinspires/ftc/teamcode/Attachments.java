@@ -82,7 +82,7 @@ public class Attachments {
         clawServo.setPosition(clawPosition);
         setArmMotors(0.3, 0);
     }
-    public void pickUp() {
+    public void pickUpPixel() {
         wristPosition = Constants.wristIn;
         wristServo.setPosition(wristPosition);
         sleep(200);
