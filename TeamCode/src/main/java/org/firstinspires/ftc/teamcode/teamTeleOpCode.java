@@ -15,6 +15,7 @@ Simplify Buttons
 Make wrist move by hold the button instead of one press
 Slow down pickup function
 Set limit to how far the arm can go
+
 Harware problems:
 Attach control hub and other electronics to base
 Label Wires
