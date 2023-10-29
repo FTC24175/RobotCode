@@ -6,6 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+/*
+Issues to fix:
+Robot to fast: Add pressure sensitivity.
+Simplify Buttons
+ */
 @TeleOp(name = "TeleOp", group = "Iterative Opmode")
 public class teamTeleOpCode extends OpMode {
     
@@ -58,18 +63,18 @@ public class teamTeleOpCode extends OpMode {
         /*
             Turn left or right when when left_stick is moved in x direction
          */
-        if(lx > 0.1)
+        if(rx > 0.1)
         {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.leftDriveMotor.setPower(motorPower);
+            iRobot.leftDriveMotor.setPower(rx);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.rightDriveMotor.setPower(motorPower);
         }
-        else if(lx < -0.1) {
+        else if(rx < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.leftDriveMotor.setPower(motorPower);
+            iRobot.leftDriveMotor.setPower(Math.abs(rx));
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.rightDriveMotor.setPower(motorPower);
+            iRobot.rightDriveMotor.setPower(Math.abs(rx));
         }
         else
         {
@@ -91,7 +96,7 @@ public class teamTeleOpCode extends OpMode {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.rightDriveMotor.setPower(motorPower);
+            iRobot.rightDriveMotor.setPower(rx);
         }
         else
         {
