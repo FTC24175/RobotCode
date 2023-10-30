@@ -16,7 +16,7 @@ Make wrist move by hold the button instead of one press
 Slow down pickup function
 Set limit to how far the arm can go
 
-Harware problems:
+Hardware problems:
 Attach control hub and other electronics to base
 Label Wires
 Wire Management
@@ -34,11 +34,12 @@ public class teamTeleOpCode extends OpMode {
     
     public static Attachments iRobot = new Attachments();
 
+
     private static double leftArmPosition = 0;
     private static double rightArmPosition = 0;
 
     // Servos
-    public static double wristPosition = Constants.wristIn;
+    public static double wristPosition = Constants.wristUp;
     public static double clawPosition = Constants.clawOpen;
 
     /*
@@ -73,52 +74,48 @@ public class teamTeleOpCode extends OpMode {
         double rx = gamepad1.right_stick_x;
         double ry = gamepad1.right_stick_y;
 
-        float motorPower = 0.3f;
+        float motorPower = 0.6f;
         int liftMax = -1175;
         int liftMin = 0;
         int cycleLift1Pos = 0;
 
         /*
-            Turn left or right when when left_stick is moved in x direction
-         */
-        if(rx > 0.1)
-        {
-            iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.leftDriveMotor.setPower(rx);
-            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else if(rx < -0.1) {
-            iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.leftDriveMotor.setPower(Math.abs(rx));
-            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.rightDriveMotor.setPower(Math.abs(rx));
-        }
-        else
-        {
-            iRobot.leftDriveMotor.setPower(0);
-            iRobot.rightDriveMotor.setPower(0);
-        }
-
-        /*
-            Move forward or backward when left_stick is moved in y direction
+            Left Wheel Control
          */
         if(ly > 0.1)
         {
-            iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.leftDriveMotor.setPower(motorPower);
-            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.rightDriveMotor.setPower(motorPower);
-        }
-        else if(ly < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftDriveMotor.setPower(motorPower);
-            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.rightDriveMotor.setPower(rx);
+
+        }
+        else if(ly < -0.1) {
+            iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
+            iRobot.leftDriveMotor.setPower(motorPower);
+
         }
         else
         {
             iRobot.leftDriveMotor.setPower(0);
+
+        }
+
+        /*
+            Right Wheel Control
+         */
+        if(ry > 0.1)
+        {
+
+            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
+            iRobot.rightDriveMotor.setPower(motorPower);
+        }
+        else if(ry < -0.1) {
+
+            iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
+            iRobot.rightDriveMotor.setPower(motorPower);
+        }
+        else
+        {
+
             iRobot.rightDriveMotor.setPower(0);
         }
 
@@ -127,14 +124,14 @@ public class teamTeleOpCode extends OpMode {
         */
         if (gamepad1.y)
         {
-            wristPosition = Constants.wristIn;
+            wristPosition = Constants.wristUp;
             iRobot.wristServo.setPosition(wristPosition);
         }
         if (gamepad1.x)
         {
-            wristPosition = Constants.wristOut;
+            wristPosition = Constants.wristDown;
             iRobot.wristServo.setPosition(wristPosition);
-        }
+       }
 
         /*
             open and close claw when A and B buttons are pressed
@@ -150,6 +147,7 @@ public class teamTeleOpCode extends OpMode {
         /*
             Move arm up and down when right_stick is moved in y direction
         */
+        /*
         if(ry > 0.1)
         {
             iRobot.leftArmMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -168,17 +166,23 @@ public class teamTeleOpCode extends OpMode {
             iRobot.leftArmMotor.setPower(0);
             iRobot.rightArmMotor.setPower(0);
         }
+        */
+
 
         // Actually moves the claw and extension
         //iRobot.setClawServo(clawPosition);
-        //iRobot.setArmServo(armPosition);
+        //iRobot.setWristServo(wristPosition);
 
-        /* ------------------------------------Arm Down ----------------------------------------*/
+        /* ------------------------------------Wrist Down ----------------------------------------*/
         if(gamepad1.left_trigger > 0.1) {
             iRobot.wristDown();
         }
         if(gamepad1.left_bumper) {
             iRobot.pickUpPixel();
+	}
+
+        if(gamepad1.right_bumper) {
+            iRobot.release();
         }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
@@ -194,3 +198,9 @@ public class teamTeleOpCode extends OpMode {
     public void stop() {
     }
 }
+
+
+
+
+
+

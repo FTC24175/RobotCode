@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import static android.os.SystemClock.sleep;
 import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
 import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
+import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -76,25 +78,36 @@ public class Attachments {
     }
 
     public void wristDown() {
-        wristPosition = Constants.wristOut;
+        wristPosition = Constants.wristUp;
         wristServo.setPosition(wristPosition);
         clawPosition = Constants.clawOpen;
         clawServo.setPosition(clawPosition);
         setArmMotors(0.3, 0);
     }
     public void pickUpPixel() {
-        wristPosition = Constants.wristIn;
+        wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
         sleep(200);
         clawPosition = Constants.clawClose;
         clawServo.setPosition(clawPosition);
         sleep(500);
-        wristPosition = Constants.wristOut;
+        wristPosition = Constants.wristUp;
         wristServo.setPosition(wristPosition);
     }
 
     public void setClawServo (double position) {
         clawServo.setPosition(position);
+    }
+
+    public void release() {
+        wristPosition = Constants.wristDown;
+        wristServo.setPosition(wristPosition);
+        sleep(500);
+        clawPosition = Constants.clawOpen;
+        clawServo.setPosition(clawPosition);
+        sleep(500);
+        wristPosition = Constants.wristUp;
+        wristServo.setPosition((wristPosition));
     }
 
     //    public void setCamServo (double position) {camServo.setPosition(position);}
