@@ -55,6 +55,16 @@ public class teamTeleOpCode extends OpMode {
         telemetry.update();
     }
 
+    private double getMotorPower(double x) {
+        double output = 0.6*(Math.pow(x,2));
+        if (output < 0.2){
+            return 0.2;
+        }
+        else{
+            return output;
+        }
+    }
+
     /*
      * Code to run after the driver hits PLAY but before they hit STOP
      * This is a continuous loop that responds to buttons being pressed on the game pad
@@ -85,12 +95,13 @@ public class teamTeleOpCode extends OpMode {
         if(ly > 0.1)
         {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.leftDriveMotor.setPower(motorPower);
+                iRobot.leftDriveMotor.setPower(getMotorPower(ly));
+
 
         }
         else if(ly < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.leftDriveMotor.setPower(motorPower);
+            iRobot.leftDriveMotor.setPower(getMotorPower(ly));
 
         }
         else
@@ -106,12 +117,12 @@ public class teamTeleOpCode extends OpMode {
         {
 
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
-            iRobot.rightDriveMotor.setPower(motorPower);
+            iRobot.rightDriveMotor.setPower(getMotorPower(ry));
         }
         else if(ry < -0.1) {
 
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-            iRobot.rightDriveMotor.setPower(motorPower);
+            iRobot.rightDriveMotor.setPower(getMotorPower(ry));
         }
         else
         {
