@@ -87,10 +87,10 @@ public class Attachments {
     public void pickUpPixel() {
         wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
-        sleep(200);
+        sleep(1000);
         clawPosition = Constants.clawClose;
         clawServo.setPosition(clawPosition);
-        sleep(500);
+        sleep(1000);
         wristPosition = Constants.wristUp;
         wristServo.setPosition(wristPosition);
     }
@@ -100,14 +100,15 @@ public class Attachments {
     }
 
     public void release() {
+
         wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
-        sleep(500);
+        setArmMotors(0.7, 0);
+        sleep(1000);
         clawPosition = Constants.clawOpen;
         clawServo.setPosition(clawPosition);
         sleep(500);
-        wristPosition = Constants.wristUp;
-        wristServo.setPosition((wristPosition));
+        setArmMotors(0.7, 1);
     }
 
     //    public void setCamServo (double position) {camServo.setPosition(position);}
