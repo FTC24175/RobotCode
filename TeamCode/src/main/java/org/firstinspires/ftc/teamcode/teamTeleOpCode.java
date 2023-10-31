@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import static android.os.SystemClock.sleep;
 
 /*
 Software problems:
@@ -133,40 +134,54 @@ public class teamTeleOpCode extends OpMode {
         /*
             move wrist up and down when X & Y buttons are pressed
         */
-        if (gamepad1.y)
+        if (gamepad1.b)
         {
-            wristPosition = Constants.wristUp;
-            iRobot.wristServo.setPosition(wristPosition);
+            if(wristPosition < Constants.wristUp) {
+                wristPosition += 0.02;
+                iRobot.wristServo.setPosition(wristPosition);
+
+            }
+            sleep(10);
         }
-        if (gamepad1.x)
+        if (gamepad1.a)
         {
-            wristPosition = Constants.wristDown;
-            iRobot.wristServo.setPosition(wristPosition);
+            if(wristPosition > Constants.wristDown) {
+                wristPosition -= 0.02;
+                iRobot.wristServo.setPosition(wristPosition);
+
+            }
+            sleep(10);
        }
+
 
         /*
             open and close claw when A and B buttons are pressed
         */
-        if (gamepad1.a) {
-            clawPosition = Constants.clawOpen;
+        if (gamepad1.right_bumper) {
+            if(clawPosition == Constants.clawOpen) {
+                clawPosition = Constants.clawClose;
+
+            }
+            else if(clawPosition == Constants.clawClose) {
+                clawPosition = Constants.clawOpen;
+
+            }
             iRobot.clawServo.setPosition(clawPosition);
-        } else if (gamepad1.b) {
-            clawPosition = Constants.clawClose;
-            iRobot.clawServo.setPosition(clawPosition);
+            sleep(200);
         }
 
         /*
             Move arm up and down when right_stick is moved in y direction
         */
-        /*
-        if(ry > 0.1)
+
+        if(gamepad1.y)
         {
             iRobot.leftArmMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftArmMotor.setPower(motorPower);
             iRobot.rightArmMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.rightArmMotor.setPower(motorPower);
         }
-        else if(ry < -0.1) {
+        else if(gamepad1.x) {
             iRobot.leftArmMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.leftArmMotor.setPower(motorPower);
             iRobot.rightArmMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -177,7 +192,7 @@ public class teamTeleOpCode extends OpMode {
             iRobot.leftArmMotor.setPower(0);
             iRobot.rightArmMotor.setPower(0);
         }
-        */
+
 
 
         // Actually moves the claw and extension
@@ -192,7 +207,7 @@ public class teamTeleOpCode extends OpMode {
             iRobot.pickUpPixel();
 	}
 
-        if(gamepad1.right_bumper) {
+        if(gamepad1.right_trigger > 0.1) {
             iRobot.release();
         }
 
