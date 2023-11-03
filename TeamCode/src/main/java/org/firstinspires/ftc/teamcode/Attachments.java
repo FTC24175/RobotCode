@@ -51,8 +51,9 @@ public class Attachments {
         leftArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightArmMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
-
     /* --------------------------------------- ACCESSORS --------------------------------------- */
 //    public double getRightDistance() {return rightDistance.getDistance(DistanceUnit.INCH);}
 //    public double getLeftDistance() {return rightDistance.getDistance(DistanceUnit.INCH);}
@@ -68,6 +69,7 @@ public class Attachments {
         leftArmMotor.setPower(power);
         rightArmMotor.setPower(power);
     }
+
     public void setArmMotors(double power, int position) {
         leftArmMotor.setPower(power);
         leftArmMotor.setTargetPosition(position);
