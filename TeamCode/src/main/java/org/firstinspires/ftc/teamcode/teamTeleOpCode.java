@@ -176,18 +176,29 @@ public class teamTeleOpCode extends OpMode {
 
         if(gamepad1.y)
         {
-            iRobot.leftArmMotor.setPower(motorPower);
-            iRobot.rightArmMotor.setPower(motorPower);
+            if(leftArmPosition>=315) {
+                iRobot.leftArmMotor.setPower(0);
+                iRobot.rightArmMotor.setPower(0);
+            }
+            else {
+                iRobot.leftArmMotor.setPower(motorPower);
+                iRobot.rightArmMotor.setPower(motorPower);
+                leftArmPosition = iRobot.leftArmMotor.getCurrentPosition();
+            }
         }
         else if(gamepad1.x) {
             iRobot.leftArmMotor.setPower(-motorPower);
             iRobot.rightArmMotor.setPower(-motorPower);
+            leftArmPosition = iRobot.leftArmMotor.getCurrentPosition();
         }
         else
         {
             iRobot.leftArmMotor.setPower(0);
             iRobot.rightArmMotor.setPower(0);
         }
+
+
+
 
 
 
