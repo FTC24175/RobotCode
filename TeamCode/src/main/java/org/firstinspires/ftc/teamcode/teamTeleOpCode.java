@@ -5,12 +5,14 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import static android.os.SystemClock.sleep;
 
 /*
 Software problems:
 Remap Controls - each joystick controls it's respective wheel
-Add brake mode to motors so gravity doesnt affect the arm
+Add brake mode to motors so gravity doesn't affect the arm
 Robot too fast: Add pressure sensitivity.
 Simplify Buttons
 Make wrist move by hold the button instead of one press
@@ -21,11 +23,11 @@ Hardware problems:
 Attach control hub and other electronics to base
 Label Wires
 Wire Management
-add weight to front so it doesnt tip over when arm is out
+add weight to front so it doesn't tip over when arm is out
 Research Gear Ratio
 zip ties are too long - cut off tails
 Claw is too tight
-Two gamepad - one for move and one for claw, wrist, and arm
+Two game-pads - one for move and one for claw, wrist, and arm
 
 Also scissor lift and lead screw should be use in case we ever plan on making the robot hang off a bar
  */
@@ -35,9 +37,6 @@ public class teamTeleOpCode extends OpMode {
     
     public static Attachments iRobot = new Attachments();
 
-
-    private static double leftArmPosition = 0;
-    private static double rightArmPosition = 0;
 
     // Servos
     public static double wristPosition = Constants.wristUp;
@@ -58,12 +57,7 @@ public class teamTeleOpCode extends OpMode {
 
     private double getMotorPower(double x) {
         double output = 0.6*(Math.pow(x,2));
-        if (output < 0.2){
-            return 0.2;
-        }
-        else{
-            return output;
-        }
+        return Math.max(output, 0.2);
     }
 
     /*
@@ -74,8 +68,8 @@ public class teamTeleOpCode extends OpMode {
     public void loop() {
         /* ------------------------------------ Drive ------------------------------------ */
         // Get Position constants
-        leftArmPosition = iRobot.getLeftArmPosition();
-        rightArmPosition = iRobot.getRightArmPosition();
+        double leftArmPosition = iRobot.getLeftArmPosition();
+        double rightArmPosition = iRobot.getRightArmPosition();
         wristPosition  = iRobot.getWristPosition();
         clawPosition = iRobot.getClawPosition();
 
@@ -86,7 +80,7 @@ public class teamTeleOpCode extends OpMode {
         double ry = gamepad1.right_stick_y;
 
         float motorPower = 0.6f;
-        int liftMax = -1175;
+        int liftMax = 450;
         int liftMin = 0;
         int cycleLift1Pos = 0;
 
@@ -176,7 +170,7 @@ public class teamTeleOpCode extends OpMode {
 
         if(gamepad1.y)
         {
-            if(leftArmPosition>=315) {
+            if(leftArmPosition >=liftMax) {
                 iRobot.leftArmMotor.setPower(0);
                 iRobot.rightArmMotor.setPower(0);
             }

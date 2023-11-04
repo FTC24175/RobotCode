@@ -24,6 +24,9 @@ public class Attachments {
     public DcMotor leftDriveMotor, rightDriveMotor, leftArmMotor, rightArmMotor;
     public Servo clawServo;
     public static Servo  wristServo; //, camServo;
+
+    public Servo droneServo;
+
     public Rev2mDistanceSensor rightDistance, leftDistance, clawRightDistance, clawLeftDistance, clawDistance;
 
     public void initialize(HardwareMap hardwareMap) {
@@ -41,7 +44,7 @@ public class Attachments {
         // Servos operating wrist and claw
         clawServo =  hardwareMap.get(Servo.class, "servo1");
         wristServo = hardwareMap.get(Servo.class, "servo2");
-
+        droneServo = hardwareMap.get(Servo.class, "servo3");
         // Sensors
         // Todo: need to add
 
