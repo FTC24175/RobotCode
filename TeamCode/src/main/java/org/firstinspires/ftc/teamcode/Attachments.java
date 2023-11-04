@@ -54,6 +54,13 @@ public class Attachments {
         rightArmMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftArmMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightArmMotor.setDirection(DcMotor.Direction.REVERSE);
+
+
+
+
     }
     /* --------------------------------------- ACCESSORS --------------------------------------- */
 //    public double getRightDistance() {return rightDistance.getDistance(DistanceUnit.INCH);}
@@ -150,5 +157,7 @@ public class Attachments {
     public double getWristPosition() {
         return wristServo.getPosition();
     }
+
+
 }
 
