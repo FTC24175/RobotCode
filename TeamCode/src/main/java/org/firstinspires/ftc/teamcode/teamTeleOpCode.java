@@ -211,6 +211,16 @@ public class teamTeleOpCode extends OpMode {
             iRobot.release();
         }
 
+        if(gamepad1.dpad_down) {
+            iRobot.rotateClockwise();
+        }
+
+        if(gamepad1.dpad_up) {
+            iRobot.rotateCounterClockwise();
+        }
+
+
+
         /* ------------------------------------ Telemetry ------------------------------------ */
         // Telemetry is for debugging
         telemetry.addData("left arm position", leftArmPosition);

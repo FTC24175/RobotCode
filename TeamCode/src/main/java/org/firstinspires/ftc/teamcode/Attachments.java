@@ -10,6 +10,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -110,6 +111,21 @@ public class Attachments {
         sleep(500);
         setArmMotors(0.7, 1);
     }
+    public void rotateClockwise() {
+        leftDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftDriveMotor.setPower(0.5);
+        rightDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightDriveMotor.setPower(0.5);
+    }
+
+    public void rotateCounterClockwise() {
+        leftDriveMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftDriveMotor.setPower(0.5);
+        rightDriveMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightDriveMotor.setPower(0.5);
+    }
+
+
 
     //    public void setCamServo (double position) {camServo.setPosition(position);}
 
