@@ -99,7 +99,7 @@ public class rightClose extends LinearOpMode {
             iRobot.resetEncoder();
             iRobot.moveRobot(-430, 430, 0.3); // move forwards a bit
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
 
 
 
@@ -110,7 +110,7 @@ public class rightClose extends LinearOpMode {
             //reverse action
             iRobot.backMode();
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
         } else{
             iRobot.forwardMode();
             iRobot.resetEncoder();
@@ -126,7 +126,7 @@ public class rightClose extends LinearOpMode {
             iRobot.resetEncoder();
             iRobot.moveRobot(430, -430, 0.3); // move forwards a bit
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
         }
 
         // move to base
