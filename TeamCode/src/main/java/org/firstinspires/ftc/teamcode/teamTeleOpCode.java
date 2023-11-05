@@ -79,7 +79,7 @@ public class teamTeleOpCode extends OpMode {
         double ry = gamepad1.right_stick_y;
 
         float motorPower = 0.6f;
-        int liftMax = 450;
+        int liftMax = 550;
         int liftMin = 0;
         int cycleLift1Pos = 0;
 
