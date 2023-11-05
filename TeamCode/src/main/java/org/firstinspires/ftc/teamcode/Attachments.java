@@ -59,11 +59,8 @@ public class Attachments {
         rightArmMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         leftArmMotor.setDirection(DcMotor.Direction.FORWARD);
+
         rightArmMotor.setDirection(DcMotor.Direction.REVERSE);
-
-
-
-
     }
     /* --------------------------------------- ACCESSORS --------------------------------------- */
 //    public double getRightDistance() {return rightDistance.getDistance(DistanceUnit.INCH);}
@@ -111,6 +108,8 @@ public class Attachments {
     public void setClawServo (double position) {
         clawServo.setPosition(position);
     }
+
+    public void setDroneServo (double position) {droneServo.setPosition(position);}
 
     public void release() {
 

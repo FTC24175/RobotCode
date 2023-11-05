@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
 import static android.os.SystemClock.sleep;
 
 /*
@@ -37,10 +36,10 @@ public class teamTeleOpCode extends OpMode {
     
     public static Attachments iRobot = new Attachments();
 
-
     // Servos
     public static double wristPosition = Constants.wristUp;
     public static double clawPosition = Constants.clawOpen;
+    private boolean initialized = false;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -84,25 +83,29 @@ public class teamTeleOpCode extends OpMode {
         int liftMin = 0;
         int cycleLift1Pos = 0;
 
+        if (initialized == false)
+        {
+            initialized = true;
+            iRobot.setWristServo(Constants.wristDown + 0.1);
+            iRobot.setClawServo(Constants.clawOpen);
+            iRobot.setDroneServo(0);
+        }
+
         /*
             Left Wheel Control
          */
         if(ly > 0.1)
         {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.REVERSE);
-                iRobot.leftDriveMotor.setPower(getMotorPower(ly));
-
-
+            iRobot.leftDriveMotor.setPower(getMotorPower(ly));
         }
         else if(ly < -0.1) {
             iRobot.leftDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.leftDriveMotor.setPower(getMotorPower(ly));
-
         }
         else
         {
             iRobot.leftDriveMotor.setPower(0);
-
         }
 
         /*
@@ -110,18 +113,15 @@ public class teamTeleOpCode extends OpMode {
          */
         if(ry > 0.1)
         {
-
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.FORWARD);
             iRobot.rightDriveMotor.setPower(getMotorPower(ry));
         }
         else if(ry < -0.1) {
-
             iRobot.rightDriveMotor.setDirection(DcMotor.Direction.REVERSE);
             iRobot.rightDriveMotor.setPower(getMotorPower(ry));
         }
         else
         {
-
             iRobot.rightDriveMotor.setPower(0);
         }
 
@@ -191,11 +191,6 @@ public class teamTeleOpCode extends OpMode {
             iRobot.rightArmMotor.setPower(0);
         }
 
-
-
-
-
-
         // Actually moves the claw and extension
         //iRobot.setClawServo(clawPosition);
         //iRobot.setWristServo(wristPosition);
@@ -220,7 +215,9 @@ public class teamTeleOpCode extends OpMode {
             iRobot.rotateCounterClockwise();
         }
 
-
+        if (gamepad1.left_trigger > 0.1 && gamepad1.right_trigger > 0.1) {
+            iRobot.setDroneServo(0.7);
+        }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
         // Telemetry is for debugging
