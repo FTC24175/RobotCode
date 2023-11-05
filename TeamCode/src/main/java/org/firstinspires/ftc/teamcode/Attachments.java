@@ -89,13 +89,16 @@ public class Attachments {
     }
 
     public void wristDown() {
-        wristPosition = Constants.wristUp;
+        wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
         clawPosition = Constants.clawOpen;
         clawServo.setPosition(clawPosition);
-        setArmMotors(0.3, 0);
+        //setArmMotors(0.3, 0);
     }
     public void pickUpPixel() {
+        clawPosition = Constants.clawOpen;
+        clawServo.setPosition(clawPosition);
+        sleep(100);
         wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
         sleep(1000);

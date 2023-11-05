@@ -71,7 +71,7 @@ public class teamTeleOpCode extends OpMode {
         double rightArmPosition = iRobot.getRightArmPosition();
         wristPosition  = iRobot.getWristPosition();
         clawPosition = iRobot.getClawPosition();
-
+        double droneServoLocation = iRobot.droneServo.getPosition();
         // Motors
         double lx = gamepad1.left_stick_x;
         double ly = gamepad1.left_stick_y;
@@ -196,12 +196,10 @@ public class teamTeleOpCode extends OpMode {
         //iRobot.setWristServo(wristPosition);
 
         /* ------------------------------------Wrist Down ----------------------------------------*/
-        if(gamepad1.left_trigger > 0.1) {
-            iRobot.wristDown();
-        }
+
         if(gamepad1.left_bumper) {
             iRobot.pickUpPixel();
-	}
+    	}
 
    /*     if(gamepad1.right_trigger > 0.1) {
             iRobot.release();
@@ -215,14 +213,18 @@ public class teamTeleOpCode extends OpMode {
             iRobot.rotateCounterClockwise();
         }
 
-        if (gamepad1.left_trigger > 0.1 && gamepad1.right_trigger > 0.1) {
+        if (gamepad1.left_trigger > 0.3 && gamepad1.right_trigger > 0.3) {
             iRobot.setDroneServo(0.7);
+        }
+        else if (gamepad1.left_trigger > 0.3) {
+            iRobot.wristDown();
         }
 
         /* ------------------------------------ Telemetry ------------------------------------ */
         // Telemetry is for debugging
         telemetry.addData("left arm position", leftArmPosition);
         telemetry.addData("right arm position", rightArmPosition);
+        telemetry.addData("drone position", droneServoLocation);
         telemetry.addData("claw position", clawPosition);
         telemetry.addData("wrist position", wristPosition);
         telemetry.update();
