@@ -29,11 +29,9 @@ public class Constants {
 
     public static int changeThresh = 128;
 
-    public static int signalDetectionMethod = 3; // 1: detect QR code
-    // 2: detect vertical 1, 2, 3 lines: require rigid alignment
-    // 3: detect H vs V vs Empty: best solution, require less alignment
-    // 4: detect H vs V vs Diagonal
-    // 5: detect H vs V vs #
+    public static int signalDetectionMethod = 1; // 1: Max mean method
+    // 2: detect histogram
+
 
 }
 

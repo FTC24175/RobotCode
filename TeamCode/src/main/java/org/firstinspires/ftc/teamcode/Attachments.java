@@ -22,6 +22,7 @@ public class Attachments {
     private Telemetry telemetry;
     private ElapsedTime runtime = new ElapsedTime();
     public DcMotor leftDriveMotor, rightDriveMotor, leftArmMotor, rightArmMotor;
+
     public Servo clawServo;
     public static Servo  wristServo; //, camServo;
 
@@ -158,6 +159,40 @@ public class Attachments {
 
     public double getWristPosition() {
         return wristServo.getPosition();
+    }
+
+    public void moveRobot(int leftTarget, int rightTarget, double speed){
+
+        leftDriveMotor.setTargetPosition(leftTarget);
+        rightDriveMotor.setTargetPosition(rightTarget);
+
+        leftDriveMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDriveMotor.setMode((DcMotor.RunMode.RUN_TO_POSITION));
+
+        leftDriveMotor.setPower(speed);
+        rightDriveMotor.setPower(speed);
+
+        //sleep(1000);
+        while(leftDriveMotor.isBusy()){
+            sleep(10);
+        }
+    }
+
+
+    public void resetEncoder(){
+        leftDriveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDriveMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+       // rightDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+    public void forwardMode(){
+        leftDriveMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void backMode(){
+        rightDriveMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftDriveMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
 
