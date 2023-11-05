@@ -98,13 +98,13 @@ public class Attachments {
     public void pickUpPixel() {
         clawPosition = Constants.clawOpen;
         clawServo.setPosition(clawPosition);
-        sleep(500);
+        sleep(100);
         wristPosition = Constants.wristDown;
         wristServo.setPosition(wristPosition);
         sleep(1000);
         clawPosition = Constants.clawClose;
         clawServo.setPosition(clawPosition);
-        sleep(500);
+        sleep(1000);
         wristPosition = Constants.wristUp;
         wristServo.setPosition(wristPosition);
     }
