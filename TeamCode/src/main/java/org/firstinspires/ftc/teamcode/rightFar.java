@@ -99,7 +99,7 @@ public class rightFar extends LinearOpMode {
             iRobot.resetEncoder();
             iRobot.moveRobot(-430, 430, 0.3); // move forwards a bit
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
 
         } else if (signal == 2) { // center
             iRobot.forwardMode();
@@ -108,7 +108,7 @@ public class rightFar extends LinearOpMode {
             //reverse action
             iRobot.backMode();
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
         } else{   // right
             iRobot.forwardMode();
             iRobot.resetEncoder();
@@ -124,7 +124,7 @@ public class rightFar extends LinearOpMode {
             iRobot.resetEncoder();
             iRobot.moveRobot(430, -430, 0.3); // move forwards a bit
             iRobot.resetEncoder();
-            iRobot.moveRobot(1100, 1100, 0.3); // move forwards a bit
+            iRobot.moveRobot(950, 950, 0.3); // move forwards a bit
 
         }
         // go to right far

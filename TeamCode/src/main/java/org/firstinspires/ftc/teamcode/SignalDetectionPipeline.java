@@ -85,7 +85,7 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
             Imgproc.cvtColor(workingMatrix, workingMatrix, Imgproc.COLOR_RGB2YCrCb);
 
             //imageLeft = workingMatrix.submat(300, 700, 10, 400);
-            imageCenter = workingMatrix.submat(1, 270, 170, 750);
+            imageCenter = workingMatrix.submat(30, 250, 220, 700);
             imageRight = workingMatrix.submat(162, 425, 853, 1066);
 
             //leftTotal = Core.sumElems(imageLeft).val[0];
@@ -93,8 +93,8 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
             rightTotal = Core.sumElems(imageRight).val[0];
 
             //meanLeft = leftTotal/(401*390);
-            meanCenter = centerTotal/(269*580);
-            meanRight = rightTotal/(263*213);
+            meanCenter = centerTotal/(221*481);
+            meanRight = rightTotal/(264*214);
 
             if (meanRight < meanCenter) {
                 if (meanCenter - meanRight > 70) {
