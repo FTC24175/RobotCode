@@ -208,9 +208,9 @@ public class teamTeleOpCode extends OpMode {
             iRobot.pickUpPixel();
 	}
 
-        if(gamepad1.right_trigger > 0.1) {
+   /*     if(gamepad1.right_trigger > 0.1) {
             iRobot.release();
-        }
+        } */
 
         if(gamepad1.dpad_down) {
             iRobot.rotateClockwise();
