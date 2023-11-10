@@ -41,6 +41,7 @@ public class teamTeleOpCode extends OpMode {
     public static double clawPosition = Constants.clawOpen;
     private boolean initialized = false;
 
+    int clicks = 0;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -152,6 +153,21 @@ public class teamTeleOpCode extends OpMode {
             open and close claw when A and B buttons are pressed
         */
         if (gamepad1.right_bumper) {
+            clicks += 1;
+            if (clicks == 2){
+                if (clawPosition == Constants.clawOpen) {
+                    clawPosition = Constants.clawClose;
+                } else if (clawPosition == Constants.clawClose) {
+                    clawPosition = Constants.clawOpen;
+                }
+                iRobot.clawServo.setPosition(clawPosition);
+                sleep(200);
+                clicks = 0;
+            }
+        }
+
+            /*
+        if (gamepad1.right_bumper) {
             if(clawPosition == Constants.clawOpen) {
                 clawPosition = Constants.clawClose;
 
@@ -162,9 +178,9 @@ public class teamTeleOpCode extends OpMode {
             }
             iRobot.clawServo.setPosition(clawPosition);
             sleep(200);
-        }
+        } */
 
-        /*
+       /*
             Move arm up and down when right_stick is moved in y direction
         */
 
