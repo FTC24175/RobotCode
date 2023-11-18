@@ -56,7 +56,7 @@ public class teamTeleOpCode extends OpMode {
     }
 
     private double getMotorPower(double x) {
-        double output = 0.6*(Math.pow(x,2));
+        double output = 0.9*(Math.pow(x,2));
         return Math.max(output, 0.2);
     }
 
