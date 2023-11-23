@@ -22,6 +22,33 @@ public class MecanumTest extends LinearOpMode {
     DcMotor motor3;
     DcMotor motor4;
 
+    AprilTagProcessor tagProcessor;
+
+    VisionPortal visionPortal;
+
+    private AprilTagDetection tryDetectApriTag(int idCode)
+    {
+        AprilTagDetection aprilTagDetection = null;
+        List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
+        for (int i = 0; i < myAprilTagDetections.size(); i++) {
+            AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+            if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                int myAprilTagIdCode = myAprilTagDetection.id;
+                if (myAprilTagIdCode == idCode) {
+                    aprilTagDetection = myAprilTagDetection;
+                    telemetry.addData("y", myAprilTagDetection.ftcPose.y);
+                    telemetry.addData("z", myAprilTagDetection.ftcPose.z);
+                    telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
+                    telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
+                    telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
+                    telemetry.update();
+                }
+            }
+        }
+        return aprilTagDetection;
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
         motor1 = hardwareMap.dcMotor.get("motor1");
@@ -38,19 +65,24 @@ public class MecanumTest extends LinearOpMode {
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
-        List<AprilTagDetection> myAprilTagDetections;
-        int myAprilTagIdCode;
 
+        int myAprilTagIdCode = -1;
+        int targetAprilTag = 2;
         boolean aprilTagRunning = false;
+        // mode 0 : scanning
+        // mode 1 : approaching
+        int aprilTagMode = 0;
+        double desiredDistance = 7;
+        boolean aprilTagDetected = false;
 
-        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
+        tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
                 .setDrawTagOutline(true)
                 .build();
 
-        VisionPortal visionPortal = new VisionPortal.Builder()
+        visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
@@ -84,15 +116,15 @@ public class MecanumTest extends LinearOpMode {
                 rightRear /= power + Math.abs(turn);
             }
 
-            if (tagProcessor.getDetections().size() > 0) {
-                AprilTagDetection tag = tagProcessor.getDetections().get(0);
-                distance = tag.ftcPose.y;
-                telemetry.addData("x", tag.ftcPose.x);
-                telemetry.addData("y", tag.ftcPose.y);
-                telemetry.addData("z", tag.ftcPose.z);
-                telemetry.addData("roll", tag.ftcPose.roll);
-                telemetry.addData("pitch", tag.ftcPose.pitch);
-                telemetry.addData("yaw", tag.ftcPose.yaw);
+            telemetry.addData("April Tag detected: ", tagProcessor.getDetections().size() > 0);
+
+            aprilTagDetected = false;
+            AprilTagDetection myAprilTagDetection = tryDetectApriTag(targetAprilTag);
+
+            if (myAprilTagDetection != null)
+            {
+                distance = myAprilTagDetection.ftcPose.y;
+                aprilTagDetected = true;
             }
 
             motor1.setPower(leftFront);
@@ -127,37 +159,48 @@ public class MecanumTest extends LinearOpMode {
 
             if(gamepad1.right_bumper) {
                 aprilTagRunning = true;
-
             }
 
             if(aprilTagRunning) {
-                motor1.setPower(0.3);
-                motor2.setPower(-0.3);
-                motor3.setPower(-0.3);
-                motor4  .setPower(0.3);
-                telemetry.addData("April Tag detected: ", tagProcessor.getDetections().size() > 0);
-                telemetry.update();
-                myAprilTagDetections = tagProcessor.getDetections();
+                if (aprilTagDetected && aprilTagMode == 0) {
+                    aprilTagMode = 1;
+                }
+                else if (aprilTagDetected && aprilTagMode == 1){
+                    double difference = distance - desiredDistance;
 
-                if (myAprilTagDetections.size() > 0) {
-                    for (int i = 0; i < myAprilTagDetections.size(); i++) {
-                        AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+                    // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.2)
+                    if (difference > 0.1) {
+                        motor1.setPower(0.2);
+                        motor2.setPower(0.2);
+                        motor3.setPower(0.2);
+                        motor4.setPower(0.2);
 
-                        if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
-                            myAprilTagIdCode = myAprilTagDetection.id;
-                            if(myAprilTagIdCode == 2) {
-                                distance = myAprilTagDetection.ftcPose.y;
-                                aprilTagRunning = false;
-                                motor1.setPower(0.2);
-                                motor2.setPower(-0.2);
-                                motor3.setPower(-0.2);
-                                motor4  .setPower(0.2);
-                                sleep(750);
-                            }
-                        }
+                        sleep((long) (170 * difference));
                     }
+                    else if (difference < -0.1) {
+
+                        motor1.setPower(-0.2);
+                        motor2.setPower(-0.2);
+                        motor3.setPower(-0.2);
+                        motor4.setPower(-0.2);
+                        sleep((long) (170 * abs(difference)));
+                    }
+                    aprilTagRunning = false;
+                    aprilTagMode = 0;
+                    motor1.setPower(0.2);
+                    motor2.setPower(-0.2);
+                    motor3.setPower(-0.2);
+                    motor4  .setPower(0.2);
+                    sleep(750);
+                }
+                else if (aprilTagDetected == false && aprilTagMode == 0) {
+                    motor1.setPower(0.3);
+                    motor2.setPower(-0.3);
+                    motor3.setPower(-0.3);
+                    motor4.setPower(0.3);
                 }
             }
+
             telemetry.addData("Motor 1 Left Front",leftFront);
             telemetry.addData("Motor 2 Left Rear", leftRear);
             telemetry.addData("Motor 3 Right Front",rightFront);
@@ -168,6 +211,7 @@ public class MecanumTest extends LinearOpMode {
         }
 
     }
+
 
 
 }
