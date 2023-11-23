@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import java.util.List;
 
 public class MecanumRobot {
@@ -19,12 +19,13 @@ public class MecanumRobot {
     public DcMotor motor2;
     public DcMotor motor3;
     public DcMotor motor4;
-
+    public ColorSensor colorSensor;
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
 
     private Telemetry telemetry;
-
+    public int default_red;
+    public int default_blue;
     public void initialize(HardwareMap hardwareMap, Telemetry _telemetry)
     {
         telemetry = _telemetry;
@@ -32,6 +33,9 @@ public class MecanumRobot {
         motor2 = hardwareMap.dcMotor.get("motor2");
         motor3 = hardwareMap.dcMotor.get("motor3");
         motor4 = hardwareMap.dcMotor.get("motor4");
+
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
+        colorSensor.enableLed(true);
 
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -43,6 +47,9 @@ public class MecanumRobot {
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
 
+
+        default_red = colorSensor.red();
+        default_blue = colorSensor.blue();
         int myAprilTagIdCode = -1;
         int targetAprilTag = 2;
         boolean aprilTagRunning = false;

@@ -8,13 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import static android.os.SystemClock.sleep;
 import java.util.List;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
@@ -27,6 +27,8 @@ public class MecanumTest extends LinearOpMode {
         int myAprilTagIdCode = -1;
         int targetAprilTag = 2;
         boolean aprilTagRunning = false;
+        boolean checkForRed = false;
+        boolean checkForBlue = false;
         // mode 0 : scanning
         // mode 1 : approaching
         int aprilTagMode = 0;
@@ -43,6 +45,12 @@ public class MecanumTest extends LinearOpMode {
             //make sure ^^ is negated
             double turn = gamepad1.right_stick_x;
 
+            int red = robot.colorSensor.red();   // Red channel value
+            int green = robot.colorSensor.green(); // Green channel value
+            int blue = robot.colorSensor.blue();  // Blue channel value
+            int alpha = robot.colorSensor.alpha(); // Total luminosity
+            int argb = robot.colorSensor.argb();  // Combined color value
+
             robot.move(x,y,turn,1);
 
             telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size() > 0);
@@ -57,20 +65,26 @@ public class MecanumTest extends LinearOpMode {
             }
 
             if(gamepad1.dpad_up) {
-                robot.move(0,-1,0,0.5);
-            }
-            if(gamepad1.dpad_down) {
                 robot.move(0,1,0,0.5);
             }
+            if(gamepad1.dpad_down) {
+                robot.move(0,-1,0,0.5);
+            }
             if(gamepad1.dpad_left) {
-                robot.move(1,0,0,0.5);
+                robot.move(-1,0,0,0.5);
             }
             if(gamepad1.dpad_right) {
-                robot.move(-1,0,0,0.5);
+                robot.move(1,0,0,0.5);
             }
 
             if(gamepad1.right_bumper) {
                 aprilTagRunning = true;
+            }
+            if(gamepad1.x) {
+                checkForRed = true;
+            }
+            if(gamepad1.y) {
+                checkForBlue = true;
             }
 
             if(aprilTagRunning) {
@@ -102,7 +116,26 @@ public class MecanumTest extends LinearOpMode {
                     robot.move(1,0,0,0.3);
                 }
             }
+            if(checkForRed) {
+                if(red < robot.default_red + 500) {
+                    robot.move(0,1,0,0.3);
+                }
+                else  {
+                    checkForRed = false;
+                }
+            }
 
+            if(checkForBlue) {
+                if (blue < robot.default_blue + 500) {
+                    robot.move(0, 1, 0, 0.3);
+                } else {
+                    checkForBlue = false;
+                }
+            }
+            telemetry.addData("Red: ", red);
+            telemetry.addData("Blue: ", blue);
+            telemetry.addData("Checking for Red: ", checkForRed);
+            telemetry.addData("Checking for Blue: ", checkForBlue);
             telemetry.addData("distance",distance);
             telemetry.update();
         }
