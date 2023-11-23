@@ -116,11 +116,9 @@ public class MecanumRobot {
         motor3.setPower(rightFront * powerScale);
         motor4.setPower(rightRear *powerScale);
 
-
         telemetry.addData("Motor 1 Left Front",leftFront);
         telemetry.addData("Motor 2 Left Rear", leftRear);
         telemetry.addData("Motor 3 Right Front",rightFront);
         telemetry.addData("Motor 4 Right Rear", rightRear);
     }
-
 }
