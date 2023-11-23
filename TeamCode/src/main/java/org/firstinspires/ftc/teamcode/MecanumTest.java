@@ -2,13 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static java.lang.Math.*;
-
+import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import static android.os.SystemClock.sleep;
+import java.util.List;
 
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
@@ -33,6 +39,23 @@ public class MecanumTest extends LinearOpMode {
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
+        List<AprilTagDetection> myAprilTagDetections;
+        int myAprilTagIdCode;
+
+        boolean aprilTagRunning = false;
+
+        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .build();
+
+        VisionPortal visionPortal = new VisionPortal.Builder()
+                .addProcessor(tagProcessor)
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .build();
 
         waitForStart();
 
@@ -43,6 +66,8 @@ public class MecanumTest extends LinearOpMode {
             double turn = gamepad1.right_stick_x;
             double theta = Math.atan2(y,x);
             double power = Math.hypot(x,y);
+
+
 
             double sin = Math.sin(theta - Math.PI/4);
             double cos = Math.cos(theta - Math.PI/4);
@@ -65,7 +90,63 @@ public class MecanumTest extends LinearOpMode {
             motor3.setPower(rightFront);
             motor4.setPower(rightRear);
 
+            if(gamepad1.dpad_up) {
+                motor1.setPower(1);
+                motor2.setPower(1);
+                motor3.setPower(1);
+                motor4.setPower(1);
+            }
+            if(gamepad1.dpad_down) {
+                motor1.setPower(-1);
+                motor2.setPower(-1);
+                motor3.setPower(-1);
+                motor4.setPower(-1);
+            }
+            if(gamepad1.dpad_left) {
+                motor1.setPower(-1);
+                motor2.setPower(1);
+                motor3.setPower(1);
+                motor4.setPower(-1);
+            }
+            if(gamepad1.dpad_right) {
+                motor1.setPower(1);
+                motor2.setPower(-1);
+                motor3.setPower(-1);
+                motor4.setPower(1);
+            }
 
+            if(gamepad1.right_bumper) {
+                aprilTagRunning = true;
+
+            }
+            if(aprilTagRunning) {
+                motor1.setPower(0.3);
+                motor2.setPower(-0.3);
+                motor3.setPower(-0.3);
+                motor4  .setPower(0.3);
+                telemetry.addData("April Tag detected: ", tagProcessor.getDetections().size() > 0);
+                telemetry.update();
+                myAprilTagDetections = tagProcessor.getDetections();
+
+                if (myAprilTagDetections.size() > 0) {
+                    for (int i = 0; i < myAprilTagDetections.size(); i++) {
+                        AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+                        if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                            myAprilTagIdCode = myAprilTagDetection.id;
+                            if(myAprilTagIdCode == 2) {
+                                aprilTagRunning = false;
+                                motor1.setPower(0.2);
+                                motor2.setPower(-0.2);
+                                motor3.setPower(-0.2);
+                                motor4  .setPower(0.2);
+                                sleep(750);
+                            }
+                        }
+                    }
+
+                }
+            }
             telemetry.addData("Motor 1 Left Front",leftFront);
             telemetry.addData("Motor 2 Left Rear", leftRear);
             telemetry.addData("Motor 3 Right Front",rightFront);

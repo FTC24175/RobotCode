@@ -67,11 +67,44 @@ public class MechanumTest extends LinearOpMode {
             double backLeftPower = (rotY - rotX + rx) / denominator;
             double frontRightPower = ((rotY - rotX - rx) / denominator) * -1;
             double backRightPower = ((rotY + rotX - rx) / denominator) * -1;
-
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
+
+            if(gamepad1.dpad_up) {
+                frontLeftMotor.setPower(-1);
+                backLeftMotor.setPower(1);
+                frontRightMotor.setPower(-1);
+                backRightMotor.setPower(-1);
+            }
+            if(gamepad1.dpad_down) {
+                frontLeftMotor.setPower(1);
+                backLeftMotor.setPower(-1);
+                frontRightMotor.setPower(1);
+                backRightMotor.setPower(1);
+            }
+            if(gamepad1.dpad_left) {
+                frontLeftMotor.setPower(1);
+                backLeftMotor.setPower(1);
+                frontRightMotor.setPower(-1);
+                backRightMotor.setPower(1);
+            }
+            if(gamepad1.dpad_right) {
+                frontLeftMotor.setPower(-1);
+                backLeftMotor.setPower(-1);
+                frontRightMotor.setPower(1);
+                backRightMotor.setPower(-1);
+            }
+            telemetry.addData("Left Joystick x", x);
+            telemetry.addData("Left Joystick y", y);
+            telemetry.addData("Right Joystick x", rx);
+            telemetry.addData("Back Right Wheel Power", backRightPower);
+            telemetry.addData("Back Left Wheel Power", backLeftPower);
+            telemetry.addData("Front Right Wheel Power", frontRightPower);
+            telemetry.addData("Front Left Wheel Power", frontLeftPower);
+
+            telemetry.update();
         }
     }
 }
