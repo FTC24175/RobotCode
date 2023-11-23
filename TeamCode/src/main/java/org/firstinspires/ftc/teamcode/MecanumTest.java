@@ -2,19 +2,18 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static java.lang.Math.*;
-
 import android.util.Size;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import static android.os.SystemClock.sleep;
+import java.util.List;
 
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
@@ -39,6 +38,10 @@ public class MecanumTest extends LinearOpMode {
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
+        List<AprilTagDetection> myAprilTagDetections;
+        int myAprilTagIdCode;
+
+        boolean aprilTagRunning = false;
 
         AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -50,7 +53,7 @@ public class MecanumTest extends LinearOpMode {
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640,480))
+                .setCameraResolution(new Size(640, 480))
                 .build();
 
         double distance = Double.MAX_VALUE;
@@ -81,8 +84,6 @@ public class MecanumTest extends LinearOpMode {
                 rightRear /= power + Math.abs(turn);
             }
 
-
-
             if (tagProcessor.getDetections().size() > 0) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
                 distance = tag.ftcPose.y;
@@ -94,41 +95,79 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("yaw", tag.ftcPose.yaw);
             }
 
-            if (distance < 8) {
-                motor1.setPower(0);
-                motor2.setPower(0);
-                motor3.setPower(0);
-                motor4.setPower(0);
+            motor1.setPower(leftFront);
+            motor2.setPower(leftRear);
+            motor3.setPower(rightFront);
+            motor4.setPower(rightRear);
+
+            if(gamepad1.dpad_up) {
+                motor1.setPower(1);
+                motor2.setPower(1);
+                motor3.setPower(1);
+                motor4.setPower(1);
             }
-            else {
-                motor1.setPower(leftFront);
-                motor2.setPower(leftRear);
-                motor3.setPower(rightFront);
-                motor4.setPower(rightRear);
+            if(gamepad1.dpad_down) {
+                motor1.setPower(-1);
+                motor2.setPower(-1);
+                motor3.setPower(-1);
+                motor4.setPower(-1);
+            }
+            if(gamepad1.dpad_left) {
+                motor1.setPower(-1);
+                motor2.setPower(1);
+                motor3.setPower(1);
+                motor4.setPower(-1);
+            }
+            if(gamepad1.dpad_right) {
+                motor1.setPower(1);
+                motor2.setPower(-1);
+                motor3.setPower(-1);
+                motor4.setPower(1);
             }
 
-            if (distance < 8 && gamepad1.a && gamepad1.b) {
-                motor1.setPower(-leftFront);
-                motor2.setPower(-leftRear);
-                motor3.setPower(-rightFront);
-                motor4.setPower(-rightRear);
-            }
-            else {
-                motor1.setPower(leftFront);
-                motor2.setPower(leftRear);
-                motor3.setPower(rightFront);
-                motor4.setPower(rightRear);
+            if(gamepad1.right_bumper) {
+                aprilTagRunning = true;
+
             }
 
+            if(aprilTagRunning) {
+                motor1.setPower(0.3);
+                motor2.setPower(-0.3);
+                motor3.setPower(-0.3);
+                motor4  .setPower(0.3);
+                telemetry.addData("April Tag detected: ", tagProcessor.getDetections().size() > 0);
+                telemetry.update();
+                myAprilTagDetections = tagProcessor.getDetections();
+
+                if (myAprilTagDetections.size() > 0) {
+                    for (int i = 0; i < myAprilTagDetections.size(); i++) {
+                        AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+                        if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                            myAprilTagIdCode = myAprilTagDetection.id;
+                            if(myAprilTagIdCode == 2) {
+                                distance = myAprilTagDetection.ftcPose.y;
+                                aprilTagRunning = false;
+                                motor1.setPower(0.2);
+                                motor2.setPower(-0.2);
+                                motor3.setPower(-0.2);
+                                motor4  .setPower(0.2);
+                                sleep(750);
+                            }
+                        }
+                    }
+                }
+            }
             telemetry.addData("Motor 1 Left Front",leftFront);
             telemetry.addData("Motor 2 Left Rear", leftRear);
             telemetry.addData("Motor 3 Right Front",rightFront);
             telemetry.addData("Motor 4 Right Rear", rightRear);
-            telemetry.addData("y",distance);
+            telemetry.addData("distance",distance);
 
             telemetry.update();
         }
 
     }
+
 
 }
