@@ -18,27 +18,27 @@ import java.util.List;
 
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
-    DcMotor motor1;
-    DcMotor motor2;
-    DcMotor motor3;
-    DcMotor motor4;
+    DcMotor frontLeftMotor;
+    DcMotor backLeftMotor;
+    DcMotor frontRightMotor;
+    DcMotor backRightMotor;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        motor1 = hardwareMap.dcMotor.get("motor1");
-        motor2 = hardwareMap.dcMotor.get("motor2");
-        motor3 = hardwareMap.dcMotor.get("motor3");
-        motor4 = hardwareMap.dcMotor.get("motor4");
+        frontLeftMotor = hardwareMap.dcMotor.get("motor1");
+        backLeftMotor = hardwareMap.dcMotor.get("motor2");
+        frontRightMotor = hardwareMap.dcMotor.get("motor3");
+        backRightMotor = hardwareMap.dcMotor.get("motor4");
 
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor3.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor4.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         List<AprilTagDetection> myAprilTagDetections;
         int myAprilTagIdCode;
 
@@ -85,34 +85,34 @@ public class MecanumTest extends LinearOpMode {
                 rightRear /= power + Math.abs(turn);
             }
 
-            motor1.setPower(leftFront);
-            motor2.setPower(leftRear);
-            motor3.setPower(rightFront);
-            motor4.setPower(rightRear);
+            frontLeftMotor.setPower(leftFront);
+            backLeftMotor.setPower(leftRear);
+            frontRightMotor.setPower(rightFront);
+            backRightMotor.setPower(rightRear);
 
             if(gamepad1.dpad_up) {
-                motor1.setPower(1);
-                motor2.setPower(1);
-                motor3.setPower(1);
-                motor4.setPower(1);
+                frontLeftMotor.setPower(1);
+                backLeftMotor.setPower(1);
+                frontRightMotor.setPower(1);
+                backRightMotor.setPower(1);
             }
             if(gamepad1.dpad_down) {
-                motor1.setPower(-1);
-                motor2.setPower(-1);
-                motor3.setPower(-1);
-                motor4.setPower(-1);
+                frontLeftMotor.setPower(-1);
+                backLeftMotor.setPower(-1);
+                frontRightMotor.setPower(-1);
+                backRightMotor.setPower(-1);
             }
             if(gamepad1.dpad_left) {
-                motor1.setPower(-1);
-                motor2.setPower(1);
-                motor3.setPower(1);
-                motor4.setPower(-1);
+                frontLeftMotor.setPower(-1);
+                backLeftMotor.setPower(1);
+                frontRightMotor.setPower(1);
+                backRightMotor.setPower(-1);
             }
             if(gamepad1.dpad_right) {
-                motor1.setPower(1);
-                motor2.setPower(-1);
-                motor3.setPower(-1);
-                motor4.setPower(1);
+                frontLeftMotor.setPower(1);
+                backLeftMotor.setPower(-1);
+                frontRightMotor.setPower(-1);
+                backRightMotor.setPower(1);
             }
 
             if(gamepad1.right_bumper) {
@@ -120,10 +120,10 @@ public class MecanumTest extends LinearOpMode {
 
             }
             if(aprilTagRunning) {
-                motor1.setPower(0.3);
-                motor2.setPower(-0.3);
-                motor3.setPower(-0.3);
-                motor4  .setPower(0.3);
+                frontLeftMotor.setPower(0.3);
+                backLeftMotor.setPower(-0.3);
+                frontRightMotor.setPower(-0.3);
+                backRightMotor  .setPower(0.3);
                 telemetry.addData("April Tag detected: ", tagProcessor.getDetections().size() > 0);
                 telemetry.update();
                 myAprilTagDetections = tagProcessor.getDetections();
@@ -136,10 +136,10 @@ public class MecanumTest extends LinearOpMode {
                             myAprilTagIdCode = myAprilTagDetection.id;
                             if(myAprilTagIdCode == 2) {
                                 aprilTagRunning = false;
-                                motor1.setPower(0.2);
-                                motor2.setPower(-0.2);
-                                motor3.setPower(-0.2);
-                                motor4  .setPower(0.2);
+                                frontLeftMotor.setPower(0.2);
+                                backLeftMotor.setPower(-0.2);
+                                frontRightMotor.setPower(-0.2);
+                                backRightMotor  .setPower(0.2);
                                 sleep(750);
                             }
                         }
