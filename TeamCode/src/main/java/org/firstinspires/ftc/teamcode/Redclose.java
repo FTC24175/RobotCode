@@ -15,6 +15,7 @@ public class Redclose extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot();
         robot.initialize(hardwareMap,telemetry);
+
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
         int targetAprilTag = 4;
@@ -25,13 +26,14 @@ public class Redclose extends LinearOpMode {
 
         while (opModeInInit())
         {
-
+            telemetry.update();
         }
 
-        while (aprilTagRunning) {
+        while (aprilTagRunning && opModeIsActive()) {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
+            telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
 
             if (myAprilTagDetection != null)
             {
@@ -42,7 +44,6 @@ public class Redclose extends LinearOpMode {
             if (aprilTagDetected && aprilTagMode == 0) {
                 aprilTagMode = 1;
             }
-
             else if (aprilTagDetected && aprilTagMode == 1) {
                 double difference = distance - desiredDistance;
                 // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
@@ -71,13 +72,15 @@ public class Redclose extends LinearOpMode {
             else if (aprilTagDetected == false && aprilTagMode == 0) {
                 if (alliance == 0)
                 {
-                    robot.move(1,0,0,0.3);
+                    robot.move(1,0,0,0.2);
                 }
                 else if (alliance == 1)
                 {
-                    robot.move(-1,0,0,0.3);
+                    robot.move(-1,0,0,0.2);
                 }
             }
+
+            telemetry.update();
         }
     }
 }

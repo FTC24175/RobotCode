@@ -85,7 +85,6 @@ public class MecanumRobot {
                     telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
                     telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
                     telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
-                    telemetry.update();
                 }
             }
         }
@@ -114,11 +113,11 @@ public class MecanumRobot {
         motor1.setPower(leftFront * powerScale);
         motor2.setPower(leftRear * powerScale);
         motor3.setPower(rightFront * powerScale);
-        motor4.setPower(rightRear *powerScale);
+        motor4.setPower(rightRear * powerScale);
 
-        telemetry.addData("Motor 1 Left Front",leftFront);
-        telemetry.addData("Motor 2 Left Rear", leftRear);
-        telemetry.addData("Motor 3 Right Front",rightFront);
-        telemetry.addData("Motor 4 Right Rear", rightRear);
+        telemetry.addData("Motor 1 Left Front",leftFront * powerScale);
+        telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
+        telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
+        telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
     }
 }
