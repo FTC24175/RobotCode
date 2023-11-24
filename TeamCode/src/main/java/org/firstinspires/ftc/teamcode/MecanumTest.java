@@ -66,10 +66,10 @@ public class MecanumTest extends LinearOpMode {
                 robot.move(0,-1,0,0.5);
             }
             if(gamepad1.dpad_left) {
-                robot.move(1,0,0,0.5);
+                robot.move(-1,0,0,0.5);
             }
             if(gamepad1.dpad_right) {
-                robot.move(-1,0,0,0.5);
+                robot.move(1,0,0,0.5);
             }
 
             if(gamepad1.right_bumper) {
