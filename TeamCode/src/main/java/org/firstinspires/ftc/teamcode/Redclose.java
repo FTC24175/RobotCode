@@ -20,15 +20,59 @@ public class Redclose extends LinearOpMode {
         int aprilTagMode = 0;
         int targetAprilTag = 4;
         int alliance = 1;
+        int red = robot.colorSensor.red();
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
+        boolean checkForRed = true;
 
         while (opModeInInit())
         {
             telemetry.update();
         }
+        //move robot to red lines
 
+        robot.move(0,1,0,0.4);
+        sleep(1000);
+        robot.move(0,0,0,0);
+        sleep(1000);
+        //move robot back
+
+        robot.move(0,-1,0,0.4);
+        sleep(900);
+        robot.move(0,0,0,0);
+        sleep(200);
+        //turn to face backdrop
+
+        robot.move(0,0,1,0.4);
+        sleep(1150);
+        robot.move(0,0,0,0);
+        //Move robot forward until it senses red
+
+        robot.move(0,1,0,0.4);
+        sleep(1000);
+        robot.move(0,1,0,0.2);
+        while (checkForRed) {
+            red = robot.colorSensor.red();
+            if(red >= robot.default_red + 500) {
+                robot.move(0,0,0,0);
+                checkForRed = false;
+            }
+            telemetry.addData("Red: ", red);
+            telemetry.addData("initial red: ", robot.default_red);
+            telemetry.update();
+            sleep(10);
+        }
+        //start scanning for april tag
+
+        if (alliance == 0)
+        {
+            robot.move(1,0,0,0.2);
+        }
+        else if (alliance == 1)
+        {
+            robot.move(-1,0,0,0.2);
+        }
         while (aprilTagRunning && opModeIsActive()) {
 
             aprilTagDetected = false;
@@ -60,27 +104,22 @@ public class Redclose extends LinearOpMode {
                 aprilTagMode = 0;
 
                 if (alliance == 0) {
-                    robot.move(1, 0, 0, 0.2);
+                    robot.move(1, 0, 0, 0.3);
                     sleep(750);
                 } else if (alliance == 1) {
-                    robot.move(1, 0, 0, 0.2);
+                    robot.move(1, 0, 0, 0.3);
                     sleep(300);
                 }
 
                 aprilTagRunning = false;
             }
             else if (aprilTagDetected == false && aprilTagMode == 0) {
-                if (alliance == 0)
-                {
-                    robot.move(1,0,0,0.2);
-                }
-                else if (alliance == 1)
-                {
-                    robot.move(-1,0,0,0.2);
-                }
+
             }
 
             telemetry.update();
         }
+        robot.move(0,0,1,0.4);
+        sleep(2400);
     }
 }
