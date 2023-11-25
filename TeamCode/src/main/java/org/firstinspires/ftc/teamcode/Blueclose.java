@@ -20,14 +20,50 @@ public class Blueclose extends LinearOpMode {
         int aprilTagMode = 0;
         int targetAprilTag = 2;
         int alliance = 0;
+        int blue = robot.colorSensor.blue();
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
+        boolean checkForBlue = true;
 
         while (opModeInInit())
         {
             telemetry.update();
         }
+        //move robot to red lines
+
+        robot.move(0,1,0,0.4);
+        sleep(1000);
+        robot.move(0,0,0,0);
+        sleep(1000);
+        //move robot back
+
+        robot.move(0,-1,0,0.4);
+        sleep(900);
+        robot.move(0,0,0,0);
+        sleep(200);
+        //turn to face backdrop
+
+        robot.move(0,0,1,0.4);
+        sleep(1150);
+        robot.move(0,0,0,0);
+        //Move robot forward until it senses red
+
+        robot.move(0,1,0,0.4);
+        sleep(1000);
+        robot.move(0,1,0,0.2);
+        while (checkForBlue) {
+            blue = robot.colorSensor.blue();
+            if(blue >= robot.default_blue + 500) {
+                robot.move(0,0,0,0);
+                checkForBlue = false;
+            }
+            telemetry.addData("Blue: ", blue);
+            telemetry.addData("initial blue: ", robot.default_blue);
+            telemetry.update();
+            sleep(10);
+        }
+        //start scanning for april tag
 
         // april tag start
         if (alliance == 0)
@@ -69,21 +105,21 @@ public class Blueclose extends LinearOpMode {
                 aprilTagMode = 0;
 
                 if (alliance == 0) {
-                    robot.move(1, 0, 0, 0.2);
+                    robot.move(1, 0, 0, 0.3);
                     sleep(750);
                 } else if (alliance == 1) {
-                    robot.move(1, 0, 0, 0.2);
+                    robot.move(1, 0, 0, 0.3);
                     sleep(300);
                 }
-
-                robot.move(0,0,1,0.4);
-                sleep(2500);
 
                 aprilTagRunning = false;
             }
 
+
             telemetry.update();
             sleep(10);
         }
+        robot.move(0,0,-1,0.4);
+        sleep(2400);
     }
 }
