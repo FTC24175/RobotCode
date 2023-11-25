@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "Redclose")
-public class Redclose extends LinearOpMode {
+@Autonomous(name = "Blueclose")
+public class Blueclose extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot();
@@ -18,8 +18,8 @@ public class Redclose extends LinearOpMode {
 
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
-        int targetAprilTag = 4;
-        int alliance = 1;
+        int targetAprilTag = 2;
+        int alliance = 0;
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
@@ -76,7 +76,7 @@ public class Redclose extends LinearOpMode {
                     sleep(300);
                 }
 
-                robot.move(0,0,-1,0.4);
+                robot.move(0,0,1,0.4);
                 sleep(2500);
 
                 aprilTagRunning = false;
