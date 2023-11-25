@@ -2,15 +2,19 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import java.util.List;
 
@@ -19,12 +23,14 @@ public class MecanumRobot {
     public DcMotor motor2;
     public DcMotor motor3;
     public DcMotor motor4;
-
+    public ColorSensor colorSensor;
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
 
+    public IMU imu;
     private Telemetry telemetry;
-
+    public int default_red;
+    public int default_blue;
     public void initialize(HardwareMap hardwareMap, Telemetry _telemetry)
     {
         telemetry = _telemetry;
@@ -32,6 +38,9 @@ public class MecanumRobot {
         motor2 = hardwareMap.dcMotor.get("motor2");
         motor3 = hardwareMap.dcMotor.get("motor3");
         motor4 = hardwareMap.dcMotor.get("motor4");
+
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
+        colorSensor.enableLed(true);
 
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -43,7 +52,18 @@ public class MecanumRobot {
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        int myAprilTagIdCode = -1;
+        // Retrieve the IMU from the hardware map
+        imu = hardwareMap.get(IMU.class, "imu");
+        // Adjust the orientation parameters to match your robot
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
+        imu.initialize(parameters);
+
+        default_red = colorSensor.red();
+        default_blue = colorSensor.blue();
+        int myAprilTaIdCode = -1;
         int targetAprilTag = 2;
         boolean aprilTagRunning = false;
         // mode 0 : scanning
@@ -119,5 +139,72 @@ public class MecanumRobot {
         telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
         telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
         telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
+    }
+    public void Rotate90() {
+        imu.resetYaw(); // set to 0 degree
+        double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        currentAngle = currentAngle *  180 / Math.PI;
+        double leftFront, rightFront, leftRear, rightRear, turn;
+        double diff =0;
+        diff = (90+currentAngle);
+        double sign;
+        while (Math.abs(diff)>2){
+            sign = diff/Math.abs(diff);
+            turn = sign*0.2;
+            leftFront =  turn;
+            rightFront = turn;
+            leftRear =  - turn;
+            rightRear =  - turn;
+
+            motor1.setPower(leftFront);
+            motor2.setPower(leftRear);
+            motor3.setPower(rightFront);
+            motor4.setPower(rightRear);
+
+            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            currentAngle = currentAngle *  180 / Math.PI;
+            diff = (90+currentAngle);
+            telemetry.addData("current angle", currentAngle);
+            telemetry.addData("diff", diff);
+            telemetry.update();
+        }
+        motor1.setPower(0);
+        motor2.setPower(0);
+        motor3.setPower(0);
+        motor4.setPower(0);
+    }
+
+    public void RotateMinus90() {
+        imu.resetYaw(); // set to 0 degree
+        double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        currentAngle = currentAngle *  180 / Math.PI;
+        double leftFront, rightFront, leftRear, rightRear, turn;
+        double diff =0;
+        diff = (90-currentAngle);
+        double sign;
+        while (Math.abs(diff)>2){
+            sign = diff/Math.abs(diff);
+            turn = -sign*0.2;
+            leftFront =  turn;
+            rightFront = turn;
+            leftRear =  - turn;
+            rightRear =  - turn;
+
+            motor1.setPower(leftFront);
+            motor2.setPower(leftRear);
+            motor3.setPower(rightFront);
+            motor4.setPower(rightRear);
+
+            currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            currentAngle = currentAngle *  180 / Math.PI;
+            diff = (90-currentAngle);
+            telemetry.addData("current angle", currentAngle);
+            telemetry.addData("diff", diff);
+            telemetry.update();
+        }
+        motor1.setPower(0);
+        motor2.setPower(0);
+        motor3.setPower(0);
+        motor4.setPower(0);
     }
 }
