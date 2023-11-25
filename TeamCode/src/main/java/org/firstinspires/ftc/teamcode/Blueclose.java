@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "Redclose")
-public class Redclose extends LinearOpMode {
+@Autonomous(name = "Blueclose")
+public class Blueclose extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot();
@@ -18,13 +18,13 @@ public class Redclose extends LinearOpMode {
 
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
-        int targetAprilTag = 4;
-        int alliance = 1;
-        int red = robot.colorSensor.red();
+        int targetAprilTag = 2;
+        int alliance = 0;
+        int blue = robot.colorSensor.blue();
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
-        boolean checkForRed = true;
+        boolean checkForBlue = true;
 
         while (opModeInInit())
         {
@@ -52,14 +52,14 @@ public class Redclose extends LinearOpMode {
         robot.move(0,1,0,0.4);
         sleep(1000);
         robot.move(0,1,0,0.2);
-        while (checkForRed) {
-            red = robot.colorSensor.red();
-            if(red >= robot.default_red + 500) {
+        while (checkForBlue) {
+            blue = robot.colorSensor.blue();
+            if(blue >= robot.default_blue + 500) {
                 robot.move(0,0,0,0);
-                checkForRed = false;
+                checkForBlue = false;
             }
-            telemetry.addData("Red: ", red);
-            telemetry.addData("initial red: ", robot.default_red);
+            telemetry.addData("Blue: ", blue);
+            telemetry.addData("initial blue: ", robot.default_blue);
             telemetry.update();
             sleep(10);
         }
