@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -27,6 +28,8 @@ public class Attachments {
     public static Servo  wristServo; //, camServo;
 
     public Servo droneServo;
+
+    ColorSensor color;
 
     public Rev2mDistanceSensor rightDistance, leftDistance, clawRightDistance, clawLeftDistance, clawDistance;
 
@@ -43,9 +46,9 @@ public class Attachments {
         rightArmMotor = hardwareMap.get(DcMotorEx.class, "motor4");
 
         // Servos operating wrist and claw
-        clawServo =  hardwareMap.get(Servo.class, "servo1");
+      /*  clawServo =  hardwareMap.get(Servo.class, "servo1");
         wristServo = hardwareMap.get(Servo.class, "servo2");
-        droneServo = hardwareMap.get(Servo.class, "servo3");
+        droneServo = hardwareMap.get(Servo.class, "servo3");*/
         // Sensors
         // Todo: need to add
 
