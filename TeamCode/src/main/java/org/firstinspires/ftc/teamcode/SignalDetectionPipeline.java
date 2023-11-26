@@ -1,135 +1,188 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.opencv.imgproc.Imgproc.calcHist;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
-import org.opencv.objdetect.QRCodeDetector;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SignalDetectionPipeline extends OpenCvPipeline {
+    Scalar HOT_PINK = new Scalar(196, 23, 112);
 
-    Mat YCrCb = new Mat();
-    Mat Y = new Mat();
-    ArrayList<Mat> yCrCbChannels = new ArrayList(3);
-    int counter = 0; // have to give an initial value
+    public Scalar scalarLowerYCrCb;// = new Scalar(0.0, 180.0, 60.0);
+    public Scalar scalarUpperYCrCb;// = new Scalar(255.0, 255.0, 120.0);
 
-    private Mat workingMatrix = new Mat();
-    private Mat imageLeft = new Mat();
-    private Mat imageCenter = new Mat();
-    private Mat imageRight = new Mat();
 
-    double leftTotal, centerTotal, rightTotal;
-    double meanLeft, meanCenter, meanRight;
 
-    Telemetry telemetry;
+    public volatile boolean error = false;
+    public volatile Exception debug;
 
-    Scalar meanImage;
-    /*
-     * This function takes the RGB frame, converts to YCrCb,
-     * and extracts the Y channel to the 'Y' variable
-     */
-    void inputToY(Mat input) {
-        Imgproc.cvtColor(input, YCrCb, Imgproc.COLOR_RGB2YCrCb);
-        Core.split(YCrCb, yCrCbChannels);
-        Y = yCrCbChannels.get(0);
+    private double borderLeftX;     //fraction of pixels from the left side of the cam to skip
+    private double borderRightX;    //fraction of pixels from the right of the cam to skip
+    private double borderTopY;      //fraction of pixels from the top of the cam to skip
+    private double borderBottomY;   //fraction of pixels from the bottom of the cam to skip
+
+    private int CAMERA_WIDTH;
+    private int CAMERA_HEIGHT;
+
+    private int loopCounter = 0;
+    private int pLoopCounter = 0;
+
+    private final Mat mat = new Mat();
+    private final Mat processed = new Mat();
+
+    private Rect maxRect = new Rect(600,1,1,1);
+
+    private double maxArea = 0;
+    private boolean first = false;
+
+    private final Object sync = new Object();
+
+    public SignalDetectionPipeline(double borderLeftX, double borderRightX, double borderTopY, double borderBottomY) {
+        this.borderLeftX = borderLeftX;
+        this.borderRightX = borderRightX;
+        this.borderTopY = borderTopY;
+        this.borderBottomY = borderBottomY;
+    }
+    public void configureScalarLower(double y, double cr, double cb) {
+        scalarLowerYCrCb = new Scalar(y, cr, cb);
+    }
+    public void configureScalarUpper(double y, double cr, double cb) {
+        scalarUpperYCrCb = new Scalar(y, cr, cb);
     }
 
-    int detectBlackWhite(Mat input) {
-        int edgeCounter = 0;
-        int lEdgeCounter = 0;
-        int rEdgeCounter = 0;
-        int x1 = Constants.leftBoundary;
-        int x2 = Constants.rightBoundary;
-        int midy = Constants.middleLine;
-        for (int j = x1 + 1; j < x2; j++) {
-//            if (input.at(Byte.class, (y2 + y1) / 2, j).getV4c().get_0() - input.at(Byte.class, (y2 + y1) / 2, j - 1).getV4c().get_0() > Constants.changeThresh) {
-            if ((input.at(Byte.class, midy, j).getV().byteValue() - input.at(Byte.class, midy, j - 1).getV().byteValue()) > Constants.changeThresh) {
-                lEdgeCounter += 1;
-            }
-            if ((input.at(Byte.class, midy, j - 1).getV().byteValue() - input.at(Byte.class, midy, j).getV().byteValue()) > Constants.changeThresh) {
-                rEdgeCounter += 1;
-            }
-        }
-        edgeCounter = Math.min(lEdgeCounter, rEdgeCounter);
-        if (edgeCounter == 0) { // clip
-            edgeCounter = 1;
-        } else if (edgeCounter > 3) {
-            edgeCounter = 3;
-        }
-        return edgeCounter;
-    }
-
-
-
-    @Override
-    public void init(Mat firstFrame) {
-        inputToY(firstFrame);
+    public void configureBorders(double borderLeftX, double borderRightX, double borderTopY, double borderBottomY) {
+        this.borderLeftX = borderLeftX;
+        this.borderRightX = borderRightX;
+        this.borderTopY = borderTopY;
+        this.borderBottomY = borderBottomY;
     }
 
     @Override
     public Mat processFrame(Mat input) {
-        if (Constants.signalDetectionMethod == 1) {
-            input.copyTo(workingMatrix);
-            if (workingMatrix.empty()){
-                return input;
-            }
+        CAMERA_WIDTH = input.width();
+        CAMERA_HEIGHT = input.height();
+        try {
+            Imgproc.cvtColor(input, mat, Imgproc.COLOR_RGB2YCrCb);
+            Core.inRange(mat, scalarLowerYCrCb, scalarUpperYCrCb, processed);
+            Imgproc.morphologyEx(processed, processed, Imgproc.MORPH_OPEN, new Mat());
+            Imgproc.morphologyEx(processed, processed, Imgproc.MORPH_CLOSE, new Mat());
+            Imgproc.GaussianBlur(processed, processed, new Size(5.0, 15.0), 0.00);
+            List<MatOfPoint> contours = new ArrayList<>();
+            Imgproc.findContours(processed, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            Imgproc.cvtColor(workingMatrix, workingMatrix, Imgproc.COLOR_RGB2YCrCb);
+            synchronized (sync) {
+                for (MatOfPoint contour : contours) {
+                    Point[] contourArray = contour.toArray();
 
-            //imageLeft = workingMatrix.submat(300, 700, 10, 400);
-            imageCenter = workingMatrix.submat(30, 250, 220, 700);
-            imageRight = workingMatrix.submat(162, 425, 853, 1066);
+                    if (contourArray.length >= 15) {
+                        MatOfPoint2f areaPoints = new MatOfPoint2f(contourArray);
+                        Rect rect = Imgproc.boundingRect(areaPoints);
 
-            //leftTotal = Core.sumElems(imageLeft).val[0];
-            centerTotal = Core.sumElems(imageCenter).val[0];
-            rightTotal = Core.sumElems(imageRight).val[0];
+                        if (                        rect.area() > maxArea
+                                && rect.x + (rect.width / 2.0)  > (borderLeftX * CAMERA_WIDTH)
+                                && rect.x + (rect.width / 2.0)  < CAMERA_WIDTH - (borderRightX * CAMERA_WIDTH)
+                                && rect.y + (rect.height / 2.0) > (borderTopY * CAMERA_HEIGHT)
+                                && rect.y + (rect.height / 2.0) < CAMERA_HEIGHT - (borderBottomY * CAMERA_HEIGHT)
 
-            //meanLeft = leftTotal/(401*390);
-            meanCenter = centerTotal/(221*481);
-            meanRight = rightTotal/(264*214);
+                                || loopCounter - pLoopCounter   > 6
+                                && rect.x + (rect.width / 2.0)  > (borderLeftX * CAMERA_WIDTH)
+                                && rect.x + (rect.width / 2.0)  < CAMERA_WIDTH - (borderRightX * CAMERA_WIDTH)
+                                && rect.y + (rect.height / 2.0) > (borderTopY * CAMERA_HEIGHT)
+                                && rect.y + (rect.height / 2.0) < CAMERA_HEIGHT - (borderBottomY * CAMERA_HEIGHT)
+                        ){
+                            maxArea = rect.area();
+                            maxRect = rect;
+                            pLoopCounter++;
+                            loopCounter = pLoopCounter;
+                            first = true;
+                        }
+                        else if(loopCounter - pLoopCounter > 10){
+                            maxArea = new Rect().area();
+                            maxRect = new Rect();
+                        }
 
-            if (meanRight < meanCenter) {
-                if (meanCenter - meanRight > 70) {
-                    counter = 3;  // Right the smallest
+                        areaPoints.release();
+                    }
+                    contour.release();
+                }
+                if (contours.isEmpty()) {
+                    maxRect = new Rect(600,1,1,1);
                 }
             }
-            else if (meanRight > meanCenter){
-                if (meanRight - meanCenter > 5) {
-                    counter = 2;  // Center is the smallest
-                }
+            if (first && maxRect.area() > 500) {
+                Imgproc.rectangle(input, maxRect, new Scalar(0, 255, 0), 2);
             }
-            else{
-                    counter = 1;  // left is the largest
-                }
-            }
+            Imgproc.rectangle(input, new Rect(
+                    (int) (borderLeftX * CAMERA_WIDTH),
+                    (int) (borderTopY * CAMERA_HEIGHT),
+                    (int) (CAMERA_WIDTH - (borderRightX * CAMERA_WIDTH) - (borderLeftX * CAMERA_WIDTH)),
+                    (int) (CAMERA_HEIGHT - (borderBottomY * CAMERA_HEIGHT) - (borderTopY * CAMERA_HEIGHT))
+            ), HOT_PINK, 2);
 
+            Imgproc.putText(input, "Area: " + getRectArea() + " Midpoint: " + getRectMidpointXY().x + " , " + getRectMidpointXY().y, new Point(5, CAMERA_HEIGHT - 5), 0, 0.6, new Scalar(255, 255, 255), 2);
 
-
+            loopCounter++;
+        } catch (Exception e) {
+            debug = e;
+            error = true;
+        }
         return input;
     }
 
-    public int getCounter() {
-        return counter;
+    public int getRectHeight() {
+        synchronized (sync) {
+            return maxRect.height;
+        }
     }
-
-    public double getMeanCenter() {
-        return meanCenter;
+    public int getRectWidth() {
+        synchronized (sync) {
+            return maxRect.width;
+        }
     }
-    public double getMeanLeft() {
-        return meanLeft;
+    public int getRectX() {
+        synchronized (sync) {
+            return maxRect.x;
+        }
     }
-    public double getMeanRight() {
-        return meanRight;
+    public int getRectY() {
+        synchronized (sync) {
+            return maxRect.y;
+        }
+    }
+    public double getRectMidpointX() {
+        synchronized (sync) {
+            return getRectX() + (getRectWidth() / 2.0);
+        }
+    }
+    public double getRectMidpointY() {
+        synchronized (sync) {
+            return getRectY() + (getRectHeight() / 2.0);
+        }
+    }
+    public Point getRectMidpointXY() {
+        synchronized (sync) {
+            return new Point(getRectMidpointX(), getRectMidpointY());
+        }
+    }
+    public double getAspectRatio() {
+        synchronized (sync) {
+            return getRectArea() / (CAMERA_HEIGHT * CAMERA_WIDTH);
+        }
+    }
+    public double getRectArea() {
+        synchronized (sync) {
+            return maxRect.area();
+        }
     }
 }
-
 
 
