@@ -10,10 +10,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 
 @TeleOp(name = "McDrive", group = "Iterative Opcode")
 public class McDrive extends LinearOpMode {
+
+        ColorSensor color;
 
         @Override
         public void runOpMode() throws InterruptedException {
@@ -23,6 +26,7 @@ public class McDrive extends LinearOpMode {
             DcMotor backLeftMotor = hardwareMap.dcMotor.get("motor2");
             DcMotor frontRightMotor = hardwareMap.dcMotor.get("motor3");
             DcMotor backRightMotor = hardwareMap.dcMotor.get("motor4");
+            color = hardwareMap.get(ColorSensor.class, "color1");
 
 
             // Reverse the right side motors. This may be wrong for your setup.
@@ -53,6 +57,11 @@ public class McDrive extends LinearOpMode {
 
 
             while (opModeIsActive()) {
+                telemetry.addData("Red", color.red());
+                telemetry.addData("Green", color.green());
+                telemetry.addData("Blue", color.blue());
+                telemetry.update();
+
                 y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
                 x = gamepad1.left_stick_x;
                 turn = gamepad1.right_stick_x;
@@ -116,10 +125,10 @@ public class McDrive extends LinearOpMode {
                 rightRear = power * cos/max - turn;
 
                 if ((power + Math.abs(turn))>1){
-                    leftFront /= power + turn;
-                    rightFront /= power + turn;
-                    leftRear /= power + turn;
-                    rightRear /= power + turn;
+                    leftFront /= (power + Math.abs(turn));
+                    rightFront /= (power + Math.abs(turn));
+                    leftRear /= (power + Math.abs(turn));
+                    rightRear /= (power + Math.abs(turn));
                 }
 
 
