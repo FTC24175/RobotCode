@@ -11,6 +11,9 @@ import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
 @Autonomous(name="TeamProdDetectionBlue", group="Tutorials")
@@ -34,10 +37,11 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     private double lowerruntime = 0;
     private double upperruntime = 0;
 
-    // Red Range                                      Y      Cr     Cb
+    // Blue Range                                      Y      Cr     Cb
     public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 90.0, 160.0);
     public static Scalar scalarUpperYCrCb = new Scalar(255.0, 130.0, 255.0);
 
+    boolean checkForBlue = true;
 
     @Override
     public void runOpMode()
@@ -71,6 +75,8 @@ public class TeamProdDetectionBlue extends LinearOpMode {
         FtcDashboard.getInstance().startCameraStream(webcam, 10);
 
         telemetry.update();
+
+
         waitForStart();
 
         while (opModeIsActive())
@@ -108,6 +114,7 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     }
     public void AUTONOMOUS_B(){
         telemetry.addLine("Autonomous B");
+
     }
     public void AUTONOMOUS_C(){
         telemetry.addLine("Autonomous C");
