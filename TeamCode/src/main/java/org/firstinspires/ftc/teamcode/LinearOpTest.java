@@ -1,27 +1,39 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-@Autonomous(name="MotorTiming")
-public class LinearOpTest extends LinearOpMode {
-    DcMotor motor1;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
+@Autonomous(name="touchSensor")
+public class LinearOpTest extends LinearOpMode {
+    //public static Attachments iRobot = new Attachments();
+
+    TouchSensor touch;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        motor1 = hardwareMap.dcMotor.get("motor1");
-
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //iRobot.initialize(hardwareMap);
+        touch = hardwareMap.get(TouchSensor.class, "touch1");
 
         waitForStart();
 
-        motor1.setPower(0.8);
-        sleep(30000);
-        /*motor1.setPower(0);
-        sleep(3000);
-        motor1.setPower(0.5);
-        sleep(5000);
-        motor1.setPower(0);*/
+
+        while (opModeIsActive()) {
+            // If the touch sensor is pressed, stop the motor
+            if (touch.isPressed()) {
+                telemetry.addData("Path","Touch sensor is pressed");
+                telemetry.update();
+
+            } else { // Otherwise, run the motor
+                telemetry.addData("Path","Waiting for touch sensor bumper to be pressed");
+                telemetry.update();
+
+            }
+        }
+
+
+
     }
 }
