@@ -15,6 +15,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.List;
 
@@ -23,6 +24,12 @@ public class MecanumRobot {
     public DcMotor motor2;
     public DcMotor motor3;
     public DcMotor motor4;
+    public DcMotor motor1ex;
+    public DcMotor motor2ex;
+    public DcMotor motor3ex;
+    public Servo servo1;
+    public Servo servo2;
+
     public ColorSensor colorSensor;
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
@@ -38,6 +45,12 @@ public class MecanumRobot {
         motor2 = hardwareMap.dcMotor.get("motor2");
         motor3 = hardwareMap.dcMotor.get("motor3");
         motor4 = hardwareMap.dcMotor.get("motor4");
+        motor1ex = hardwareMap.dcMotor.get("motor1ex");
+        motor2ex = hardwareMap.dcMotor.get("motor2ex");
+        motor3ex = hardwareMap.dcMotor.get("motor3ex");
+        servo1 = hardwareMap.get(Servo.class, "servo1");
+        servo2 = hardwareMap.get(Servo.class, "servo2");
+
 
         colorSensor = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
         colorSensor.enableLed(true);
@@ -46,11 +59,16 @@ public class MecanumRobot {
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor1ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor2ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor3ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1ex.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor2ex.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");

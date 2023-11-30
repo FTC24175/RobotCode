@@ -81,14 +81,43 @@ public class MecanumTest extends LinearOpMode {
                 robot.move(1,0,0,0.5);
             }
 
-            if(gamepad1.right_bumper) {
-                aprilTagRunning = true;
-            }
+            //if(gamepad1.right_trigger > 0.1) {
+            //    aprilTagRunning = true;
+            //}
             if(gamepad1.x) {
-                checkForRed = true;
+                robot.motor1ex.setPower(0.5);
+                robot.motor2ex.setPower(0.5);
             }
-            if(gamepad1.y) {
-                checkForBlue = true;
+
+            else if(gamepad1.y) {
+                robot.motor1ex.setPower(-0.5);
+                robot.motor2ex.setPower(-0.5);
+            }
+            else {
+                robot.motor1ex.setPower(0);
+                robot.motor2ex.setPower(0);
+            }
+            if(gamepad1.right_bumper) {
+                if(robot.servo1.getPosition() > 0) {
+                    robot.servo1.setPosition(0);
+                    robot.servo2.setPosition(0);
+                }
+                else {
+                    robot.servo1.setPosition(1);
+                    robot.servo2.setPosition(1);
+                }
+                sleep(300);
+            }
+
+            if(gamepad1.a) {
+                robot.motor3ex.setPower(0.3);
+            }
+
+            else if(gamepad1.b) {
+                robot.motor3ex.setPower(-0.3);
+            }
+            else {
+                robot.motor3ex.setPower(0);
             }
 
             if(aprilTagRunning) {
