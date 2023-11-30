@@ -127,7 +127,10 @@ public class AutoBlueClose extends LinearOpMode {
 
         waitForStart();
 
-        webcam.stopStreaming();
+        // webcam.stopStreaming();
+        webcam.closeCameraDevice();
+        sleep(1000);
+
 
 
         tagProcessor = new AprilTagProcessor.Builder()
