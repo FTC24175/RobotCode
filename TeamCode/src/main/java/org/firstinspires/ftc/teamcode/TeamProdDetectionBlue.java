@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.abs;
+
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -17,7 +19,10 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import java.util.List;
 
 @Config
 @Autonomous(name="TeamProdDetectionBlue", group="Tutorials")
@@ -47,8 +52,14 @@ public class TeamProdDetectionBlue extends LinearOpMode {
 
     boolean checkForBlue = true;
 
+    int targetAprilTag = 2;
+
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
+
+    boolean aprilTagRunning = true;
+
+    boolean aprilTagDetected = true;
 
     @Override
     public void runOpMode()
@@ -133,6 +144,21 @@ public class TeamProdDetectionBlue extends LinearOpMode {
                     .setCameraResolution(new Size(640, 480))
                     .build();
 
+
+        while (aprilTagRunning && opModeIsActive()) {
+
+            aprilTagDetected = false;
+            AprilTagDetection myAprilTagDetection = tryDetectApriTag(targetAprilTag);
+            //telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
+
+            if (myAprilTagDetection != null)
+            {
+                aprilTagDetected = true;
+            }
+
+        }
+
+
         telemetry.addData("finish running: ", "ok");
         telemetry.update();
 
@@ -153,5 +179,27 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     }
     public void AUTONOMOUS_C(){
         telemetry.addLine("Autonomous C");
+    }
+
+    public AprilTagDetection tryDetectApriTag(int idCode)
+    {
+        AprilTagDetection aprilTagDetection = null;
+        List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
+        for (int i = 0; i < myAprilTagDetections.size(); i++) {
+            AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+            if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                int myAprilTagIdCode = myAprilTagDetection.id;
+                if (myAprilTagIdCode == idCode) {
+                    aprilTagDetection = myAprilTagDetection;
+                    telemetry.addData("y", myAprilTagDetection.ftcPose.y);
+                    telemetry.addData("z", myAprilTagDetection.ftcPose.z);
+                    telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
+                    telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
+                    telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
+                }
+            }
+        }
+        return aprilTagDetection;
     }
 }
