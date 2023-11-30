@@ -94,13 +94,21 @@ public class MecanumTest extends LinearOpMode {
                 robot.motor1ex.setPower(0);
                 robot.motor2ex.setPower(0);
             }
-            if(gamepad1.right_bumper) {
+            if(gamepad1.left_bumper) {
                 if(robot.servo1.getPosition() > 0) {
                     robot.servo1.setPosition(0);
-                    robot.servo2.setPosition(0);
                 }
                 else {
                     robot.servo1.setPosition(1);
+                }
+                sleep(300);
+            }
+
+            if(gamepad1.right_bumper) {
+                if(robot.servo2.getPosition() > 0) {
+                    robot.servo2.setPosition(0);
+                }
+                else {
                     robot.servo2.setPosition(1);
                 }
                 sleep(300);
