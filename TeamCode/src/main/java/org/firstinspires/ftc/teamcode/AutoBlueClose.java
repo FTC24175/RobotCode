@@ -47,8 +47,8 @@ public class AutoBlueClose extends LinearOpMode {
 
 
     // blue Range                                      Y      Cr     Cb
-    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 90.0, 160.0);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 130.0, 255.0);
+    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 50.0, 160.0);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 170.0, 255.0);
 
 
     public int moveDirection = 1;//0=left, 1=center, 2=right
