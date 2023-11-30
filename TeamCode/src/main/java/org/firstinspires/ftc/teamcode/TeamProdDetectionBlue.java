@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -7,6 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -38,10 +42,13 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     private double upperruntime = 0;
 
     // Blue Range                                      Y      Cr     Cb
-    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 90.0, 160.0);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 130.0, 255.0);
+    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 50.0, 160.0);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 170.0, 255.0);
 
     boolean checkForBlue = true;
+
+    public VisionPortal visionPortal;
+    public AprilTagProcessor tagProcessor;
 
     @Override
     public void runOpMode()
@@ -77,9 +84,9 @@ public class TeamProdDetectionBlue extends LinearOpMode {
         telemetry.update();
 
 
-        waitForStart();
+        //
 
-        while (opModeIsActive())
+        while (opModeInInit())
         {
             myPipeline.configureBorders(borderLeftX, borderRightX, borderTopY, borderBottomY);
             if(myPipeline.error){
@@ -92,15 +99,43 @@ public class TeamProdDetectionBlue extends LinearOpMode {
             if(myPipeline.getRectArea() > 2000){
                 if(myPipeline.getRectMidpointX() > 400){
                     AUTONOMOUS_C(); //right
+                    //moveDirection = 2;
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     AUTONOMOUS_B(); //center
+                    //moveDirection = 1;
                 }
                 else {
                     AUTONOMOUS_A(); //left
+
                 }
             }
+            telemetry.update();
         }
+
+        waitForStart();
+
+           // webcam.stopStreaming();
+           webcam.closeCameraDevice();
+            sleep(1000);
+
+            // crash test
+            tagProcessor = new AprilTagProcessor.Builder()
+                    .setDrawAxes(true)
+                    .setDrawCubeProjection(true)
+                    .setDrawTagID(true)
+                    .setDrawTagOutline(true)
+                    .build();
+
+            visionPortal = new VisionPortal.Builder()
+                    .addProcessor(tagProcessor)
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .setCameraResolution(new Size(640, 480))
+                    .build();
+
+        telemetry.addData("finish running: ", "ok");
+        telemetry.update();
+
     }
 
     public Double inValues(double value, double min, double max){
