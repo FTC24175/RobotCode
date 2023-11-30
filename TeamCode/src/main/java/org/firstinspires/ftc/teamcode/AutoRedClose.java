@@ -112,14 +112,17 @@ public class AutoRedClose extends LinearOpMode {
                 if(myPipeline.getRectMidpointX() > 400){
                     //AUTONOMOUS_C(); //right
                     moveDirection = 2;
+                    targetAprilTag = 6;
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     //AUTONOMOUS_B(); //center
                     moveDirection = 1;
+                    targetAprilTag = 5;
                 }
                 else {
                     //AUTONOMOUS_A(); //left
                     moveDirection = 0;
+                    targetAprilTag = 4;
                 }
             }
             telemetry.update();

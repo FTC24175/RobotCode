@@ -59,7 +59,7 @@ public class AutoBlueFar extends LinearOpMode {
 
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
-        int targetAprilTag = 4;
+        int targetAprilTag = 1;
         int alliance = 0;
         int blue, blue2;
         double desiredDistance = 7;
@@ -112,14 +112,17 @@ public class AutoBlueFar extends LinearOpMode {
                 if(myPipeline.getRectMidpointX() > 400){
                     //AUTONOMOUS_C(); //right
                     moveDirection = 2;
+                    targetAprilTag = 3;
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     //AUTONOMOUS_B(); //center
                     moveDirection = 1;
+                    targetAprilTag = 2;
                 }
                 else {
                     //AUTONOMOUS_A(); //left
                     moveDirection = 0;
+                    targetAprilTag = 1;
                 }
             }
             telemetry.update();
@@ -182,7 +185,6 @@ public class AutoBlueFar extends LinearOpMode {
             }
             // release one pixel
 
-
             robot.move(0, -1,0, 0.3);
             sleep(100);
             robot.move(-1, 0, 0, 0.3);
@@ -191,6 +193,7 @@ public class AutoBlueFar extends LinearOpMode {
 
         }else if(moveDirection == 1){   //Object is located on center
             // release one pixel
+
             robot.move(0, -1, 0, 0);
             sleep(1000);
             robot.RotateM90();
