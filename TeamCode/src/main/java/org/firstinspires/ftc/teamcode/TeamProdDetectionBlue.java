@@ -54,12 +54,16 @@ public class TeamProdDetectionBlue extends LinearOpMode {
 
     int targetAprilTag = 2;
 
+    int aprilTagMode = 0;
+
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
 
     boolean aprilTagRunning = true;
 
     boolean aprilTagDetected = true;
+
+    double distance = 1000;
 
     @Override
     public void runOpMode()
@@ -149,11 +153,23 @@ public class TeamProdDetectionBlue extends LinearOpMode {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = tryDetectApriTag(targetAprilTag);
-            //telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
+
 
             if (myAprilTagDetection != null)
             {
+                telemetry.addData("April Tag detected: ", "!");
+                distance = myAprilTagDetection.ftcPose.y;
                 aprilTagDetected = true;
+            }
+
+            if (aprilTagDetected && aprilTagMode == 0) {
+                aprilTagMode = 1;
+            }
+            else if (aprilTagDetected && aprilTagMode == 1) {
+                double difference = distance ;
+                // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
+
+                telemetry.addData("distance =  ", distance);
             }
 
         }
