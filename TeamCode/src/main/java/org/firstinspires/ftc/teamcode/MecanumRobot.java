@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import static android.os.SystemClock.sleep;
+
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
+
 import android.util.Size;
 
 //import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
@@ -40,6 +45,9 @@ public class MecanumRobot {
     public Servo servo1;
     public Servo servo2;
 
+    public Servo servo3;
+    public Servo servo4;
+
     public void initialize(HardwareMap hardwareMap, Telemetry _telemetry)
     {
         telemetry = _telemetry;
@@ -52,6 +60,8 @@ public class MecanumRobot {
         motor3ex = hardwareMap.dcMotor.get("motor3ex");
         servo1 = hardwareMap.get(Servo.class, "servo1");
         servo2 = hardwareMap.get(Servo.class, "servo2");
+        servo3 = hardwareMap.get(Servo.class, "servo3");
+        servo4 = hardwareMap.get(Servo.class, "servo4");
 
         colorSensor = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
         colorSensor.enableLed(true);
@@ -62,6 +72,14 @@ public class MecanumRobot {
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        motor1ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor1ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor2ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor2ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor3ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor3ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         motor1ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor2ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor3ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -72,6 +90,7 @@ public class MecanumRobot {
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
         motor1ex.setDirection(DcMotorSimple.Direction.FORWARD);
         motor2ex.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor3ex.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
         imu = hardwareMap.get(IMU.class, "imu");
@@ -163,6 +182,47 @@ public class MecanumRobot {
     }
 
 
+    public void pickUpPixel() {
+        clawPosition = Constants.clawOpen;
+        servo2.setPosition(clawPosition);
+        servo3.setPosition(clawPosition);
+        sleep(100);
+        wristPosition = Constants.wristDown;
+        servo1.setPosition(wristPosition);
+        sleep(1000);
+        clawPosition = Constants.clawClose;
+        servo2.setPosition(clawPosition);
+        servo3.setPosition(clawPosition);
+        sleep(1000);
+        wristPosition = Constants.wristUp;
+        servo1.setPosition(wristPosition);
+    }
+
+    public void releasePixel() {
+        clawPosition = Constants.clawOpen;
+        servo2.setPosition(clawPosition);
+        servo3.setPosition(clawPosition);
+        sleep(100);
+        wristPosition = Constants.wristDown;
+        servo1.setPosition(wristPosition);
+        sleep(1000);
+        clawPosition = Constants.clawClose;
+        servo2.setPosition(clawPosition);
+        servo3.setPosition(clawPosition);
+        sleep(1000);
+        wristPosition = Constants.wristUp;
+        servo1.setPosition(wristPosition);
+    }
+
+    public int getLeftArmPosition() {
+        return motor1ex.getCurrentPosition();
+    }
+
+    public int getWristPosition() {
+        return motor3ex.getCurrentPosition();
+    }
+
+
     public void RotateP90() {
         imu.resetYaw(); // set to 0 degree
         double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
@@ -231,3 +291,4 @@ public class MecanumRobot {
         motor4.setPower(0);
     }
 }
+

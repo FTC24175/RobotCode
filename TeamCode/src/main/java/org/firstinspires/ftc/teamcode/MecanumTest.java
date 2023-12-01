@@ -20,6 +20,9 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
 
+
+    int clicks = 0;
+
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot();
@@ -35,6 +38,13 @@ public class MecanumTest extends LinearOpMode {
         int aprilTagMode = 0;
         double desiredDistance = 7;
         int alliance = 1;
+        int liftMax = 550;
+        int wristMax = 550;
+        double leftArmPosition = robot.getLeftArmPosition();
+        double wristPosition = robot.getWristPosition();
+
+        double clawPosition = Constants.clawOpen;
+
         // 0 : blue
         // 1 : red
         boolean aprilTagDetected = false;
@@ -81,49 +91,101 @@ public class MecanumTest extends LinearOpMode {
                 robot.move(1,0,0,0.5);
             }
 
-            if(gamepad1.x) {
-                robot.motor1ex.setPower(0.5);
-                robot.motor2ex.setPower(0.5);
-            }
 
-            else if(gamepad1.y) {
-                robot.motor1ex.setPower(-0.5);
-                robot.motor2ex.setPower(-0.5);
+
+            /*
+            move arm up and down when x & y buttons are pressed
+        */
+
+            if(gamepad1.y)
+            {
+                if(leftArmPosition >=liftMax) {
+                    robot.motor1ex.setPower(0);
+                    robot.motor2ex.setPower(0);
+                }
+                else {
+                    robot.motor1ex.setPower(0.6);
+                    robot.motor2ex.setPower(0.6);
+                    leftArmPosition = robot.motor1ex.getCurrentPosition();
+                }
             }
-            else {
+            else if(gamepad1.x) {
+                robot.motor1ex.setPower(-0.6);
+                robot.motor2ex.setPower(-0.6);
+                leftArmPosition = robot.motor1ex.getCurrentPosition();
+            }
+            else
+            {
                 robot.motor1ex.setPower(0);
                 robot.motor2ex.setPower(0);
             }
-            if(gamepad1.left_bumper) {
-                if(robot.servo1.getPosition() > 0) {
-                    robot.servo1.setPosition(0);
+
+         /*
+            move wrist up and down when a & b buttons are pressed
+        */
+            if (gamepad1.b)
+            {
+                if(wristPosition < Constants.wristUp) {
+                    wristPosition += 0.02;
+                    robot.servo1.setPosition(wristPosition);
+
                 }
-                else {
-                    robot.servo1.setPosition(1);
+                sleep(10);
+            }
+            if (gamepad1.a)
+            {
+                if(wristPosition > Constants.wristDown) {
+                    wristPosition -= 0.02;
+                    robot.servo1.setPosition(wristPosition);
+
                 }
-                sleep(300);
+                sleep(10);
             }
 
-            if(gamepad1.right_bumper) {
-                if(robot.servo2.getPosition() > 0) {
-                    robot.servo2.setPosition(0);
+
+        /*
+            open and close one claw
+        */
+            if (gamepad1.left_bumper) {
+                clicks += 1;
+                if (clicks == 2){
+                    if (clawPosition == Constants.clawOpen) {
+                        clawPosition = Constants.clawClose;
+                    } else if (clawPosition == Constants.clawClose) {
+                        clawPosition = Constants.clawOpen;
+                    }
+                    robot.servo3.setPosition(clawPosition);
+                    sleep(200);
+                    clicks = 0;
                 }
-                else {
-                    robot.servo2.setPosition(1);
+            }
+        /*
+            open and close the other claw
+        */
+            if (gamepad1.right_bumper) {
+                clicks += 1;
+                if (clicks == 2){
+                    if (clawPosition == Constants.clawOpen) {
+                        clawPosition = Constants.clawClose;
+                    } else if (clawPosition == Constants.clawClose) {
+                        clawPosition = Constants.clawOpen;
+                    }
+                    robot.servo2.setPosition(clawPosition);
+                    sleep(200);
+                    clicks = 0;
                 }
-                sleep(300);
             }
 
-            if(gamepad1.a) {
-                robot.motor3ex.setPower(0.3);
+            // move the wheel out
+            if (gamepad1.left_trigger > 0.3){
+                robot.motor3ex.setPower(0.5);
             }
 
-            else if(gamepad1.b) {
-                robot.motor3ex.setPower(-0.3);
+            // move the wheel in
+            if (gamepad1.right_trigger > 0.3){
+                robot.motor3ex.setPower(0.5);
             }
-            else {
-                robot.motor3ex.setPower(0);
-            }
+
 
 
            /* if(gamepad1.right_bumper) {
