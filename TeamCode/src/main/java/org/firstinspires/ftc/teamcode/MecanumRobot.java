@@ -112,7 +112,14 @@ public class MecanumRobot {
         double desiredDistance = 7;
         boolean aprilTagDetected = false;
 
-     /*  tagProcessor = new AprilTagProcessor.Builder()
+
+
+        double distance = Double.MAX_VALUE;
+
+    }
+    public void intializeAprilTag(HardwareMap hardwareMap)
+    {
+        tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
@@ -123,10 +130,7 @@ public class MecanumRobot {
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
-                .build(); */
-
-        double distance = Double.MAX_VALUE;
-
+                .build();
     }
 
     public AprilTagDetection tryDetectApriTag(int idCode)
@@ -233,7 +237,7 @@ public class MecanumRobot {
         double sign;
         while (Math.abs(diff)>2){
             sign = diff/Math.abs(diff);
-            turn = sign*0.2;
+            turn = sign*0.3;
             leftFront =  turn;
             rightFront = -turn;
             leftRear =  turn;
@@ -247,9 +251,9 @@ public class MecanumRobot {
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
             diff = (90+currentAngle);
-            telemetry.addData("current angle", currentAngle);
-            telemetry.addData("diff", diff);
-            telemetry.update();
+            //telemetry.addData("current angle", currentAngle);
+            //telemetry.addData("diff", diff);
+            //telemetry.update();
         }
         motor1.setPower(0);
         motor2.setPower(0);
@@ -267,7 +271,7 @@ public class MecanumRobot {
         double sign;
         while (Math.abs(diff)>2){
             sign = diff/Math.abs(diff);
-            turn = -sign*0.2;
+            turn = -1*sign*0.3;
             leftFront =  turn;
             rightFront = - turn;
             leftRear =  turn;
@@ -281,9 +285,9 @@ public class MecanumRobot {
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
             diff = (90-currentAngle);
-            telemetry.addData("current angle", currentAngle);
-            telemetry.addData("diff", diff);
-            telemetry.update();
+            //telemetry.addData("current angle", currentAngle);
+            //telemetry.addData("diff", diff);
+            //telemetry.update();
         }
         motor1.setPower(0);
         motor2.setPower(0);

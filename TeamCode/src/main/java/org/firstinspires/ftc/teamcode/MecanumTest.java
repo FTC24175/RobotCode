@@ -28,14 +28,13 @@ public class MecanumTest extends LinearOpMode {
         MecanumRobot robot = new MecanumRobot();
         robot.initialize(hardwareMap,telemetry);
 
-        int myAprilTagIdCode = -1;
-        int targetAprilTag = 4;
-        boolean aprilTagRunning = false;
+
+
         boolean checkForRed = false;
         boolean checkForBlue = false;
         // mode 0 : scanning
         // mode 1 : approaching
-        int aprilTagMode = 0;
+
         double desiredDistance = 7;
         int alliance = 1;
         int liftMax = 550;
@@ -47,7 +46,7 @@ public class MecanumTest extends LinearOpMode {
 
         // 0 : blue
         // 1 : red
-        boolean aprilTagDetected = false;
+
 
         double distance = Double.MAX_VALUE;
 
@@ -67,16 +66,9 @@ public class MecanumTest extends LinearOpMode {
 
             robot.move(x,y,turn,1);
 
-            telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
 
-            aprilTagDetected = false;
-            AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
 
-            if (myAprilTagDetection != null)
-            {
-                distance = myAprilTagDetection.ftcPose.y;
-                aprilTagDetected = true;
-            }
+
 
             if(gamepad1.dpad_up) {
                 robot.move(0,1,0,0.5);
@@ -183,10 +175,30 @@ public class MecanumTest extends LinearOpMode {
 
             // move the wheel in
             if (gamepad1.right_trigger > 0.3){
-                robot.motor3ex.setPower(0.5);
+                robot.motor3ex.setPower(-0.5);
+            }
+
+            if (gamepad1.left_bumper && gamepad1.right_bumper) {
+                if (clawPosition == Constants.clawOpen) {
+                    clawPosition = Constants.clawClose;
+                } else if (clawPosition == Constants.clawClose) {
+                    clawPosition = Constants.clawOpen;
+                }
+                robot.servo3.setPosition(clawPosition);
+                robot.servo2.setPosition(clawPosition);
+                sleep(200);
+                clicks = 0;
+
             }
 
 
+            if (gamepad1.left_trigger > 0.3 && gamepad1.right_trigger > 0.3) {
+                robot.servo4.setPosition(0.5);
+            }
+
+            //if (gamepad1.start) {
+            //    robot.servo4
+            //}
 
            /* if(gamepad1.right_bumper) {
                 aprilTagRunning = true;
@@ -268,3 +280,7 @@ public class MecanumTest extends LinearOpMode {
 
 
 }
+
+
+
+

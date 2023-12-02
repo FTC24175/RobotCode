@@ -42,6 +42,9 @@ public class TeamProdDetection extends LinearOpMode {
     @Override
     public void runOpMode()
     {
+        MecanumRobot robot = new MecanumRobot();
+        robot.initialize(hardwareMap,telemetry);
+
         // OpenCV webcam
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -86,12 +89,38 @@ public class TeamProdDetection extends LinearOpMode {
             if(myPipeline.getRectArea() > 2000){
                 if(myPipeline.getRectMidpointX() > 400){
                     AUTONOMOUS_C(); //right
+                    robot.RotateP90();
+                    sleep(200);
+                    robot.move(0,1,0,0.2);
+                    sleep(400);
+                    // release one pixel
+                    robot.move(0,-1,0,0.3);
+                    sleep(400);
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     AUTONOMOUS_B(); //center
+                    robot.move(0,1,0,0.3);
+                    sleep(400);
+
+                    // release one pixel
+
+
+                    robot.move(0, -1, 0, 0.5);
+                    sleep(400);
+                    robot.RotateP90();
                 }
                 else {
                     AUTONOMOUS_A(); //left
+                    robot.RotateM90();
+                    sleep(200);
+                    robot.move(0,1,0,0.2);
+                    sleep(400);
+
+                    // release one pixel
+
+
+                    robot.move(0, -1,0, 0.2);
+                    sleep(800);
                 }
             }
         }

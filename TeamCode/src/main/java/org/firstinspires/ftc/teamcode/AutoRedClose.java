@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
 import static java.lang.Math.abs;
 import android.util.Size;
 
@@ -9,6 +10,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -44,6 +46,10 @@ public class AutoRedClose extends LinearOpMode {
     public static double borderRightX   = 0.0;
     public static double borderTopY     = 0.0;
     public static double borderBottomY  = 0.0;
+
+    int liftMax = 550;
+    int wristMax = 550;
+    double leftArmPosition;
 
 
     // Red Range                                      Y      Cr     Cb
@@ -105,27 +111,34 @@ public class AutoRedClose extends LinearOpMode {
                 telemetry.addData("Exception: ", myPipeline.debug);
             }
 
-            telemetry.addData("RectArea: ", myPipeline.getRectArea());
-            telemetry.update();
+       //     telemetry.addData("RectArea: ", myPipeline.getRectArea());
+       //     telemetry.update();
 
             if(myPipeline.getRectArea() > 2000){
                 if(myPipeline.getRectMidpointX() > 400){
                     //AUTONOMOUS_C(); //right
                     moveDirection = 2;
                     targetAprilTag = 6;
+                    telemetry.addData("object on left: ", moveDirection);
+         //           telemetry.update();
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     //AUTONOMOUS_B(); //center
                     moveDirection = 1;
                     targetAprilTag = 5;
+                    telemetry.addData("object on center: ", moveDirection);
+           //         telemetry.update();
                 }
                 else {
                     //AUTONOMOUS_A(); //left
                     moveDirection = 0;
                     targetAprilTag = 4;
+                    telemetry.addData("object on right: ", moveDirection);
+            //        telemetry.update();
                 }
+                telemetry.update();
             }
-            telemetry.update();
+
         }
 
         waitForStart();
@@ -134,29 +147,21 @@ public class AutoRedClose extends LinearOpMode {
         webcam.closeCameraDevice();
         sleep(1000);
 
+        robot.intializeAprilTag(hardwareMap);
 
-
-        tagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .build();
-
-        visionPortal = new VisionPortal.Builder()
-                .addProcessor(tagProcessor)
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .build();
 
 
         //move robot to red lines and stop when detected
 
-        robot.move(0,1,0,0.3);
+        robot.move(0,1,0,0.4);
+        sleep(1200);
+        robot.move(0,1,0,0.2);
 
         checkForRed = true;
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
 
-        while (checkForRed) {
+        while (checkForRed && elapsedTime.seconds() < 4) {
             red = robot.colorSensor.red();
             red2 = robot.colorSensor2.red();
             if (red >= robot.default_red + 500 || red2 >= robot.default_red + 500)
@@ -164,75 +169,70 @@ public class AutoRedClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 checkForRed = false;
             }
+
+
         }
 
 
-        if (moveDirection == 0){  //Object is located on left side
-            robot.move(0,-1,0,0.3);
-            sleep(100);
-            robot.RotateM90();
-            robot.move(0,1,0,0.3);
-            checkForRed = true;
-            sleep(10);
-            while (checkForRed) {
-                red = robot.colorSensor.red();
-                red2 = robot.colorSensor2.red();
 
-                if (red >= robot.default_red + 500 || red2 >= robot.default_red + 500) {
-                    robot.move(0,0,0,0);
-                    checkForRed = false;
-                }
-            }
+        if (moveDirection == 0){  //Object is located on left side
+            telemetry.addData("object on: ", moveDirection);
+            telemetry.update();
+            robot.RotateM90();
+            sleep(200);
+            robot.move(0,1,0,0.2);
+            sleep(400);
+
             // release one pixel
 
 
-            robot.move(0, -1,0, 0.3);
-            sleep(100);
-            robot.move(-1, 0, 0, 0.3);
-            sleep(1000);
+            robot.move(0, -1,0, 0.2);
+            sleep(800);
             robot.RotateP90();
             robot.RotateP90();
 
         }else if(moveDirection == 1){   //Object is located on center
-            // release one pixel
-            robot.move(0, -1, 0, 0);
-            sleep(1000);
-            robot.RotateP90();
-        } else
-        {
-            robot.move(0,-1,0,0.3);
-            sleep(100);
-            robot.RotateP90();
+            //sleep(1000);
+            telemetry.addData("object on: ", moveDirection);
+            telemetry.update();
             robot.move(0,1,0,0.3);
-            checkForRed = true;
-            sleep(10);
-            while (checkForRed) {
-                red = robot.colorSensor.red();
-                red2 = robot.colorSensor2.red();
+            sleep(400);
 
-                if (red >= robot.default_red + 500 || red2 >= robot.default_red + 500) {
-                    robot.move(0,0,0,0);
-                    checkForRed = false;
-                }
-            }
             // release one pixel
 
-            robot.move(0, -1,0, 0.3);
-            sleep(100);
-            robot.move(-1, 0, 0, 0.3);
-            sleep(1000);
+
+            robot.move(0, -1, 0, 0.5);
+            sleep(400);
+            robot.RotateP90();
+        } else //object on right
+        {
+            telemetry.addData("object on: ", moveDirection);
+            telemetry.update();
+            robot.RotateP90();
+            sleep(200);
+            robot.move(0,1,0,0.2);
+            sleep(400);
+            // release one pixel
+            robot.move(0,-1,0,0.3);
+            sleep(400);
+            robot.move(1,0,0,0.6);
+            sleep(800);
+
+
+
         }
 
 
         //Move robot forward until it senses red
         checkForRed = true;
-        robot.move(0,1,0,0.4);
+        robot.move(0,1,0,0.5);
         sleep(1000);
         robot.move(0,1,0,0.2);
-        while (checkForRed) {
+        elapsedTime.reset();
+        while (checkForRed && elapsedTime.seconds() < 3) {
             red = robot.colorSensor.red();
             red2 = robot.colorSensor2.red();
-            if (red >= robot.default_red + 500 || red2 >= robot.default_red + 500) {
+            if (red >= robot.default_red + 300 || red2 >= robot.default_red + 300) {
                 robot.move(0,0,0,0);
                 checkForRed = false;
             }
@@ -249,6 +249,7 @@ public class AutoRedClose extends LinearOpMode {
         {
             robot.move(-1,0,0,0.2);
         }
+
         while (aprilTagRunning && opModeIsActive()) {
 
             aprilTagDetected = false;
@@ -268,12 +269,12 @@ public class AutoRedClose extends LinearOpMode {
                 double difference = distance - desiredDistance;
                 // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
                 if (difference > 0.1) {
-                    robot.move(0, 1, 0, 0.15);
+                    robot.move(0, 1, 0, 0.2);
 /////////////////////////going up
 
                     sleep((long) (170 * difference));
                 } else if (difference < -0.1) {
-                    robot.move(0, -1, 0, 0.15);
+                    robot.move(0, -1, 0, 0.2);
 /////////////////////////going down
                     sleep((long) (170 * abs(difference)));
                 }
@@ -294,8 +295,27 @@ public class AutoRedClose extends LinearOpMode {
             telemetry.update();
             sleep(10);
         }
-        robot.move(0,0,-1,0.4);
-        sleep(2400);
+//        robot.move(0,0,-1,0.4);
+//        sleep(2400);
+        robot.RotateP90();
+        robot.RotateP90();
+        robot.move(0, -1, 0, 0.3);
+        sleep(350);
+
+        while(leftArmPosition >=liftMax) {
+            robot.motor1ex.setPower(0.6);
+            robot.motor2ex.setPower(0.6);
+            leftArmPosition = robot.motor1ex.getCurrentPosition();
+        }
+
+        //wristPosition = Constants.wristUp;
+
+        sleep(500);
+        robot.servo2.setPosition(Constants.clawOpen);
+        robot.servo3.setPosition(Constants.clawOpen);
+        sleep(200);
+        robot.move(0, 1, 0, 0.3);
+
 
     }
 }

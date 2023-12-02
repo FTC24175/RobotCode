@@ -134,6 +134,7 @@ public class AutoBlueClose extends LinearOpMode {
         webcam.closeCameraDevice();
         sleep(1000);
 
+        robot.intializeAprilTag(hardwareMap);
 
 
         tagProcessor = new AprilTagProcessor.Builder()

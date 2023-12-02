@@ -10,9 +10,9 @@ public class Constants {
 
     public static double wristDown = 0;
 
-    public static double clawOpen = 0.3;
+    public static double clawOpen = 0;
 
-    public static double clawClose = 0.8;
+    public static double clawClose = 1;
 
 
     // Camera stuff

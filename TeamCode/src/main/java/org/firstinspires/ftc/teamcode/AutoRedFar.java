@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -134,7 +135,7 @@ public class AutoRedFar extends LinearOpMode {
         webcam.closeCameraDevice();
         sleep(1000);
 
-
+        robot.intializeAprilTag(hardwareMap);
 
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -166,15 +167,19 @@ public class AutoRedFar extends LinearOpMode {
             }
         }
 
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
 
         if (moveDirection == 0){  //Object is located on left side
             robot.move(0,-1,0,0.3);
             sleep(100);
-            robot.RotateM90();
+            robot.RotateP90();
+            robot.RotateP90();
+            robot.RotateP90();
             robot.move(0,1,0,0.3);
             checkForRed = true;
             sleep(10);
-            while (checkForRed) {
+            while (checkForRed && elapsedTime.seconds() < 1) {
                 red = robot.colorSensor.red();
                 red2 = robot.colorSensor2.red();
 
