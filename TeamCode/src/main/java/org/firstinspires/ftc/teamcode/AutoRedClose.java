@@ -135,20 +135,7 @@ public class AutoRedClose extends LinearOpMode {
         sleep(1000);
 
 
-
-        tagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .build();
-
-        visionPortal = new VisionPortal.Builder()
-                .addProcessor(tagProcessor)
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .build();
-
+        robot.initializeAprilTag(hardwareMap);
 
         //move robot to red lines and stop when detected
 
@@ -191,13 +178,13 @@ public class AutoRedClose extends LinearOpMode {
             robot.move(-1, 0, 0, 0.3);
             sleep(1000);
             robot.RotateP90();
-            robot.RotateP90();
+
 
         }else if(moveDirection == 1){   //Object is located on center
             // release one pixel
             robot.move(0, -1, 0, 0);
             sleep(1000);
-            robot.RotateP90();
+
         } else
         {
             robot.move(0,-1,0,0.3);
@@ -221,8 +208,20 @@ public class AutoRedClose extends LinearOpMode {
             sleep(100);
             robot.move(-1, 0, 0, 0.3);
             sleep(1000);
+            robot.RotateM90();
         }
 
+
+
+        robot.move(0,-1,0,0.4);
+        sleep(900);
+        robot.move(0,0,0,0);
+        sleep(200);
+        //turn to face backdrop
+
+        robot.move(0,0,1,0.4);
+        sleep(1150);
+        robot.move(0,0,0,0);
 
         //Move robot forward until it senses red
         checkForRed = true;

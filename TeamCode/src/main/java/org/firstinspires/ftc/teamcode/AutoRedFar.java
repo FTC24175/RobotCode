@@ -134,7 +134,7 @@ public class AutoRedFar extends LinearOpMode {
         webcam.closeCameraDevice();
         sleep(1000);
 
-
+        robot.initializeAprilTag(hardwareMap);
 
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -222,7 +222,16 @@ public class AutoRedFar extends LinearOpMode {
             robot.move(-1, 0, 0, 0.3);
             sleep(1000);
         }
+        robot.move(0,0,0,0);
+        robot.move(0,-1,0,0.4);
+        sleep(900);
+        robot.move(0,0,0,0);
+        sleep(200);
+        //turn to face backdrop
 
+        robot.move(0,0,1,0.4);
+        sleep(1150);
+        robot.move(0,0,0,0);
 
         //Move robot forward until it senses red
         checkForRed = true;

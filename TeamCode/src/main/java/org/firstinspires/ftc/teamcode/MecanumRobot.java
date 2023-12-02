@@ -112,7 +112,13 @@ public class MecanumRobot {
         double desiredDistance = 7;
         boolean aprilTagDetected = false;
 
-     /*  tagProcessor = new AprilTagProcessor.Builder()
+        double distance = Double.MAX_VALUE;
+
+    }
+
+    public void initializeAprilTag(HardwareMap hardwareMap)
+    {
+        tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
@@ -123,10 +129,7 @@ public class MecanumRobot {
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
-                .build(); */
-
-        double distance = Double.MAX_VALUE;
-
+                .build();
     }
 
     public AprilTagDetection tryDetectApriTag(int idCode)

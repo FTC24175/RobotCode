@@ -134,7 +134,7 @@ public class AutoBlueFar extends LinearOpMode {
         webcam.closeCameraDevice();
         sleep(1000);
 
-
+        robot.initializeAprilTag(hardwareMap);
 
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
