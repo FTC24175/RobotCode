@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.abs;
+
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -7,10 +11,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import java.util.List;
 
 @Config
 @Autonomous(name="TeamProdDetectionBlue", group="Tutorials")
@@ -34,10 +46,24 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     private double lowerruntime = 0;
     private double upperruntime = 0;
 
-    // Red Range                                      Y      Cr     Cb
-    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 90.0, 160.0);
-    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 130.0, 255.0);
+    // Blue Range                                      Y      Cr     Cb
+    public static Scalar scalarLowerYCrCb = new Scalar(  0.0, 50.0, 160.0);
+    public static Scalar scalarUpperYCrCb = new Scalar(255.0, 170.0, 255.0);
 
+    boolean checkForBlue = true;
+
+    int targetAprilTag = 2;
+
+    int aprilTagMode = 0;
+
+    public VisionPortal visionPortal;
+    public AprilTagProcessor tagProcessor;
+
+    boolean aprilTagRunning = true;
+
+    boolean aprilTagDetected = true;
+
+    double distance = 1000;
 
     @Override
     public void runOpMode()
@@ -71,9 +97,11 @@ public class TeamProdDetectionBlue extends LinearOpMode {
         FtcDashboard.getInstance().startCameraStream(webcam, 10);
 
         telemetry.update();
-        waitForStart();
 
-        while (opModeIsActive())
+
+        //
+
+        while (opModeInInit())
         {
             myPipeline.configureBorders(borderLeftX, borderRightX, borderTopY, borderBottomY);
             if(myPipeline.error){
@@ -86,15 +114,70 @@ public class TeamProdDetectionBlue extends LinearOpMode {
             if(myPipeline.getRectArea() > 2000){
                 if(myPipeline.getRectMidpointX() > 400){
                     AUTONOMOUS_C(); //right
+                    //moveDirection = 2;
                 }
                 else if(myPipeline.getRectMidpointX() > 200){
                     AUTONOMOUS_B(); //center
+                    //moveDirection = 1;
                 }
                 else {
                     AUTONOMOUS_A(); //left
+
                 }
             }
+            telemetry.update();
         }
+
+        waitForStart();
+
+           // webcam.stopStreaming();
+           webcam.closeCameraDevice();
+            sleep(1000);
+
+            // crash test
+            tagProcessor = new AprilTagProcessor.Builder()
+                    .setDrawAxes(true)
+                    .setDrawCubeProjection(true)
+                    .setDrawTagID(true)
+                    .setDrawTagOutline(true)
+                    .build();
+
+            visionPortal = new VisionPortal.Builder()
+                    .addProcessor(tagProcessor)
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .setCameraResolution(new Size(640, 480))
+                    .build();
+
+
+        while (aprilTagRunning && opModeIsActive()) {
+
+            aprilTagDetected = false;
+            AprilTagDetection myAprilTagDetection = tryDetectApriTag(targetAprilTag);
+
+
+            if (myAprilTagDetection != null)
+            {
+                telemetry.addData("April Tag detected: ", "!");
+                distance = myAprilTagDetection.ftcPose.y;
+                aprilTagDetected = true;
+            }
+
+            if (aprilTagDetected && aprilTagMode == 0) {
+                aprilTagMode = 1;
+            }
+            else if (aprilTagDetected && aprilTagMode == 1) {
+                double difference = distance ;
+                // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
+
+                telemetry.addData("distance =  ", distance);
+            }
+
+        }
+
+
+        telemetry.addData("finish running: ", "ok");
+        telemetry.update();
+
     }
 
     public Double inValues(double value, double min, double max){
@@ -108,8 +191,31 @@ public class TeamProdDetectionBlue extends LinearOpMode {
     }
     public void AUTONOMOUS_B(){
         telemetry.addLine("Autonomous B");
+
     }
     public void AUTONOMOUS_C(){
         telemetry.addLine("Autonomous C");
+    }
+
+    public AprilTagDetection tryDetectApriTag(int idCode)
+    {
+        AprilTagDetection aprilTagDetection = null;
+        List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
+        for (int i = 0; i < myAprilTagDetections.size(); i++) {
+            AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+            if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                int myAprilTagIdCode = myAprilTagDetection.id;
+                if (myAprilTagIdCode == idCode) {
+                    aprilTagDetection = myAprilTagDetection;
+                    telemetry.addData("y", myAprilTagDetection.ftcPose.y);
+                    telemetry.addData("z", myAprilTagDetection.ftcPose.z);
+                    telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
+                    telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
+                    telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
+                }
+            }
+        }
+        return aprilTagDetection;
     }
 }

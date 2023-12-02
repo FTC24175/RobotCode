@@ -26,7 +26,7 @@ public class McDrive extends LinearOpMode {
             DcMotor backLeftMotor = hardwareMap.dcMotor.get("motor2");
             DcMotor frontRightMotor = hardwareMap.dcMotor.get("motor3");
             DcMotor backRightMotor = hardwareMap.dcMotor.get("motor4");
-            color = hardwareMap.get(ColorSensor.class, "color1");
+            color = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
 
 
             // Reverse the right side motors. This may be wrong for your setup.
@@ -35,8 +35,8 @@ public class McDrive extends LinearOpMode {
             // See the note about this earlier on this page.
 
             frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
             // Retrieve the IMU from the hardware map
@@ -67,19 +67,19 @@ public class McDrive extends LinearOpMode {
                 turn = gamepad1.right_stick_x;
 
                 if (gamepad1.a) {
-                    RotateMinus90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+                    RotateM90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
                 }
                 if (gamepad1.x) {
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,0.5, 1600);
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,-0.5, 1600);
-                    RotateMinus90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+                    RotateM90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,0.5, 4500);
                 }
 
                 if (gamepad1.y) {
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,0.5, 1600);
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,-0.5, 1600);
-                    Rotate90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+                    RotateP90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
                     movement(frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor,0,0.5, 4500);
                 }
 
@@ -88,7 +88,7 @@ public class McDrive extends LinearOpMode {
                 telemetry.update();*/
 
                 if (gamepad1.b){
-                    Rotate90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
+                    RotateP90(imu, frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
                 }
 
                 if (gamepad1.dpad_up) {
@@ -139,7 +139,7 @@ public class McDrive extends LinearOpMode {
             }
         }
 
-        public void Rotate90(IMU imu, DcMotor fl, DcMotor fr, DcMotor bl, DcMotor br) {
+        public void RotateP90(IMU imu, DcMotor fl, DcMotor fr, DcMotor bl, DcMotor br) {
             imu.resetYaw(); // set to 0 degree
             double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
@@ -150,7 +150,7 @@ public class McDrive extends LinearOpMode {
             while (Math.abs(diff)>2){
                 sign = diff/Math.abs(diff);
                 turn = sign*0.2;
-                leftFront =  turn;
+                leftFront =  turn;  //problem one
                 rightFront = turn;
                 leftRear =  - turn;
                 rightRear =  - turn;
@@ -173,7 +173,7 @@ public class McDrive extends LinearOpMode {
             br.setPower(0);
         }
 
-    public void RotateMinus90(IMU imu, DcMotor fl, DcMotor fr, DcMotor bl, DcMotor br) {
+    public void RotateM90(IMU imu, DcMotor fl, DcMotor fr, DcMotor bl, DcMotor br) {
         imu.resetYaw(); // set to 0 degree
         double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         currentAngle = currentAngle *  180 / Math.PI;
