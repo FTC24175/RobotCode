@@ -17,18 +17,16 @@ import static android.os.SystemClock.sleep;
 import java.util.List;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
-@TeleOp(name="mecanumtest")
+@TeleOp(name="MecanumTest")
 public class MecanumTest extends LinearOpMode {
 
-
+    MecanumRobot robot = new MecanumRobot(this);
     int clicks = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumRobot robot = new MecanumRobot();
-        robot.initialize(hardwareMap,telemetry);
 
-
+        robot.initialize();
 
         boolean checkForRed = false;
         boolean checkForBlue = false;

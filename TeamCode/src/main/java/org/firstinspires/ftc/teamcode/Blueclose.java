@@ -5,22 +5,22 @@ import static java.lang.Math.abs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Autonomous(name = "Blueclose")
 public class Blueclose extends LinearOpMode {
+
+    MecanumRobot robot = new MecanumRobot(this);
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumRobot robot = new MecanumRobot();
-        robot.initialize(hardwareMap,telemetry);
+
+        robot.initialize();
 
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
         int targetAprilTag = 2;
         int alliance = 0;
-        int blue = robot.colorSensor.blue();
+        int blue = robot.getColorSensorBlue();
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
@@ -53,13 +53,13 @@ public class Blueclose extends LinearOpMode {
         sleep(1000);
         robot.move(0,1,0,0.2);
         while (checkForBlue) {
-            blue = robot.colorSensor.blue();
-            if(blue >= robot.default_blue + 500) {
+            blue = robot.getColorSensorBlue();
+            if(blue >= robot.getDefaultBlue() + 500) {
                 robot.move(0,0,0,0);
                 checkForBlue = false;
             }
             telemetry.addData("Blue: ", blue);
-            telemetry.addData("initial blue: ", robot.default_blue);
+            telemetry.addData("initial blue: ", robot.getDefaultBlue());
             telemetry.update();
             sleep(10);
         }
@@ -78,7 +78,7 @@ public class Blueclose extends LinearOpMode {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
-            telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
+            telemetry.addData("April Tag detected: ", robot.getDetectionSize());
 
             if (myAprilTagDetection != null)
             {

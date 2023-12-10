@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.deprecated;
 
 import static android.os.SystemClock.sleep;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
+import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
+import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
