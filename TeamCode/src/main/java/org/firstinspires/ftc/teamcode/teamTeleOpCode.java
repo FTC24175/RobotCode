@@ -5,8 +5,10 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import static android.os.SystemClock.sleep;
+
+import org.firstinspires.ftc.teamcode.deprecated.Attachments;
 
 /*
 Software problems:
