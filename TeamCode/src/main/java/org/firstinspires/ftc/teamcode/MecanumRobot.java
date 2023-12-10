@@ -42,7 +42,6 @@ public class MecanumRobot {
     private AprilTagProcessor tagProcessor;
 
     private IMU imu;
-    private Telemetry telemetry;
     private int default_red;
     private int default_blue;
 
@@ -102,6 +101,7 @@ public class MecanumRobot {
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
         motor3.setDirection(DcMotorSimple.Direction.FORWARD);
         motor4.setDirection(DcMotorSimple.Direction.FORWARD);
+
         /* By Bo
         motor1ex.setDirection(DcMotorSimple.Direction.FORWARD);
         motor2ex.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -171,10 +171,10 @@ public class MecanumRobot {
         motor3.setPower(rightFront * powerScale);
         motor4.setPower(rightRear * powerScale);
 
-        telemetry.addData("Motor 1 Left Front",leftFront * powerScale);
-        telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
-        telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
-        telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
+        myOpMode.telemetry.addData("Motor 1 Left Front",leftFront * powerScale);
+        myOpMode.telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
+        myOpMode.telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
+        myOpMode.telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
     }
 
     public void intializeAprilTag()
@@ -204,11 +204,11 @@ public class MecanumRobot {
                 int myAprilTagIdCode = myAprilTagDetection.id;
                 if (myAprilTagIdCode == idCode) {
                     aprilTagDetection = myAprilTagDetection;
-                    telemetry.addData("y", myAprilTagDetection.ftcPose.y);
-                    telemetry.addData("z", myAprilTagDetection.ftcPose.z);
-                    telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
-                    telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
-                    telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
+                    myOpMode.telemetry.addData("y", myAprilTagDetection.ftcPose.y);
+                    myOpMode.telemetry.addData("z", myAprilTagDetection.ftcPose.z);
+                    myOpMode.telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
+                    myOpMode.telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
+                    myOpMode.telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
                 }
             }
         }
@@ -230,8 +230,20 @@ public class MecanumRobot {
         return colorSensor.red();
     }
 
+    public int getColorSensorGreen() {
+        return colorSensor.green();
+    }
+
     public int getDetectionSize() {
         return tagProcessor.getDetections().size();
+    }
+
+    public int getColorSensorAlpha() {
+        return colorSensor.alpha();
+    }
+
+    public int getColorSensorArgb() {
+        return colorSensor.argb();
     }
 
     /*

@@ -13,14 +13,14 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 public class Redclose extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumRobot robot = new MecanumRobot();
-        robot.initialize(hardwareMap,telemetry);
+        MecanumRobot robot = new MecanumRobot(this);
+        robot.initialize();
 
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
         int targetAprilTag = 4;
         int alliance = 1;
-        int red = robot.colorSensor.red();
+        int red = robot.getColorSensorRed();
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
@@ -53,13 +53,13 @@ public class Redclose extends LinearOpMode {
         sleep(1000);
         robot.move(0,1,0,0.2);
         while (checkForRed) {
-            red = robot.colorSensor.red();
-            if(red >= robot.default_red + 500) {
+            red = robot.getColorSensorRed();
+            if(red >= robot.getDefaultRed() + 500) {
                 robot.move(0,0,0,0);
                 checkForRed = false;
             }
             telemetry.addData("Red: ", red);
-            telemetry.addData("initial red: ", robot.default_red);
+            telemetry.addData("initial red: ", robot.getDefaultRed());
             telemetry.update();
             sleep(10);
         }
@@ -78,7 +78,7 @@ public class Redclose extends LinearOpMode {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
-            telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
+            telemetry.addData("April Tag detected: ", robot.getDetectionSize());
 
             if (myAprilTagDetection != null)
             {

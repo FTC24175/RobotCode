@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.vision.VisionPortal;
+//import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+//import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import static android.os.SystemClock.sleep;
@@ -28,6 +28,14 @@ public class MecanumTest extends LinearOpMode {
 
         robot.initialize();
 
+        int myAprilTaIdCode = -1;
+        int targetAprilTag = 2;
+        boolean aprilTagRunning = false;
+        // mode 0 : scanning
+        // mode 1 : approaching
+        int aprilTagMode = 0;
+        boolean aprilTagDetected = false;
+
         boolean checkForRed = false;
         boolean checkForBlue = false;
         // mode 0 : scanning
@@ -37,9 +45,10 @@ public class MecanumTest extends LinearOpMode {
         int alliance = 1;
         int liftMax = 550;
         int wristMax = 550;
+        /* // By Bo
         double leftArmPosition = robot.getLeftArmPosition();
         double wristPosition = robot.getWristPosition();
-
+        */
         double clawPosition = Constants.clawOpen;
 
         // 0 : blue
@@ -56,11 +65,11 @@ public class MecanumTest extends LinearOpMode {
             //make sure ^^ is negated
             double turn = gamepad1.right_stick_x;
 
-            int red = robot.colorSensor.red();   // Red channel value
-            int green = robot.colorSensor.green(); // Green channel value
-            int blue = robot.colorSensor.blue();  // Blue channel value
-            int alpha = robot.colorSensor.alpha(); // Total luminosity
-            int argb = robot.colorSensor.argb();  // Combined color value
+            int red = robot.getColorSensorRed();   // Red channel value
+            int green = robot.getColorSensorGreen(); // Green channel value
+            int blue = robot.getColorSensorBlue();  // Blue channel value
+            int alpha = robot.getColorSensorAlpha(); // Total luminosity
+            int argb = robot.getColorSensorArgb();  // Combined color value
 
             robot.move(x,y,turn,1);
 
@@ -85,7 +94,6 @@ public class MecanumTest extends LinearOpMode {
 
             /*
             move arm up and down when x & y buttons are pressed
-        */
 
             if(gamepad1.y)
             {
@@ -112,7 +120,7 @@ public class MecanumTest extends LinearOpMode {
 
          /*
             move wrist up and down when a & b buttons are pressed
-        */
+
             if (gamepad1.b)
             {
                 if(wristPosition < Constants.wristUp) {
@@ -131,11 +139,11 @@ public class MecanumTest extends LinearOpMode {
                 }
                 sleep(10);
             }
-
+*/
 
         /*
             open and close one claw
-        */
+
             if (gamepad1.left_bumper) {
                 clicks += 1;
                 if (clicks == 2){
@@ -149,9 +157,10 @@ public class MecanumTest extends LinearOpMode {
                     clicks = 0;
                 }
             }
+                    */
         /*
             open and close the other claw
-        */
+
             if (gamepad1.right_bumper) {
                 clicks += 1;
                 if (clicks == 2){
@@ -197,8 +206,8 @@ public class MecanumTest extends LinearOpMode {
             //if (gamepad1.start) {
             //    robot.servo4
             //}
-
-           /* if(gamepad1.right_bumper) {
+        */
+            if(gamepad1.right_bumper) {
                 aprilTagRunning = true;
             }
             if(gamepad1.x) {
@@ -248,7 +257,7 @@ public class MecanumTest extends LinearOpMode {
                 }
             }
             if(checkForRed) {
-                if(red < robot.default_red + 500) {
+                if(red < robot.getDefaultRed() + 500) {
                     robot.move(0,1,0,0.3);
                 }
                 else  {
@@ -257,7 +266,7 @@ public class MecanumTest extends LinearOpMode {
             }
 
             if(checkForBlue) {
-                if (blue < robot.default_blue + 500) {
+                if (blue < robot.getDefaultBlue() + 500) {
                     robot.move(0, 1, 0, 0.3);
                 } else {
                     checkForBlue = false;
@@ -270,7 +279,7 @@ public class MecanumTest extends LinearOpMode {
             telemetry.addData("Checking for Red: ", checkForRed);
             telemetry.addData("Checking for Blue: ", checkForBlue);
             telemetry.addData("distance",distance);
-            telemetry.update(); */
+            telemetry.update();
         }
 
     }
