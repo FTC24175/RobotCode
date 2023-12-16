@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.teamTeleOpCode.iRobot;
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsTouchSensor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -28,6 +29,8 @@ public class Attachments {
 
     public Servo droneServo;
 
+    public ModernRoboticsTouchSensor touchSensor = null;
+
     public Rev2mDistanceSensor rightDistance, leftDistance, clawRightDistance, clawLeftDistance, clawDistance;
 
     public void initialize(HardwareMap hardwareMap) {
@@ -48,6 +51,8 @@ public class Attachments {
         droneServo = hardwareMap.get(Servo.class, "servo3");
         // Sensors
         // Todo: need to add
+        touchSensor = hardwareMap.get(ModernRoboticsTouchSensor.class, "tch");
+
 
         // Motor Behavior
         leftDriveMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

@@ -32,6 +32,7 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
     Telemetry telemetry;
 
     Scalar meanImage;
+
     /*
      * This function takes the RGB frame, converts to YCrCb,
      * and extracts the Y channel to the 'Y' variable
@@ -68,7 +69,6 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
     }
 
 
-
     @Override
     public void init(Mat firstFrame) {
         inputToY(firstFrame);
@@ -78,58 +78,103 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
     public Mat processFrame(Mat input) {
         if (Constants.signalDetectionMethod == 1) {
             input.copyTo(workingMatrix);
-            if (workingMatrix.empty()){
+            if (workingMatrix.empty()) {
                 return input;
             }
 
             Imgproc.cvtColor(workingMatrix, workingMatrix, Imgproc.COLOR_RGB2YCrCb);
 
-            //imageLeft = workingMatrix.submat(300, 700, 10, 400);
+
+
+
+            imageLeft = workingMatrix.submat(300, 700, 10, 400);
             imageCenter = workingMatrix.submat(30, 250, 220, 700);
             imageRight = workingMatrix.submat(162, 425, 853, 1066);
 
-            //leftTotal = Core.sumElems(imageLeft).val[0];
-            centerTotal = Core.sumElems(imageCenter).val[0];
-            rightTotal = Core.sumElems(imageRight).val[0];
+            leftTotal = Core.sumElems(imageLeft).val[1];
+            centerTotal = Core.sumElems(imageCenter).val[1];
+            rightTotal = Core.sumElems(imageRight).val[1];
 
-            //meanLeft = leftTotal/(401*390);
+            meanLeft = leftTotal/(401*390);
             meanCenter = centerTotal/(221*481);
             meanRight = rightTotal/(264*214);
 
-            if (meanRight < meanCenter) {
-                if (meanCenter - meanRight > 70) {
-                    counter = 3;  // Right the smallest
-                }
-            }
-            else if (meanRight > meanCenter){
-                if (meanRight - meanCenter > 5) {
-                    counter = 2;  // Center is the smallest
-                }
-            }
-            else{
-                    counter = 1;  // left is the largest
+            int countl = 0;
+            int countc = 0;
+            int countr = 0;
+            int colorThreshold = 100;
+
+
+            for (int i = 300; i < 700; i+=5) {
+                for (int j = 10; j < 400; j+=5) {
+                    double[] a = workingMatrix.get(i, j);
+                    if (a[1] > colorThreshold) {
+                        countl++;
+                    }
+
                 }
             }
 
+            for (int i = 30; i < 250; i+=5) {
+                for (int j = 220; j < 700; j+=5) {
+                    double[] a = workingMatrix.get(i, j);
+                    if (a[1] > colorThreshold) {
+                        countc++;
+                    }
 
+                }
+            }
 
+            for (int i = 162; i < 425; i+=5) {
+                for (int j = 853; j < 1066; j+=5) {
+                    double[] a = workingMatrix.get(i, j);
+                    if (a[1] > colorThreshold) {
+                        countr++;
+                    }
+
+                }
+            }
+
+            meanCenter = countc;
+            meanLeft = countl;
+            meanRight = countr;
+
+            if (countl >= countc) {
+                if (countl >= countr) {
+                    counter = countl;
+                } else {
+                    counter = countr;
+                }
+            } else {
+                if (countc >= countr) {
+                    counter = countc;
+                } else {
+                    counter = countr;
+                }
+
+            }
+
+        }
         return input;
-    }
 
+    }
     public int getCounter() {
         return counter;
     }
 
-    public double getMeanCenter() {
+    public double getMeanCenter(){
         return meanCenter;
     }
-    public double getMeanLeft() {
+    public double getMeanLeft(){
         return meanLeft;
     }
-    public double getMeanRight() {
+
+    public double getMeanRight(){
         return meanRight;
     }
 }
+
+
 
 
 
