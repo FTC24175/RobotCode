@@ -28,12 +28,36 @@ public class MecanumTest extends LinearOpMode {
 
         robot.initialize();
 
-        int myAprilTaIdCode = -1;
-        int targetAprilTag = 2;
-        boolean aprilTagRunning = false;
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        // manual mode
+        double leftPower = 0;
+        double rightPower = 0;
+        double slidePower = 0;
+        double leftPosition = 0;
+        double rightPosition = 0;
+        double wristPosition = 0;
+
+        /* // Manual mode By Bo
+        int liftMax = 550;
+        int wristMax = 550;
+        double leftArmPosition = robot.getLeftArmPosition();
+        double wristPosition = robot.getWristPosition();
+        double clawPosition = Constants.clawOpen;
+        */
+
+        /* Auto mode
+        * April Tag
+         */
+
+        // int myAprilTaIdCode = -1; // not used
+        // int targetAprilTag = 2; // not used
+
         // mode 0 : scanning
         // mode 1 : approaching
         int aprilTagMode = 0;
+        boolean aprilTagRunning = Constants.aprilTagRunning;
         boolean aprilTagDetected = false;
 
         boolean checkForRed = false;
@@ -43,57 +67,136 @@ public class MecanumTest extends LinearOpMode {
 
         double desiredDistance = 7;
         int alliance = 1;
-        int liftMax = 550;
-        int wristMax = 550;
-        /* // By Bo
-        double leftArmPosition = robot.getLeftArmPosition();
-        double wristPosition = robot.getWristPosition();
-        */
-        double clawPosition = Constants.clawOpen;
 
         // 0 : blue
         // 1 : red
-
+        int red = 0;
+        int blue = 0;
 
         double distance = Double.MAX_VALUE;
 
         waitForStart();
 
         while(opModeIsActive()) {
+
+            // Mecanum Drivetrain By Kush & Derek 11/18-11/22
+
             double x = gamepad1.left_stick_x;
             double y = -gamepad1.left_stick_y;
             //make sure ^^ is negated
             double turn = gamepad1.right_stick_x;
 
-            int red = robot.getColorSensorRed();   // Red channel value
-            int green = robot.getColorSensorGreen(); // Green channel value
-            int blue = robot.getColorSensorBlue();  // Blue channel value
-            int alpha = robot.getColorSensorAlpha(); // Total luminosity
-            int argb = robot.getColorSensorArgb();  // Combined color value
+            robot.move(x, y, turn, 1);
 
-            robot.move(x,y,turn,1);
-
-
-
-
-
-            if(gamepad1.dpad_up) {
-                robot.move(0,1,0,0.5);
+            if (gamepad1.dpad_up) {
+                robot.move(0, 1, 0, 0.5);
             }
-            if(gamepad1.dpad_down) {
-                robot.move(0,-1,0,0.5);
+            if (gamepad1.dpad_down) {
+                robot.move(0, -1, 0, 0.5);
             }
-            if(gamepad1.dpad_left) {
-                robot.move(-1,0,0,0.5);
+            if (gamepad1.dpad_left) {
+                robot.move(-1, 0, 0, 0.5);
             }
-            if(gamepad1.dpad_right) {
-                robot.move(1,0,0,0.5);
+            if (gamepad1.dpad_right) {
+                robot.move(1, 0, 0, 0.5);
             }
 
+            // Manual mode By Kush on 11/29/2023
 
+            // Arm movement
+
+            if (gamepad1.x) {
+
+                //robot.motor1ex.setPower(0.5);
+                //robot.motor2ex.setPower(0.5);
+
+                leftPower = 0.5;
+                rightPower = 0.5;
+                robot.setMotorPowerArm(0); // need correction
+                telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                telemetry.update();
+
+            } else if (gamepad1.y) {
+
+                //robot.motor1ex.setPower(-0.5);
+                //robot.motor2ex.setPower(-0.5);
+
+                leftPower = -0.5;
+                rightPower = -0.5;
+                robot.setMotorPowerArm(0); // need correction
+                telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                telemetry.update();
+
+            } else { // when nothing is pressed, brake the arm motors
+
+                //robot.motor1ex.setPower(0);
+                //robot.motor2ex.setPower(0);
+
+                leftPower = 0;
+                rightPower = 0;
+                robot.setMotorPowerArm(0); // need correction
+                telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                telemetry.update();
+            }
+
+
+            // Slide movement
+
+            ///////////////////// Fill in ///////////////////
+
+
+            // Hand movement
+
+            if (gamepad1.right_bumper) {
+
+                if (robot.getServoPositionLeftHand() == 1) {
+
+                    //robot.servo1.setPosition(0);
+                    //robot.servo2.setPosition(0);
+                    leftPosition = 0;
+                    rightPosition = 0;
+                    robot.setServoPositionLeftHand(); // need correction
+                    robot.setServoPositionRightHand(); // need correction
+                    telemetry.addData("Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    telemetry.update();
+
+                } else {
+
+                    //robot.servo1.setPosition(1);
+                    //robot.servo2.setPosition(1);
+                    leftPosition = 1;
+                    rightPosition = 1;
+                    robot.setServoPositionLeftHand(); // need correction
+                    robot.setServoPositionRightHand(); // need correction
+                    telemetry.addData("Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    telemetry.update();
+                }
+
+                sleep(300); // wait for 0.3 second
+
+            }
+
+            // Wrist movement
+
+            ///////////////////// Fill in ///////////////////
 
             /*
-            move arm up and down when x & y buttons are pressed
+            // Intake wheels by Kush
+
+            if (gamepad1.a) {
+                robot.motor3ex.setPower(0.3);
+            } else if (gamepad1.b) {
+                robot.motor3ex.setPower(-0.3);
+            } else {
+                robot.motor3ex.setPower(0);
+            }
+            */
+
+            /*
+            * Manual mode by Bo on 12/1
+             */
+            /*
+            //move arm up and down when x & y buttons are pressed
 
             if(gamepad1.y)
             {
@@ -118,8 +221,7 @@ public class MecanumTest extends LinearOpMode {
                 robot.motor2ex.setPower(0);
             }
 
-         /*
-            move wrist up and down when a & b buttons are pressed
+            //move wrist up and down when a & b buttons are pressed
 
             if (gamepad1.b)
             {
@@ -139,10 +241,8 @@ public class MecanumTest extends LinearOpMode {
                 }
                 sleep(10);
             }
-*/
 
-        /*
-            open and close one claw
+            //open and close one claw
 
             if (gamepad1.left_bumper) {
                 clicks += 1;
@@ -157,9 +257,8 @@ public class MecanumTest extends LinearOpMode {
                     clicks = 0;
                 }
             }
-                    */
-        /*
-            open and close the other claw
+
+            //open and close the other claw
 
             if (gamepad1.right_bumper) {
                 clicks += 1;
@@ -207,21 +306,25 @@ public class MecanumTest extends LinearOpMode {
             //    robot.servo4
             //}
         */
-            if(gamepad1.right_bumper) {
+            /* Auto mode
+            * April Tag
+             */
+            /*
+            // By Kush
+            if (gamepad1.right_bumper) {
                 aprilTagRunning = true;
             }
-            if(gamepad1.x) {
-                checkForRed = true;
-            }
-            if(gamepad1.y) {
-                checkForBlue = true;
-            }
-
-            if(aprilTagRunning) {
+            */
+            if (aprilTagRunning) {
+                if (gamepad1.x) {
+                    checkForRed = true;
+                }
+                if (gamepad1.y) {
+                    checkForBlue = true;
+                }
                 if (aprilTagDetected && aprilTagMode == 0) {
                     aprilTagMode = 1;
-                }
-                else if (aprilTagDetected && aprilTagMode == 1) {
+                } else if (aprilTagDetected && aprilTagMode == 1) {
                     double difference = distance - desiredDistance;
                     // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
                     if (difference > 0.1) {
@@ -244,48 +347,38 @@ public class MecanumTest extends LinearOpMode {
                         robot.move(1, 0, 0, 0.2);
                         sleep(300);
                     }
-                }
-                else if (aprilTagDetected == false && aprilTagMode == 0) {
-                    if (alliance == 0)
-                    {
-                        robot.move(1,0,0,0.3);
-                    }
-                    else if (alliance == 1)
-                    {
-                        robot.move(-1,0,0,0.3);
+                } else if (aprilTagDetected == false && aprilTagMode == 0) {
+                    if (alliance == 0) {
+                        robot.move(1, 0, 0, 0.3);
+                    } else if (alliance == 1) {
+                        robot.move(-1, 0, 0, 0.3);
                     }
                 }
-            }
-            if(checkForRed) {
-                if(red < robot.getDefaultRed() + 500) {
-                    robot.move(0,1,0,0.3);
+                if (checkForRed) {
+                    if (red < robot.getDefaultRed() + 500) {
+                        robot.move(0, 1, 0, 0.3);
+                    } else {
+                        checkForRed = false;
+                    }
                 }
-                else  {
-                    checkForRed = false;
+
+                if (checkForBlue) {
+                    if (blue < robot.getDefaultBlue() + 500) {
+                        robot.move(0, 1, 0, 0.3);
+                    } else {
+                        checkForBlue = false;
+                    }
                 }
+
+                telemetry.addData("Red: ", red);
+                telemetry.addData("Blue: ", blue);
+                telemetry.addData("Checking for Red: ", checkForRed);
+                telemetry.addData("Checking for Blue: ", checkForBlue);
+                telemetry.addData("distance", distance);
+                telemetry.update();
             }
-
-            if(checkForBlue) {
-                if (blue < robot.getDefaultBlue() + 500) {
-                    robot.move(0, 1, 0, 0.3);
-                } else {
-                    checkForBlue = false;
-                }
-            }
-
-
-            telemetry.addData("Red: ", red);
-            telemetry.addData("Blue: ", blue);
-            telemetry.addData("Checking for Red: ", checkForRed);
-            telemetry.addData("Checking for Blue: ", checkForBlue);
-            telemetry.addData("distance",distance);
-            telemetry.update();
         }
-
     }
-
-
-
 }
 
 

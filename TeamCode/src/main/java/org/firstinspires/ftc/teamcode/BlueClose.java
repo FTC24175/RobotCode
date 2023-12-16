@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "Blueclose")
-public class Blueclose extends LinearOpMode {
+@Autonomous(name = "BlueClose")
+public class BlueClose extends LinearOpMode {
 
     MecanumRobot robot = new MecanumRobot(this);
     @Override

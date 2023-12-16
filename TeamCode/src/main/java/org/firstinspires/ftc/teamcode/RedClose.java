@@ -5,12 +5,11 @@ import static java.lang.Math.abs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "Redclose")
-public class Redclose extends LinearOpMode {
+@Autonomous(name = "RedClose")
+public class RedClose extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot(this);

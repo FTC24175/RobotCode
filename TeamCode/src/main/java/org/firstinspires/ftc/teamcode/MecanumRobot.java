@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static android.os.SystemClock.sleep;
-
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
@@ -11,12 +9,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 // Autonomous mode
 //import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+        import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -33,10 +29,20 @@ public class MecanumRobot {
     private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
-    private DcMotor motor1 = null;
-    private DcMotor motor2 = null;
-    private DcMotor motor3 = null;
-    private DcMotor motor4 = null;
+    private DcMotor motorHDLeftFront = null;
+    private DcMotor motorHDLeftRear = null;
+    private DcMotor motorHDRightFront = null;
+    private DcMotor motorHDRightRear = null;
+
+    private DcMotor motorCoreLeftArm = null;
+    private DcMotor motorCoreRightArm = null;
+    private DcMotor motorCoreSlides = null;
+    private Servo servoWrist = null;
+    private Servo servoLeftHand = null;
+    private Servo servoRightHand = null;
+    private Servo servoLauncher = null;
+
+    // Auto mode
     private ColorSensor colorSensor, colorSensor2;
     private VisionPortal visionPortal;
     private AprilTagProcessor tagProcessor;
@@ -45,14 +51,6 @@ public class MecanumRobot {
     private int default_red;
     private int default_blue;
 
-    private DcMotor motor1ex = null;
-    private DcMotor motor2ex = null;
-    private DcMotor motor3ex = null;
-    private Servo servo1 = null;
-    private Servo servo2 = null;
-
-    private Servo servo3 = null;
-    private Servo servo4 = null;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public MecanumRobot (LinearOpMode opmode) {
@@ -61,52 +59,63 @@ public class MecanumRobot {
 
     public void initialize()
     {
-        motor1 = myOpMode.hardwareMap.get(DcMotor.class, "motor1");
-        motor2 = myOpMode.hardwareMap.get(DcMotor.class, "motor2");
-        motor3 = myOpMode.hardwareMap.get(DcMotor.class, "motor3");
-        motor4 = myOpMode.hardwareMap.get(DcMotor.class, "motor4");
-        motor1ex = myOpMode.hardwareMap.get(DcMotor.class, "motor1ex");
-        motor2ex = myOpMode.hardwareMap.get(DcMotor.class, "motor2ex");
-        motor3ex = myOpMode.hardwareMap.get(DcMotor.class, "motor3ex");
-        servo1 = myOpMode.hardwareMap.get(Servo.class, "servo1");
-        servo2 = myOpMode.hardwareMap.get(Servo.class, "servo2");
-        servo3 = myOpMode.hardwareMap.get(Servo.class, "servo3");
-        servo4 = myOpMode.hardwareMap.get(Servo.class, "servo4");
+        // Mecanum Drivertrain Motors
 
-        colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
-        colorSensor.enableLed(true);
-        //colorSensor2 = hardwareMap.get(ColorSensor.class, "sensorColor2");
-        //colorSensor2.enableLed(true);
+        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "motor0hd");
+        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "motor1hd");
+        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "motor2hd");
+        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "motor3hd");
 
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+
+        motorHDLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDLeftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDRightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        motorHDLeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorHDLeftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorHDRightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorHDRightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+
+
+        // Top Motors
+
+        motorCoreLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "motor0core");
+        motorCoreRightArm = myOpMode.hardwareMap.get(DcMotor.class, "motor1core");
+        motorCoreSlides = myOpMode.hardwareMap.get(DcMotor.class, "motor2core");
+
+
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+
+        motorCoreLeftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorCoreRightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorCoreSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        motorCoreLeftArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorCoreRightArm.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Servos
+
+        servoWrist = myOpMode.hardwareMap.get(Servo.class, "servo0exp");
+        servoLeftHand = myOpMode.hardwareMap.get(Servo.class, "servo1exp");
+        servoRightHand = myOpMode.hardwareMap.get(Servo.class, "servo2exp");
+        servoLauncher = myOpMode.hardwareMap.get(Servo.class, "servo3exp");
+
+        /*
+        * Auto mode initialization
+        */
 
         /*
         //By Bo
-        motor1ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor1ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor2ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor2ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor3ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor3ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        motor1ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor3ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor0core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor0core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor1core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor1core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor2core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor2core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
 
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor3.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor4.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        /* By Bo
-        motor1ex.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor2ex.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor3ex.setDirection(DcMotorSimple.Direction.FORWARD);
-        */
 
         // Retrieve the IMU from the hardware map
         imu = myOpMode.hardwareMap.get(IMU.class, "imu");
@@ -116,6 +125,11 @@ public class MecanumRobot {
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
+
+        colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
+        colorSensor.enableLed(true);
+        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "sensorColor2");
+        colorSensor2.enableLed(true);
 
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
@@ -129,15 +143,12 @@ public class MecanumRobot {
         int aprilTagMode = 0;
         double desiredDistance = 7;
         boolean aprilTagDetected = false;
+        double distance = Double.MAX_VALUE;
         */
-
-        // By Bo
-        //double distance = Double.MAX_VALUE;
-
     }
 
     /**
-     * Mecunam Drivetrain
+     * Mecanum Drivetrain
      * Calculates the left/right front/rear motor powers required to achieve the requested
      * robot motions: ...
      * Then sends these power levels to the motors.
@@ -166,17 +177,72 @@ public class MecanumRobot {
             leftFront /= power + Math.abs(turn);
             rightRear /= power + Math.abs(turn);
         }
-        motor1.setPower(leftFront * powerScale);
-        motor2.setPower(leftRear * powerScale);
-        motor3.setPower(rightFront * powerScale);
-        motor4.setPower(rightRear * powerScale);
+        motorHDLeftFront.setPower(leftFront * powerScale);
+        motorHDLeftRear.setPower(leftRear * powerScale);
+        motorHDRightFront.setPower(rightFront * powerScale);
+        motorHDRightRear.setPower(rightRear * powerScale);
 
-        myOpMode.telemetry.addData("Motor 1 Left Front",leftFront * powerScale);
-        myOpMode.telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
-        myOpMode.telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
-        myOpMode.telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
+        myOpMode.telemetry.addData("Motor 0 Left Front",leftFront * powerScale);
+        myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
+        myOpMode.telemetry.addData("Motor 2 Right Front",rightFront * powerScale);
+        myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
     }
 
+    /**
+     * Arm movement
+     * Set both motor powers
+     * Then sends these power levels to the motors.
+     *
+     * @param powerScale
+     */
+
+    public void setMotorPowerArm(double powerScale) {
+
+        //////////////////////// fill in ////////////////////////
+
+    }
+
+    public void setMotorPowerSlide() {
+
+        //////////////////////// fill in ////////////////////////
+
+    }
+
+    public double getServoPositionLeftHand() {
+
+        //////////////////////// fill in ////////////////////////
+        return 0;
+    }
+
+    public double getServoPositionRightHand() {
+
+        //////////////////////// fill in ////////////////////////
+        return 0;
+    }
+
+    public void setServoPositionLeftHand() {
+
+        //////////////////////// fill in ////////////////////////
+
+    }
+
+    public void setServoPositionRightHand() {
+
+        //////////////////////// fill in ////////////////////////
+
+    }
+
+    public double getServoPositionWrist() {
+
+        //////////////////////// fill in ////////////////////////
+
+        return 0;
+    }
+    public void setServoPositionWrist() {
+
+        //////////////////////// fill in ////////////////////////
+
+    }
     public void intializeAprilTag()
     {
         tagProcessor = new AprilTagProcessor.Builder()
@@ -230,21 +296,15 @@ public class MecanumRobot {
         return colorSensor.red();
     }
 
-    public int getColorSensorGreen() {
-        return colorSensor.green();
-    }
+    //public int getColorSensorGreen() { return colorSensor.green(); }
 
     public int getDetectionSize() {
         return tagProcessor.getDetections().size();
     }
 
-    public int getColorSensorAlpha() {
-        return colorSensor.alpha();
-    }
+    //public int getColorSensorAlpha() { return colorSensor.alpha(); }
 
-    public int getColorSensorArgb() {
-        return colorSensor.argb();
-    }
+    //public int getColorSensorArgb() { return colorSensor.argb(); }
 
     /*
     // by Bo
@@ -281,11 +341,11 @@ public class MecanumRobot {
     }
 
     private int getLeftArmPosition() {
-        return motor1ex.getCurrentPosition();
+        return motor0core.getCurrentPosition();
     }
 
     private int getWristPosition() {
-        return motor3ex.getCurrentPosition();
+        return motor2core.getCurrentPosition();
     }
     */
 
@@ -305,10 +365,10 @@ public class MecanumRobot {
             leftRear =  turn;
             rightRear =  - turn;
 
-            motor1.setPower(leftFront);
-            motor2.setPower(leftRear);
-            motor3.setPower(rightFront);
-            motor4.setPower(rightRear);
+            motorHDLeftFront.setPower(leftFront);
+            motorHDLeftRear.setPower(leftRear);
+            motorHDRightFront.setPower(rightFront);
+            motorHDRightRear.setPower(rightRear);
 
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
@@ -317,10 +377,10 @@ public class MecanumRobot {
             //telemetry.addData("diff", diff);
             //telemetry.update();
         }
-        motor1.setPower(0);
-        motor2.setPower(0);
-        motor3.setPower(0);
-        motor4.setPower(0);
+        motorHDLeftFront.setPower(0);
+        motorHDLeftRear.setPower(0);
+        motorHDRightFront.setPower(0);
+        motorHDRightRear.setPower(0);
     }
 
     private void RotateM90() {
@@ -339,10 +399,10 @@ public class MecanumRobot {
             leftRear =  turn;
             rightRear = - turn;
 
-            motor1.setPower(leftFront);
-            motor2.setPower(leftRear);
-            motor3.setPower(rightFront);
-            motor4.setPower(rightRear);
+            motorHDLeftFront.setPower(leftFront);
+            motorHDLeftRear.setPower(leftRear);
+            motorHDRightFront.setPower(rightFront);
+            motorHDRightRear.setPower(rightRear);
 
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
@@ -351,10 +411,10 @@ public class MecanumRobot {
             //telemetry.addData("diff", diff);
             //telemetry.update();
         }
-        motor1.setPower(0);
-        motor2.setPower(0);
-        motor3.setPower(0);
-        motor4.setPower(0);
+        motorHDLeftFront.setPower(0);
+        motorHDLeftRear.setPower(0);
+        motorHDRightFront.setPower(0);
+        motorHDRightRear.setPower(0);
     }
 }
 
