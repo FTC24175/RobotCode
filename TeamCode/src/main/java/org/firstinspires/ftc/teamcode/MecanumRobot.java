@@ -86,6 +86,7 @@ public class MecanumRobot {
         motorCoreLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "motor0core");
         motorCoreRightArm = myOpMode.hardwareMap.get(DcMotor.class, "motor1core");
         motorCoreSlides = myOpMode.hardwareMap.get(DcMotor.class, "motor2core");
+
         //motorCoreSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //motorCoreLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -224,6 +225,7 @@ public class MecanumRobot {
     public void setMotorPowerSlide(double powerScale) {
 
         motorCoreSlides.setPower(powerScale);
+
 
 
     }
