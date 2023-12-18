@@ -81,9 +81,15 @@ public class MecanumRobot {
 
         // Top Motors
 
+
+
         motorCoreLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "motor0core");
         motorCoreRightArm = myOpMode.hardwareMap.get(DcMotor.class, "motor1core");
         motorCoreSlides = myOpMode.hardwareMap.get(DcMotor.class, "motor2core");
+        //motorCoreSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //motorCoreLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+
 
 
         // RUN_WITHOUT_ENCODER mode - only set direction & power
@@ -197,50 +203,60 @@ public class MecanumRobot {
      */
 
     public void setMotorPowerArm(double powerScale) {
+        motorCoreLeftArm.setPower(powerScale);
+        motorCoreRightArm.setPower(powerScale);
 
-        //////////////////////// fill in ////////////////////////
+    }
+
+    public int getMotorPositionLeftArm(){
+        return motorCoreLeftArm.getCurrentPosition();
+    }
+
+    public int getMotorPositionSlide(){
+        return motorCoreSlides.getCurrentPosition();
+    }
+
+    public void setMotorTargetSlide(int targetPosition) {
+        motorCoreSlides.setTargetPosition(targetPosition);
+        motorCoreSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+    public void setMotorPowerSlide(double powerScale) {
+
+        motorCoreSlides.setPower(powerScale);
+
 
     }
 
-    public void setMotorPowerSlide() {
 
-        //////////////////////// fill in ////////////////////////
-
-    }
 
     public double getServoPositionLeftHand() {
-
-        //////////////////////// fill in ////////////////////////
-        return 0;
+        return servoLeftHand.getPosition();
     }
 
     public double getServoPositionRightHand() {
 
-        //////////////////////// fill in ////////////////////////
-        return 0;
+        return servoRightHand.getPosition();
     }
 
-    public void setServoPositionLeftHand() {
+    public void setServoPositionLeftHand(double position) {
 
-        //////////////////////// fill in ////////////////////////
+        servoLeftHand.setPosition(position);
 
     }
 
-    public void setServoPositionRightHand() {
+    public void setServoPositionRightHand(double position) {
 
-        //////////////////////// fill in ////////////////////////
+        servoRightHand.setPosition(position);
 
     }
 
     public double getServoPositionWrist() {
-
-        //////////////////////// fill in ////////////////////////
-
-        return 0;
+        return servoWrist.getPosition();
     }
-    public void setServoPositionWrist() {
+    public void setServoPositionWrist(double position) {
 
-        //////////////////////// fill in ////////////////////////
+        servoWrist.setPosition(position);
 
     }
     public void intializeAprilTag()
