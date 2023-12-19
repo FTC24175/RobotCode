@@ -14,14 +14,19 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
@@ -33,6 +38,7 @@ public class MecanumRobot {
     public ColorSensor colorSensor, colorSensor2;
     public VisionPortal visionPortal;
     public AprilTagProcessor tagProcessor;
+    public TfodProcessor tfod;
 
     public IMU imu;
     private Telemetry telemetry;
@@ -103,16 +109,13 @@ public class MecanumRobot {
 
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
-        int myAprilTaIdCode = -1;
-        int targetAprilTag = 2;
-        boolean aprilTagRunning = false;
-        // mode 0 : scanning
-        // mode 1 : approaching
-        int aprilTagMode = 0;
-        double desiredDistance = 7;
-        boolean aprilTagDetected = false;
+    }
 
-     /*  tagProcessor = new AprilTagProcessor.Builder()
+    public void initializeVision(HardwareMap hardwareMap)
+    {
+
+        tfod = TfodProcessor.easyCreateWithDefaults();
+        tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
@@ -121,13 +124,30 @@ public class MecanumRobot {
 
         visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
+                .addProcessor(tfod)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(new Size(640, 480))
-                .build(); */
-
-        double distance = Double.MAX_VALUE;
+                .build();
 
     }
+
+    public void telemetryTfod() {
+
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
+            double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
+
+            telemetry.addData(""," ");
+            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Position", "%.0f / %.0f", x, y);
+            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+        }   // end for() loop
+
+    }   // end method telemetryTfod()
 
     public AprilTagDetection tryDetectApriTag(int idCode)
     {
@@ -289,6 +309,27 @@ public class MecanumRobot {
         motor2.setPower(0);
         motor3.setPower(0);
         motor4.setPower(0);
+    }
+
+    public void ArmUp(double timeoutS, int difference) {
+        int LiftMax = 450;
+        ElapsedTime runtime = new ElapsedTime();
+        int current = motor1ex.getCurrentPosition();
+        telemetry.addData("Arm Pos",motor1ex.getCurrentPosition());
+        telemetry.addData("Arm Pos",motor2ex.getCurrentPosition());
+        telemetry.update();
+        motor2ex.setPower(0.3);
+        motor1ex.setPower(0.3);
+
+        runtime.reset();
+        while (runtime.milliseconds() < timeoutS && motor1ex.getCurrentPosition() < current + difference) {
+            telemetry.addData("Arm Pos",motor1ex.getCurrentPosition());
+            telemetry.addData("Arm Pos",motor2ex.getCurrentPosition());
+            telemetry.update();
+        }
+
+        motor1ex.setPower(0);
+        motor2ex.setPower(0);
     }
 }
 

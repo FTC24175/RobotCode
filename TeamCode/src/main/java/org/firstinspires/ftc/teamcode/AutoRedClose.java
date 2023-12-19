@@ -2,13 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 
 import static java.lang.Math.abs;
-import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -18,7 +16,6 @@ import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 
@@ -136,23 +133,11 @@ public class AutoRedClose extends LinearOpMode {
 
 
 
-        tagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .build();
-
-        visionPortal = new VisionPortal.Builder()
-                .addProcessor(tagProcessor)
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .build();
-
+       robot.initializeVision(hardwareMap);
 
         //move robot to red lines and stop when detected
 
-        robot.move(0,1,0,0.3);
+        robot.move(0,1,0,0.2);
 
         checkForRed = true;
 
@@ -295,7 +280,14 @@ public class AutoRedClose extends LinearOpMode {
             sleep(10);
         }
         robot.move(0,0,-1,0.4);
-        sleep(2400);
+
+        sleep(2500);
+        robot.move(0,0,0,0);
+        robot.ArmUp(100, 400);
+        robot.move(0,-1,0,0.2);
+        sleep(100);
+        robot.move(0,0,0,0);
+        robot.releasePixel();
 
     }
 }

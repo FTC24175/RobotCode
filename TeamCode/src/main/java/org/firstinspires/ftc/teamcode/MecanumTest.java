@@ -1,21 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static java.lang.Math.*;
-import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import static android.os.SystemClock.sleep;
-import java.util.List;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name="mecanumtest")
 public class MecanumTest extends LinearOpMode {
@@ -27,7 +13,7 @@ public class MecanumTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot();
         robot.initialize(hardwareMap,telemetry);
-
+        robot.initializeVision(hardwareMap);
         int myAprilTagIdCode = -1;
         int targetAprilTag = 4;
         boolean aprilTagRunning = false;
@@ -38,9 +24,8 @@ public class MecanumTest extends LinearOpMode {
         int aprilTagMode = 0;
         double desiredDistance = 7;
         int alliance = 1;
-        int liftMax = 550;
+        int liftMax = 400;
         int wristMax = 550;
-        double leftArmPosition = robot.getLeftArmPosition();
         double wristPosition = robot.getWristPosition();
 
         double clawPosition = Constants.clawOpen;
@@ -59,6 +44,8 @@ public class MecanumTest extends LinearOpMode {
             //make sure ^^ is negated
             double turn = gamepad1.right_stick_x;
 
+            double leftArmPosition = robot.getLeftArmPosition();
+
             int red = robot.colorSensor.red();   // Red channel value
             int green = robot.colorSensor.green(); // Green channel value
             int blue = robot.colorSensor.blue();  // Blue channel value
@@ -68,15 +55,9 @@ public class MecanumTest extends LinearOpMode {
             robot.move(x,y,turn,1);
 
             telemetry.addData("April Tag detected: ", robot.tagProcessor.getDetections().size());
-
-            aprilTagDetected = false;
-            AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
-
-            if (myAprilTagDetection != null)
-            {
-                distance = myAprilTagDetection.ftcPose.y;
-                aprilTagDetected = true;
-            }
+            robot.telemetryTfod();
+            telemetry.addData("Arm Position", leftArmPosition);
+            telemetry.addData("Wrist Position", wristPosition);
 
             if(gamepad1.dpad_up) {
                 robot.move(0,1,0,0.5);
@@ -90,7 +71,6 @@ public class MecanumTest extends LinearOpMode {
             if(gamepad1.dpad_right) {
                 robot.move(1,0,0,0.5);
             }
-
 
 
             /*
@@ -109,15 +89,13 @@ public class MecanumTest extends LinearOpMode {
                     leftArmPosition = robot.motor1ex.getCurrentPosition();
                 }
             }
-            else if(gamepad1.x) {
-                robot.motor1ex.setPower(-0.6);
-                robot.motor2ex.setPower(-0.6);
-                leftArmPosition = robot.motor1ex.getCurrentPosition();
-            }
-            else
-            {
+            else {
                 robot.motor1ex.setPower(0);
                 robot.motor2ex.setPower(0);
+            }
+
+            if(gamepad1.x) {
+                robot.ArmUp(1000, 50);
             }
 
          /*
@@ -259,8 +237,10 @@ public class MecanumTest extends LinearOpMode {
             telemetry.addData("Blue: ", blue);
             telemetry.addData("Checking for Red: ", checkForRed);
             telemetry.addData("Checking for Blue: ", checkForBlue);
-            telemetry.addData("distance",distance);
-            telemetry.update(); */
+            telemetry.addData("distance",distance);*/
+
+            telemetry.update();
+
         }
 
     }
