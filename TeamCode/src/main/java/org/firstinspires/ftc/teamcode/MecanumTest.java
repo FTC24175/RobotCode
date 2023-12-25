@@ -39,8 +39,8 @@ public class MecanumTest extends LinearOpMode {
         double leftPosition = 0;
         double rightPosition = 0;
         double wristPosition = 0;
-        double slideMax = 523;
-        double slideMin = 10;
+        double slideMax = 0;
+        double slideMin = -386;
 
         robot.setServoPositionWrist(wristPosition);
         robot.setServoPositionLeftHand(leftPosition);
@@ -113,25 +113,25 @@ public class MecanumTest extends LinearOpMode {
 
             // Arm movement
 
-            if (gamepad1.x) {
+            if (gamepad2.x) {
 
                 //robot.motor1ex.setPower(0.5);
                 //robot.motor2ex.setPower(0.5);
 
-                leftPower = 0.5;
-                rightPower = 0.5;
+                leftPower = 0.4;
+                rightPower = 0.4;
                 robot.setMotorPowerArm(leftPower);
                 telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 telemetry.update();
 
 
-            } else if (gamepad1.y) {
+            } else if (gamepad2.y) {
 
                 //robot.motor1ex.setPower(-0.5);
                 //robot.motor2ex.setPower(-0.5);
 
-                leftPower = -0.5;
-                rightPower = -0.5;
+                leftPower = -0.2;
+                rightPower = -0.2;
                 robot.setMotorPowerArm(leftPower);
                 telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 telemetry.update();
@@ -153,7 +153,6 @@ public class MecanumTest extends LinearOpMode {
 
 
             // Slide movement
-            //Need to set max
 
             telemetry.addData("Slide Position",robot.getMotorPositionSlide());
 
@@ -249,16 +248,14 @@ public class MecanumTest extends LinearOpMode {
 
             // Wrist movement
 
-            //*In progress - Only has 2 positions: 0 and 1*
-            //We want to make it go up in increments so it's easier for drivers to use the wrist
 
-                if (gamepad2.left_stick_y > 0) {
+                if (gamepad2.b) {
                     if (wristPosition < 1) {
                         wristPosition += 0.01;
                         robot.setServoPositionWrist(wristPosition);
                     }
                 }
-                else if(gamepad2.left_stick_y < 0){
+                else if(gamepad2.a){
                     if(wristPosition > 0){
                         wristPosition-=0.01;
                         robot.setServoPositionWrist(wristPosition);
