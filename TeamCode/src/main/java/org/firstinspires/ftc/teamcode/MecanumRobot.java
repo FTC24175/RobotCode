@@ -61,10 +61,10 @@ public class MecanumRobot {
     {
         // Mecanum Drivertrain Motors
 
-        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "motor0hd");
-        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "motor1hd");
-        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "motor2hd");
-        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "motor3hd");
+        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "motor2hd");
+        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "motor3hd");
+        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "motor0hd");
+        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "motor1hd");
 
         // RUN_WITHOUT_ENCODER mode - only set direction & power
 
