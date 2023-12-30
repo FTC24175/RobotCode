@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
+import android.text.method.Touch;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class MecanumRobot {
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
     private Servo servoLauncher = null;
+
+    public TouchSensor touchSensor = null;
 
     // Auto mode
     private ColorSensor colorSensor, colorSensor2;

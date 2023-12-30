@@ -21,7 +21,6 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 public class MecanumTest extends LinearOpMode {
 
     MecanumRobot robot = new MecanumRobot(this);
-    int clicks = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -41,6 +40,7 @@ public class MecanumTest extends LinearOpMode {
         double wristPosition = 0;
         double slideMax = 0;
         double slideMin = -386;
+        boolean armDown = false;
 
         robot.setServoPositionWrist(wristPosition);
         robot.setServoPositionLeftHand(leftPosition);
@@ -112,9 +112,16 @@ public class MecanumTest extends LinearOpMode {
             // Manual mode By Kush on 11/29/2023
 
             // Arm movement
+            if (robot.touchSensor.isPressed()) {
+                telemetry.addData("Touch Sensor", "Is Pressed");
+                armDown = true;
+
+            } else {
+                telemetry.addData("Touch Sensor", "Is Not Pressed");
+                armDown = false;
+            }
 
             if (gamepad2.x) {
-
                 //robot.motor1ex.setPower(0.5);
                 //robot.motor2ex.setPower(0.5);
 
@@ -122,19 +129,20 @@ public class MecanumTest extends LinearOpMode {
                 rightPower = 0.4;
                 robot.setMotorPowerArm(leftPower);
                 telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-
+                telemetry.update();
 
 
             } else if (gamepad2.y) {
+                if (!armDown) {
+                    //robot.motor1ex.setPower(-0.5);
+                    //robot.motor2ex.setPower(-0.5);
 
-                //robot.motor1ex.setPower(-0.5);
-                //robot.motor2ex.setPower(-0.5);
-
-                leftPower = -0.2;
-                rightPower = -0.2;
-                robot.setMotorPowerArm(leftPower);
-                telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-
+                    leftPower = -0.2;
+                    rightPower = -0.2;
+                    robot.setMotorPowerArm(leftPower);
+                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                    telemetry.update();
+                }
 
             } else { // when nothing is pressed, brake the arm motors
 
@@ -145,11 +153,11 @@ public class MecanumTest extends LinearOpMode {
                 rightPower = 0;
                 robot.setMotorPowerArm(leftPower);
                 telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-
+                telemetry.update();
             }
 
             telemetry.addData("Left Arm Position",robot.getMotorPositionLeftArm());
-
+            telemetry.update();
 
 
             // Slide movement
@@ -163,7 +171,7 @@ public class MecanumTest extends LinearOpMode {
 //            }
 
 
-            /*
+
             if(gamepad2.right_stick_y > 0){
                 //robot.setMotorTargetSlide(300);
                 if(robot.getMotorPositionSlide() >= slideMax){
@@ -188,21 +196,10 @@ public class MecanumTest extends LinearOpMode {
                 //robot.setMotorTargetSlide(0);
                 robot.setMotorPowerSlide(0);
             }
-            */
 
-            if(gamepad2.right_stick_y > 0){
-                robot.setMotorPowerSlide(gamepad2.right_stick_y);
-            }
-            else if (gamepad2.right_stick_y < 0){
-                robot.setMotorPowerSlide(gamepad2.right_stick_y);
-            }
-            else{
-                //robot.setMotorTargetSlide(0);
-                robot.setMotorPowerSlide(0);
-            }
 
             telemetry.addData("Slide Position",robot.getMotorPositionSlide());
-
+            telemetry.update();
 
 
             // Hand movement
@@ -216,7 +213,7 @@ public class MecanumTest extends LinearOpMode {
                     leftPosition = 0;
                     robot.setServoPositionLeftHand(leftPosition);
                     telemetry.addData("Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-
+                    telemetry.update();
 
                 } else {
 
@@ -225,7 +222,7 @@ public class MecanumTest extends LinearOpMode {
                     leftPosition = 1;
                     robot.setServoPositionLeftHand(leftPosition);
                     telemetry.addData("Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-
+                    telemetry.update();
                 }
 
                 sleep(300); // wait for 0.3 second
@@ -272,12 +269,6 @@ public class MecanumTest extends LinearOpMode {
                         robot.setServoPositionWrist(wristPosition);
                     }
                 }
-
-
-
-
-
-
 
 
             /*
@@ -447,7 +438,7 @@ public class MecanumTest extends LinearOpMode {
                         robot.move(1, 0, 0, 0.2);
                         sleep(300);
                     }
-                } else if (aprilTagDetected == false && aprilTagMode == 0) {
+                } else if (!aprilTagDetected && aprilTagMode == 0) {
                     if (alliance == 0) {
                         robot.move(1, 0, 0, 0.3);
                     } else if (alliance == 1) {
@@ -475,10 +466,8 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Checking for Red: ", checkForRed);
                 telemetry.addData("Checking for Blue: ", checkForBlue);
                 telemetry.addData("distance", distance);
-
+                telemetry.update();
             }
-
-            telemetry.update();
         }
     }
 }
