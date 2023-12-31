@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
-import android.text.method.Touch;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 // Autonomous mode
@@ -36,15 +36,19 @@ public class MecanumRobot {
     private DcMotor motorHDRightFront = null;
     private DcMotor motorHDRightRear = null;
 
-    private DcMotor motorCoreLeftArm = null;
-    private DcMotor motorCoreRightArm = null;
-    private DcMotor motorCoreSlides = null;
+    private DcMotor motorLeftArm = null;
+    private DcMotor motorRightArm = null;
+    private DcMotor motorSlides = null;
     private Servo servoWrist = null;
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
     private Servo servoLauncher = null;
 
     public TouchSensor touchSensor = null;
+    public DistanceSensor distanceSensorL = null;
+    public DistanceSensor distanceSensorR = null;
+    public DistanceSensor distanceSensorClawL = null;
+    public DistanceSensor distanceSensorClawR = null;
 
     // Auto mode
     private ColorSensor colorSensor, colorSensor2;
@@ -65,10 +69,10 @@ public class MecanumRobot {
     {
         // Mecanum Drivertrain Motors
 
-        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "motor2hd");
-        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "motor3hd");
-        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "motor0hd");
-        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "motor1hd");
+        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor2");
+        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor3");
+        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor0");
+        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor1");
 
         // RUN_WITHOUT_ENCODER mode - only set direction & power
 
@@ -85,34 +89,45 @@ public class MecanumRobot {
 
         // Top Motors
 
+        motorLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmL");
+        motorRightArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmR");
+        motorSlides = myOpMode.hardwareMap.get(DcMotor.class, "CoreMotorSlide");
 
-
-        motorCoreLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "motor0core");
-        motorCoreRightArm = myOpMode.hardwareMap.get(DcMotor.class, "motor1core");
-        motorCoreSlides = myOpMode.hardwareMap.get(DcMotor.class, "motor2core");
-
-        //motorCoreSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //motorCoreLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-
+        // Reset zero position
+        // sometimes randomly reverses directions when switched to STOP_AND_RESET_ENCODER mode (reverse -> forward and vice versa)
+        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // RUN_WITHOUT_ENCODER mode - only set direction & power
 
-        motorCoreLeftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorCoreRightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorCoreSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);;
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorCoreLeftArm.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorCoreRightArm.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorLeftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorRightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Try both directions and choose the one that results in positive encoder ticks
+
+        motorLeftArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        myOpMode.telemetry.addData("direction of left arm motor","forward");
+        motorRightArm.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        myOpMode.telemetry.addData("direction of slide motor","reverse");
 
         // Servos
 
-        servoWrist = myOpMode.hardwareMap.get(Servo.class, "servo0exp");
-        servoLeftHand = myOpMode.hardwareMap.get(Servo.class, "servo1exp");
-        servoRightHand = myOpMode.hardwareMap.get(Servo.class, "servo2exp");
-        servoLauncher = myOpMode.hardwareMap.get(Servo.class, "servo3exp");
-
+        servoWrist = myOpMode.hardwareMap.get(Servo.class, "ServoWrist");
+        servoLeftHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawL");
+        servoRightHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawR");
+        servoLauncher = myOpMode.hardwareMap.get(Servo.class, "ServoLauncher");
+        touchSensor = myOpMode.hardwareMap.get(TouchSensor.class, "touchSensor");
+        distanceSensorL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorL");
+        distanceSensorR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorR");
+        distanceSensorClawL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawL");
+        distanceSensorClawR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawR");
         /*
         * Auto mode initialization
         */
@@ -137,9 +152,9 @@ public class MecanumRobot {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
+        colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorR");
         colorSensor.enableLed(true);
-        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "sensorColor2");
+        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorSensor2.enableLed(true);
 
         default_red = colorSensor.red();
@@ -158,6 +173,11 @@ public class MecanumRobot {
         */
     }
 
+    public void encoderReset() {
+        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
     /**
      * Mecanum Drivetrain
      * Calculates the left/right front/rear motor powers required to achieve the requested
@@ -208,33 +228,26 @@ public class MecanumRobot {
      */
 
     public void setMotorPowerArm(double powerScale) {
-        motorCoreLeftArm.setPower(powerScale);
-        motorCoreRightArm.setPower(powerScale);
+        motorLeftArm.setPower(powerScale);
+        motorRightArm.setPower(powerScale);
 
     }
 
     public int getMotorPositionLeftArm(){
-        return motorCoreLeftArm.getCurrentPosition();
+        return motorLeftArm.getCurrentPosition();
     }
 
     public int getMotorPositionSlide(){
-        return motorCoreSlides.getCurrentPosition();
+        return motorSlides.getCurrentPosition();
     }
-
+    public DcMotorSimple.Direction getMotorDirectionSlide() { return motorSlides.getDirection(); }
     public void setMotorTargetSlide(int targetPosition) {
-        motorCoreSlides.setTargetPosition(targetPosition);
-        motorCoreSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
+        motorSlides.setTargetPosition(targetPosition);
+        motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     public void setMotorPowerSlide(double powerScale) {
-
-        motorCoreSlides.setPower(powerScale);
-
-
-
+        motorSlides.setPower(powerScale);
     }
-
-
 
     public double getServoPositionLeftHand() {
         return servoLeftHand.getPosition();
@@ -261,9 +274,10 @@ public class MecanumRobot {
         return servoWrist.getPosition();
     }
     public void setServoPositionWrist(double position) {
-
         servoWrist.setPosition(position);
-
+    }
+    public void setServoPositionLauncher(double position) {
+        servoLauncher.setPosition(position);
     }
     public void intializeAprilTag()
     {
