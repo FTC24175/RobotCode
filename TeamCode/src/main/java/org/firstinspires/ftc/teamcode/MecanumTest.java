@@ -299,9 +299,7 @@ public class MecanumTest extends LinearOpMode {
 
 ///////////////////////////////Automatic Pixel Pick-up
 
-///////////////////////////////Automatic Park at Line - Moves Forward and Right Turn
-
-///////////////////////////////Automatic Park at Line - Moves Forward and Left Turn
+///////////////////////////////Automatic Park at Line - Moves Forward
 
             /*
             // Intake wheels by Kush
