@@ -123,8 +123,6 @@ public class MecanumTest extends LinearOpMode {
                 robot.move(1, 0, 0, 0.5);
             }
 
-////////////////// Automatic parking at red line
-
             // Touch sensor
             // Cannot use port 0 on driver station
             if (robot.touchSensor.isPressed()) {
@@ -221,18 +219,14 @@ public class MecanumTest extends LinearOpMode {
             }
             telemetry.addData("Slide New Position", robot.getMotorPositionSlide());
 
-            //Automatic Arm Down
-            if (gamepad2.y) {
-                if (robot.touchSensor.isPressed() != true)
-                    robot.AutoArmDown();
-            }
-
-///////////////////////////////Automatic Arm Up
-
-///////////////////////////////Automatic Pixel Pick-up
-
 
             // Hand movement
+
+//////////////// Make it harder to lose pixels
+//////////////// Only pressing both triggers will open the claws
+
+//////////////// Solve another problem: Two pixels need to fall next to each other on the backdrop
+//////////////// How to release pixels so the problem won't occur?
 
             if ((gamepad1.left_trigger > 0.3) || (gamepad2.left_trigger > 0.3)) {
 
@@ -295,6 +289,17 @@ public class MecanumTest extends LinearOpMode {
 
             telemetry.update();
 
+            //Automatic Arm Down
+            if (gamepad2.y) {
+                if (robot.touchSensor.isPressed() != true)
+                    robot.AutoArmDown();
+            }
+
+///////////////////////////////Automatic Arm Up
+
+///////////////////////////////Automatic Pixel Pick-up
+
+///////////////////////////////Automatic Park at Line - Moves Forward
 
             /*
             // Intake wheels by Kush

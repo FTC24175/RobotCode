@@ -355,17 +355,11 @@ public class MecanumRobot {
         // Puts the wrist up
     }
 
-    // Happens in front of the back board and the human player
-    public void AutoParkAtLineForwardRightTurn() {
+    // Happens in front of the backdrop and the human player
+    public void AutoParkAtLineForward() {
         // While under a timer
         // Moves forward until a color sensor detects blue or red
-        // Rotates right until another color sensor detects blue or red
-    }
-
-    public void AutoParkAtLineMarkForwardLeftTurn() {
-        // While under a timer
-        // Moves forward until a color sensor detects blue or red
-        // Rotates left until another color sensor detects blue or red
+        // Rotates the other side of drivetrain so another color sensor can also meet the line
     }
 
     public void intializeAprilTag()
