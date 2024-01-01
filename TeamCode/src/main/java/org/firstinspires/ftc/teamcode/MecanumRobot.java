@@ -242,14 +242,11 @@ public class MecanumRobot {
     public int getMotorPositionLeftArm(){
         return motorLeftArm.getCurrentPosition();
     }
+    public int getMotorPositionRightArm() { return motorRightArm.getCurrentPosition(); }
     public int getMotorPositionSlide(){
         return motorSlides.getCurrentPosition();
     }
     public DcMotorSimple.Direction getMotorDirectionSlide() { return motorSlides.getDirection(); }
-    public void setMotorTargetSlide(int targetPosition) {
-        motorSlides.setTargetPosition(targetPosition);
-        motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
     public void setMotorPowerSlide(double powerScale) {
         motorSlides.setPower(powerScale);
     }
@@ -290,58 +287,45 @@ public class MecanumRobot {
         // Wrist up to position 0
         servoWrist.setPosition(0);
 
-        // Slide retracts to position 0 -- BUGGY
-        motorSlides.setTargetPosition(0);
-        motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        myOpMode.sleep(1000);
+        // Slide retracts to position 0
+        myOpMode.telemetry.addData("slide current position:",motorSlides.getCurrentPosition());
 
+        // With the external encoder, RUN_TO_POSITION does NOT work
+        //motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorSlides.setTargetPosition(0);
+
+        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+        runtime.reset();
+        while (motorSlides.getCurrentPosition()>0 && runtime.seconds() < 0.5) {
+            motorSlides.setPower(0.3);
+        }
+        motorSlides.setPower(0); // IMPORTANT: brake
+        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
+
+        // Only for RUN_TO_POSITION mode:
         // Reset the slide's encoder and direction as the initial settings
         // so it won't affect another part of the program
-        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Arm down to position 0
-        ElapsedTime runtime = new ElapsedTime();
-        runtime.reset();
-        while (touchSensor.isPressed() != true && runtime.seconds() < 1.5) {
-            setMotorPowerArm(0.3);
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        while (motorLeftArm.getCurrentPosition()>0 && runtime2.seconds() < 5) {
+            setMotorPowerArm(0.2);
         }
+        setMotorPowerArm(0); // IMPORTANT: brake
     }
 
     //////////////////////////// Automatic Arm Up
     public void AutoArmUp() {
 
         /* Raises the left arm to 3628 ticks
-         *
          * The right arm motor needs to rotate at the reverse direction, too
-         * The absolute positions of the two arms should never be the same
-         * but the right arm supposedly travels for same number of ticks as the left arm
-         * */
-
-        /*
-        // Sample code from the REV Duo Control System Document
-        // Encoder Navigation - OnBot Java
-
-        leftmotor.setTargetPosition(leftTarget);
-        rightmotor.setTargetPosition(rightTarget);
-        leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftmotor.setVelocity(TPS);
-        rightmotor.setVelocity(TPS);
-
-        // If any motor quits being busy, the other motor stops at the same time
-        while (opModeIsActive() && (leftmotor.isBusy() && rightmotor.isBusy())) {
-            telemetry.addData("left", leftmotor.getCurrentPosition());
-            telemetry.addData("right", rightmotor.getCurrentPosition());
-            telemetry.update();
-        }
-        */
-
-        // Refer to the initialization function to reset encoder mode and the direction for the arm motors
+         */
 
         // Extends the slide to slideMax ticks
-
-        // Refer to the AutoArmDown function to reset encoder mode and the direction for the slide motor
 
         // Puts down the wrist to position 0.6
 
