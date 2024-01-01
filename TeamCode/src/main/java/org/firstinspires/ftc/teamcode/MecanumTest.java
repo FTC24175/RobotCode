@@ -123,9 +123,9 @@ public class MecanumTest extends LinearOpMode {
                 robot.move(1, 0, 0, 0.5);
             }
 
-            // Manual mode By Kush on 11/29/2023
+////////////////// Automatic parking at red line
 
-            // Arm movement by gamepad 1
+            // Touch sensor
             // Cannot use port 0 on driver station
             if (robot.touchSensor.isPressed()) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
@@ -136,6 +136,7 @@ public class MecanumTest extends LinearOpMode {
                 armDown = false;
             }
 
+            // Arm movement by gamepad 1
             // up
             if (gamepad1.y) {
                 if (robot.getMotorPositionLeftArm() < armMax) {
@@ -189,11 +190,6 @@ public class MecanumTest extends LinearOpMode {
             }
             telemetry.addData("Arm New Position", robot.getMotorPositionLeftArm());
 
-            //Automatic Arm Down
-            if (gamepad2.y) {
-                if (robot.touchSensor.isPressed() != true)
-                    robot.AutoArmDown();
-            }
             /*
             * Slide movement
             * It's against intuition that the joystick gives a negative value when it is pushed up
@@ -224,6 +220,17 @@ public class MecanumTest extends LinearOpMode {
                 robot.setMotorPowerSlide(0);
             }
             telemetry.addData("Slide New Position", robot.getMotorPositionSlide());
+
+            //Automatic Arm Down
+            if (gamepad2.y) {
+                if (robot.touchSensor.isPressed() != true)
+                    robot.AutoArmDown();
+            }
+
+///////////////////////////////Automatic Arm Up
+
+///////////////////////////////Automatic Pixel Pick-up
+
 
             // Hand movement
 
@@ -271,8 +278,6 @@ public class MecanumTest extends LinearOpMode {
                 }
             }
 
-            telemetry.update();
-
             //Launcher
             if ((gamepad1.back) || (gamepad2.back)) {
                 launcherPosition = 1;
@@ -288,6 +293,7 @@ public class MecanumTest extends LinearOpMode {
 
             telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
 
+            telemetry.update();
 
 
             /*

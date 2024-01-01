@@ -98,6 +98,7 @@ public class MecanumRobot {
         // sometimes randomly reverses directions when switched to STOP_AND_RESET_ENCODER mode (reverse -> forward and vice versa)
         motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // RUN_WITHOUT_ENCODER mode - only set direction & power
 
@@ -174,11 +175,15 @@ public class MecanumRobot {
         */
     }
 
+    /*
     public void encoderReset() {
         motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+        // has to reset right arm, too
+        // then switch back to RUN_WITHOUT_ENCODER mode
     }
+    */
+
     /**
      * Mecanum Drivetrain
      * Calculates the left/right front/rear motor powers required to achieve the requested
@@ -237,23 +242,6 @@ public class MecanumRobot {
     public int getMotorPositionLeftArm(){
         return motorLeftArm.getCurrentPosition();
     }
-    public void AutoArmDown() {
-
-        servoWrist.setPosition(0);
-
-        motorSlides.setTargetPosition(0);
-        motorSlides.setPower(-0.3);
-        myOpMode.sleep(1000);
-
-        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
-        ElapsedTime runtime = new ElapsedTime();
-        runtime.reset();
-        while (touchSensor.isPressed() != true && (runtime.seconds() < 1.5)) {
-            setMotorPowerArm(0.3);
-
-        }
-    }
     public int getMotorPositionSlide(){
         return motorSlides.getCurrentPosition();
     }
@@ -296,6 +284,90 @@ public class MecanumRobot {
     public void setServoPositionLauncher(double position) {
         servoLauncher.setPosition(position);
     }
+
+    public void AutoArmDown() {
+
+        // Wrist up to position 0
+        servoWrist.setPosition(0);
+
+        // Slide retracts to position 0 -- BUGGY
+        motorSlides.setTargetPosition(0);
+        motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        myOpMode.sleep(1000);
+
+        // Reset the slide's encoder and direction as the initial settings
+        // so it won't affect another part of the program
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Arm down to position 0
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while (touchSensor.isPressed() != true && runtime.seconds() < 1.5) {
+            setMotorPowerArm(0.3);
+        }
+    }
+
+    //////////////////////////// Automatic Arm Up
+    public void AutoArmUp() {
+
+        /* Raises the left arm to 3628 ticks
+         *
+         * The right arm motor needs to rotate at the reverse direction, too
+         * The absolute positions of the two arms should never be the same
+         * but the right arm supposedly travels for same number of ticks as the left arm
+         * */
+
+        /*
+        // Sample code from the REV Duo Control System Document
+        // Encoder Navigation - OnBot Java
+
+        leftmotor.setTargetPosition(leftTarget);
+        rightmotor.setTargetPosition(rightTarget);
+        leftmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightmotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftmotor.setVelocity(TPS);
+        rightmotor.setVelocity(TPS);
+
+        // If any motor quits being busy, the other motor stops at the same time
+        while (opModeIsActive() && (leftmotor.isBusy() && rightmotor.isBusy())) {
+            telemetry.addData("left", leftmotor.getCurrentPosition());
+            telemetry.addData("right", rightmotor.getCurrentPosition());
+            telemetry.update();
+        }
+        */
+
+        // Refer to the initialization function to reset encoder mode and the direction for the arm motors
+
+        // Extends the slide to slideMax ticks
+
+        // Refer to the AutoArmDown function to reset encoder mode and the direction for the slide motor
+
+        // Puts down the wrist to position 0.6
+
+    }
+    /////////////////////////// Automatic Pixel Pick-up
+    // Happens at human player
+    public void AutoPickUp() {
+        // Opens claws
+        // Puts the wrist down
+        // Closes claws
+        // Puts the wrist up
+    }
+
+    // Happens in front of the back board and the human player
+    public void AutoParkAtLineForwardRightTurn() {
+        // While under a timer
+        // Moves forward until a color sensor detects blue or red
+        // Rotates right until another color sensor detects blue or red
+    }
+
+    public void AutoParkAtLineMarkForwardLeftTurn() {
+        // While under a timer
+        // Moves forward until a color sensor detects blue or red
+        // Rotates left until another color sensor detects blue or red
+    }
+
     public void intializeAprilTag()
     {
         tagProcessor = new AprilTagProcessor.Builder()
