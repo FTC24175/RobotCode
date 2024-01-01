@@ -22,6 +22,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
@@ -236,7 +237,23 @@ public class MecanumRobot {
     public int getMotorPositionLeftArm(){
         return motorLeftArm.getCurrentPosition();
     }
+    public void AutoArmDown() {
 
+        servoWrist.setPosition(0);
+
+        motorSlides.setTargetPosition(0);
+        motorSlides.setPower(-0.3);
+        myOpMode.sleep(1000);
+
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while (touchSensor.isPressed() != true && (runtime.seconds() < 1.5)) {
+            setMotorPowerArm(0.3);
+
+        }
+    }
     public int getMotorPositionSlide(){
         return motorSlides.getCurrentPosition();
     }
