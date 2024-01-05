@@ -61,6 +61,8 @@ public class MecanumRobot {
     private IMU imu;
     private int default_red;
     private int default_blue;
+    private int default_red_left;
+    private int default_blue_left;
 
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
@@ -163,6 +165,8 @@ public class MecanumRobot {
 
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
+        default_red_left = colorSensorL.red();
+        default_blue_left = colorSensorL.blue();
 
         /* local variables
         int myAprilTaIdCode = -1;
@@ -372,87 +376,47 @@ public class MecanumRobot {
     * Rotates the other side of drivetrain so another color sensor can also meet the line
      */
     public void AutoLinePark() {
-
-        // I changed the logic of this boolean variable
-        // boolean checkForBlue = true;
-        boolean detectsBlueAtRight = false;
-        boolean detectsBlueAtLeft = false;
-        boolean detectsRedAtRight = false;
-        boolean detectsRedAtLeft = false;
-////////boolean
-////////boolean
-////////boolean
+        boolean leftDetected = false;
+        boolean rightDetected = false;
 
         int blue;
+        int blueL;
         int red;
+        int redL;
 
-        // Moves forward at power 0.2 until a blue line is detected
+        // Moves forward at power 0.2 until a line is detected
+
         move(0,1,0,0.2);
-        while (detectsBlueAtRight!=true) {
+        while ((rightDetected == false) && (leftDetected == false)) {
 
-            ////////////////// Scenario 1: The right color sensor detects the blue line //////////////////
             blue = getColorSensorBlue();
-
-            // The default blue value in the gray is: say 178
-            // The blue value in the blue line is: say 245...increased by 67
-            if(blue >= getDefaultBlue() + 500) { // detects blue line
-                move(0,0,0,0); // brakes
-                detectsBlueAtRight = true; // will break the while loop
-            }
-            myOpMode.telemetry.addData("Blue: ", blue);
-            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
-            myOpMode.telemetry.update();
-
-
-            ////////////////// Scenario 69: The left color sensor detects the blue line //////////////////
-            blue = getLeftColorSensorBlue();
-            // The default blue value in the gray is: say 178
-            // The blue value in the blue line is: say 245...increased by 67
-            if(blue >= getDefaultBlue() + 500) { // detects blue line
-                move(0,0,0,0); // brakes
-                detectsBlueAtLeft = true; // will break the while loop
-            }
-            myOpMode.telemetry.addData("Blue: ", blue);
-            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
-            myOpMode.telemetry.update();
-
-
-            ////////////////// Scenario 3: The right color sensor detects the red line //////////////////
+            blueL = getLeftColorSensorBlue();
             red = getColorSensorRed();
-            if(red >= getDefaultRed() + 500) { // detects red line
-                move(0,0,0,0); // brakes
-                detectsRedAtRight = true; // will break the while loop
+            redL = getLeftColorSensorRed();
+
+            if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) { // detects blue line
+                rightDetected = true;
             }
-            myOpMode.telemetry.addData("Red: ", red);
+            if((blueL >= default_blue_left + 500) || (redL >= default_red_left + 500)) { // detects blue line
+                leftDetected = true;
+            }
+            myOpMode.telemetry.addData("Right Blue: ", blue);
+            myOpMode.telemetry.addData("Left Blue: ", blueL);
+            myOpMode.telemetry.addData("Right Red: ", red);
+            myOpMode.telemetry.addData("Left Red: ", redL);
+            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
             myOpMode.telemetry.addData("initial red: ", getDefaultRed());
             myOpMode.telemetry.update();
-
-
-            ////////////////// Scenario 4: The left color sensor detects the red line //////////////////
-            red = getLeftColorSensorRed();
-            if(red >= getDefaultRed() + 500) { // detects red line
-                move(0,0,0,0); // brakes
-                detectsRedAtLeft = true; // will break the while loop
-            }
-            myOpMode.telemetry.addData("Red: ", red);
-            myOpMode.telemetry.addData("initial red: ", getDefaultRed());
-            myOpMode.telemetry.update();
-            myOpMode.sleep(10);
+        }
+        move(0,0,0,0);
+        if(leftDetected) {
+            move(0,0,90,-0.2);
+        }
+        if(rightDetected) {
+            move(0,0,90,0.2);
         }
 
-        ///////////////////// While ___ keep turning the ___ side ///////////////
-        /*while () {
 
-            leftFront = turn;
-            rightFront = 0;
-            leftRear = turn;
-            rightRear = 0;
-
-            motorHDLeftFront.setPower(leftFront);
-            motorHDLeftRear.setPower(leftRear);
-            motorHDRightFront.setPower(rightFront);
-            motorHDRightRear.setPower(rightRear);
-        }*/
     }
 
     public void intializeAprilTag()
@@ -497,11 +461,17 @@ public class MecanumRobot {
         return default_blue;
     }
 
+    public int getLeftDefaultBlue() {
+        return default_blue_left;
+    }
     public int getDefaultRed() {
         return default_red;
     }
+    public int getLeftDefaultRed() {
+        return default_red_left;
+    }
     public int getColorSensorBlue() {
-        return colorSensor.blue();
+        return (colorSensor.blue());
     }
     public int getLeftColorSensorBlue() {
         return colorSensorL.blue();
