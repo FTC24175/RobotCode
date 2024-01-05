@@ -226,22 +226,19 @@ public class MecanumTest extends LinearOpMode {
 //////////////// How to release pixels so the problem won't occur?
 
             if ((gamepad1.left_trigger > 0.3) || (gamepad2.left_trigger > 0.3)) {
-
                 if (robot.getServoPositionLeftHand() == 1) {
                     leftPosition = 0;
-                    robot.setServoPositionLeftHand(leftPosition);
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-                } else {
+                } else if(gamepad2.dpad_left) {
                     leftPosition = 1;
-                    robot.setServoPositionLeftHand(leftPosition);
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
                 }
+                robot.setServoPositionLeftHand(leftPosition);
+                telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
                 sleep(300); // wait for 0.3 second
             }
 
             if ((gamepad1.right_trigger > 0.3) || (gamepad2.right_trigger > 0.3)) {
 
-                if (robot.getServoPositionRightHand() == 1) {
+                if ((robot.getServoPositionRightHand() == 1) && (gamepad2.dpad_right)) {
                     rightPosition = 0;
                     robot.setServoPositionRightHand(rightPosition);
                     telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
