@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
+import static android.os.SystemClock.sleep;
+
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -321,22 +323,41 @@ public class MecanumRobot {
     //////////////////////////// Automatic Arm Up
     public void AutoArmUp() {
 
-        /* Raises the left arm to 3628 ticks
-         * The right arm motor needs to rotate at the reverse direction, too
-         */
+        //Raises the left arm to 3628 ticks
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        while (motorLeftArm.getCurrentPosition()<3629 && runtime2.seconds() < 5) {
+            setMotorPowerArm(-0.5);
+        }
+        setMotorPowerArm(0); // IMPORTANT: brake
 
         // Extends the slide to slideMax ticks
+        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+        runtime.reset();
+        while (motorSlides.getCurrentPosition()<10119 && runtime.seconds() < 3) {
+            motorSlides.setPower(-0.5);
+        }
+        motorSlides.setPower(0); // IMPORTANT: brake
+        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
 
         // Puts down the wrist to position 0.6
-
+        servoWrist.setPosition(0.6);
     }
     /////////////////////////// Automatic Pixel Pick-up
     // Happens at human player
     public void AutoPickUp() {
         // Opens claws
+        setServoPositionLeftHand(1);
+        setServoPositionRightHand(0);
         // Puts the wrist down
+        servoWrist.setPosition(1);
+        sleep(1500);
         // Closes claws
+        setServoPositionLeftHand(0);
+        setServoPositionRightHand(1);
+        sleep(1500);
         // Puts the wrist up
+        servoWrist.setPosition(0);
     }
 
     // Happens in front of the backdrop and the human player
