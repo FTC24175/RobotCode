@@ -293,7 +293,7 @@ public class MecanumTest extends LinearOpMode {
             }
 
             if ((gamepad2.right_bumper) && (gamepad2.right_bumper)) {
-                robot.AutoParkAtLineForward();
+                robot.AutoLinePark();
             }
 
             if (gamepad2.a) {
@@ -496,10 +496,14 @@ public class MecanumTest extends LinearOpMode {
                     }
                 }
 
-                telemetry.addData("Red: ", red);
-                telemetry.addData("Blue: ", blue);
-                telemetry.addData("Checking for Red: ", checkForRed);
-                telemetry.addData("Checking for Blue: ", checkForBlue);
+                telemetry.addData("Red: ", robot.getColorSensorRed());
+                telemetry.addData("Blue: ", robot.getColorSensorBlue());
+                telemetry.addData("Red Left: ", robot.getLeftColorSensorRed());
+                telemetry.addData("Blue Left: ", robot.getLeftColorSensorBlue());
+                telemetry.addData("Initial Red: ", robot.getDefaultRed());
+                telemetry.addData("Initial Blue: ", robot.getDefaultBlue());
+                telemetry.addData("Initial Red Left: ", robot.getLeftDefaultRed());
+                telemetry.addData("Initial Blue Left: ", robot.getLeftDefaultBlue());
                 telemetry.addData("distance", distance);
                 telemetry.update();
             }
