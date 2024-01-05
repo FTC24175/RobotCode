@@ -161,26 +161,26 @@ public class MecanumTest extends LinearOpMode {
             telemetry.addData("Left Arm Position", robot.getMotorPositionLeftArm());
             telemetry.addData("Right Arm Position", robot.getMotorPositionRightArm());
             // Arm movement gamepad 2
-            if (gamepad2.right_stick_y > 0) { // joystick down & retract
+            if (gamepad2.right_stick_y > 0) { // Move arm down
                 telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
                 if (robot.getMotorPositionLeftArm() <= armMin) {
                     robot.setMotorPowerArm(0); // brake
-                    telemetry.addData("Extend arm. Brake arm motor", 0);
+                    telemetry.addData("Lower arm. Brake arm motor", 0);
                 } else {
                     leftPower = gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
-                    telemetry.addData("Retract arm. Set Arm Power to ", leftPower);
+                    telemetry.addData("Lower arm. Set Arm Power to ", leftPower);
                 }
             }
-            else if (gamepad2.right_stick_y < 0) { // joystick up & extend
+            else if (gamepad2.right_stick_y < 0) { // Move arm up
                 telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
                 if (robot.getMotorPositionLeftArm() >= armMax) {
                     robot.setMotorPowerArm(0); // brake
-                    telemetry.addData("Extend arm. Brake arm motor", 0);
+                    telemetry.addData("Raise arm. Brake arm motor", 0);
                 } else {
                     leftPower = gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
-                    telemetry.addData("Extend arm. Set Arm Power to ", leftPower);
+                    telemetry.addData("Raise arm. Set Arm Power to ", leftPower);
                 }
 
             } else { // brake
@@ -286,9 +286,21 @@ public class MecanumTest extends LinearOpMode {
             telemetry.update();
 
             //Automatic Arm Down
-            if (gamepad2.y) {
+            if (gamepad2.x) {
                 if (robot.touchSensor.isPressed() != true)
                     robot.AutoArmDown();
+            }
+            if (gamepad2.y) {
+
+                robot.AutoArmUp();
+            }
+
+            if ((gamepad2.right_bumper) && (gamepad2.right_bumper)) {
+                robot.AutoParkAtLineForward();
+            }
+
+            if (gamepad2.a) {
+                robot.AutoPickUp();
             }
 
 ///////////////////////////////Automatic Arm Up
