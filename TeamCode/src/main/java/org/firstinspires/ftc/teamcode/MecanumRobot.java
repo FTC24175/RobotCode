@@ -54,7 +54,7 @@ public class MecanumRobot {
     public DistanceSensor distanceSensorClawR = null;
 
     // Auto mode
-    private ColorSensor colorSensor, colorSensor2;
+    private ColorSensor colorSensor, colorSensorL;
     private VisionPortal visionPortal;
     private AprilTagProcessor tagProcessor;
 
@@ -158,8 +158,8 @@ public class MecanumRobot {
 
         colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorR");
         colorSensor.enableLed(true);
-        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
-        colorSensor2.enableLed(true);
+        colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
+        colorSensorL.enableLed(true);
 
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
@@ -360,11 +360,99 @@ public class MecanumRobot {
         servoWrist.setPosition(0);
     }
 
-    // Happens in front of the backdrop and the human player
-    public void AutoParkAtLineForward() {
-        // While under a timer
-        // Moves forward until a color sensor detects blue or red
-        // Rotates the other side of drivetrain so another color sensor can also meet the line
+    /*
+    * Automatically parks at a red or blue line
+    *
+    * Happens in the manual mode in front of the backdrop and the human player
+    * and also in the auto mode before placing a purple pixel on the ground
+    *
+    * Algorithm:
+    * While under a timer
+    * Moves forward until a color sensor detects blue or red
+    * Rotates the other side of drivetrain so another color sensor can also meet the line
+     */
+    public void AutoLinePark() {
+
+        // I changed the logic of this boolean variable
+        // boolean checkForBlue = true;
+        boolean detectsBlueAtRight = false;
+        boolean detectsBlueAtLeft = false;
+        boolean detectsRedAtRight = false;
+        boolean detectsRedAtLeft = false;
+////////boolean
+////////boolean
+////////boolean
+
+        int blue;
+        int red;
+
+        // Moves forward at power 0.2 until a blue line is detected
+        move(0,1,0,0.2);
+        while (detectsBlueAtRight!=true) {
+
+            ////////////////// Scenario 1: The right color sensor detects the blue line //////////////////
+            blue = getColorSensorBlue();
+
+            // The default blue value in the gray is: say 178
+            // The blue value in the blue line is: say 245...increased by 67
+            if(blue >= getDefaultBlue() + 500) { // detects blue line
+                move(0,0,0,0); // brakes
+                detectsBlueAtRight = true; // will break the while loop
+            }
+            myOpMode.telemetry.addData("Blue: ", blue);
+            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
+            myOpMode.telemetry.update();
+
+
+            ////////////////// Scenario 69: The left color sensor detects the blue line //////////////////
+            blue = getLeftColorSensorBlue();
+            // The default blue value in the gray is: say 178
+            // The blue value in the blue line is: say 245...increased by 67
+            if(blue >= getDefaultBlue() + 500) { // detects blue line
+                move(0,0,0,0); // brakes
+                detectsBlueAtLeft = true; // will break the while loop
+            }
+            myOpMode.telemetry.addData("Blue: ", blue);
+            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
+            myOpMode.telemetry.update();
+
+
+            ////////////////// Scenario 3: The right color sensor detects the red line //////////////////
+            red = getColorSensorRed();
+            if(red >= getDefaultRed() + 500) { // detects red line
+                move(0,0,0,0); // brakes
+                detectsRedAtRight = true; // will break the while loop
+            }
+            myOpMode.telemetry.addData("Red: ", red);
+            myOpMode.telemetry.addData("initial red: ", getDefaultRed());
+            myOpMode.telemetry.update();
+
+
+            ////////////////// Scenario 4: The left color sensor detects the red line //////////////////
+            red = getLeftColorSensorRed();
+            if(red >= getDefaultRed() + 500) { // detects red line
+                move(0,0,0,0); // brakes
+                detectsRedAtLeft = true; // will break the while loop
+            }
+            myOpMode.telemetry.addData("Red: ", red);
+            myOpMode.telemetry.addData("initial red: ", getDefaultRed());
+            myOpMode.telemetry.update();
+            myOpMode.sleep(10);
+        }
+
+        ///////////////////// While ___ keep turning the ___ side ///////////////
+        /*while () {
+
+            leftFront = turn;
+            rightFront = 0;
+            leftRear = turn;
+            rightRear = 0;
+
+            motorHDLeftFront.setPower(leftFront);
+            motorHDLeftRear.setPower(leftRear);
+            motorHDRightFront.setPower(rightFront);
+            motorHDRightRear.setPower(rightRear);
+        }*/
     }
 
     public void intializeAprilTag()
@@ -415,9 +503,14 @@ public class MecanumRobot {
     public int getColorSensorBlue() {
         return colorSensor.blue();
     }
-
+    public int getLeftColorSensorBlue() {
+        return colorSensorL.blue();
+    }
     public int getColorSensorRed() {
         return colorSensor.red();
+    }
+    public int getLeftColorSensorRed() {
+        return colorSensorL.red();
     }
 
     //public int getColorSensorGreen() { return colorSensor.green(); }
@@ -479,10 +572,11 @@ public class MecanumRobot {
         currentAngle = currentAngle *  180 / Math.PI;
         double leftFront, rightFront, leftRear, rightRear, turn;
         double diff =0;
-        diff = (90+currentAngle);
+        diff = (90+currentAngle); // needs to move this much: diff
         double sign;
-        while (Math.abs(diff)>2){
+        while (Math.abs(diff)>2){ // while there is more than 2 degree to move
             sign = diff/Math.abs(diff);
+            // increase the constant to increase turning speed
             turn = sign*0.2; //turn = sign*0.3; // by Bo
             leftFront =  turn;
             rightFront = -turn;
@@ -501,7 +595,7 @@ public class MecanumRobot {
             //telemetry.addData("diff", diff);
             //telemetry.update();
         }
-        motorHDLeftFront.setPower(0);
+        motorHDLeftFront.setPower(0); //brake
         motorHDLeftRear.setPower(0);
         motorHDRightFront.setPower(0);
         motorHDRightRear.setPower(0);

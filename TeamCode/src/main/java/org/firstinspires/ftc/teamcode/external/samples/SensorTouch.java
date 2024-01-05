@@ -32,7 +32,6 @@ package org.firstinspires.ftc.teamcode.external.samples;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 /*
@@ -49,18 +48,16 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Sensor: REV touch sensor", group = "Sensor")
-
+@Disabled
 public class SensorTouch extends LinearOpMode {
     TouchSensor touchSensor;  // Touch sensor Object
-    DcMotor motorCoreLeftArm;
-    DcMotor motorCoreRightArm;
+
     @Override
     public void runOpMode() {
 
         // get a reference to our touchSensor object.
-        touchSensor = hardwareMap.get(TouchSensor.class, "touchSensor");
-        //motorCoreLeftArm = hardwareMap.get(DcMotor.class, "motor0core");
-        //motorCoreRightArm = hardwareMap.get(DcMotor.class, "motor1core");
+        touchSensor = hardwareMap.get(TouchSensor.class, "sensor_touch");
+
         // wait for the start button to be pressed.
         waitForStart();
 
@@ -71,10 +68,6 @@ public class SensorTouch extends LinearOpMode {
             // send the info back to driver station using telemetry function.
             if (touchSensor.isPressed()) {
                 telemetry.addData("Touch Sensor", "Is Pressed");
-                if (gamepad1.dpad_up) {
-                    //stop motorCoreLeftArm
-                }
-
             } else {
                 telemetry.addData("Touch Sensor", "Is Not Pressed");
             }
