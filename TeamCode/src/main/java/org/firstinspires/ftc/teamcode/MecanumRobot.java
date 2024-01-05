@@ -1,105 +1,152 @@
 package org.firstinspires.ftc.teamcode;
 
-import static android.os.SystemClock.sleep;
-
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.clawPosition;
-import static org.firstinspires.ftc.teamcode.teamTeleOpCode.wristPosition;
+//import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
+//import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
 import android.util.Size;
 
-//import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+// Autonomous mode
+//import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
+        import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.vision.tfod.TfodProcessor;
-
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
 public class MecanumRobot {
-    public DcMotor motor1;
-    public DcMotor motor2;
-    public DcMotor motor3;
-    public DcMotor motor4;
-    public ColorSensor colorSensor, colorSensor2;
-    public VisionPortal visionPortal;
-    public AprilTagProcessor tagProcessor;
-    public TfodProcessor tfod;
 
-    public IMU imu;
-    private Telemetry telemetry;
-    public int default_red;
-    public int default_blue;
+    /* Declare OpMode members. */
+    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
-    public DcMotor motor1ex;
-    public DcMotor motor2ex;
-    public DcMotor motor3ex;
-    public Servo servo1;
-    public Servo servo2;
+    // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
+    private DcMotor motorHDLeftFront = null;
+    private DcMotor motorHDLeftRear = null;
+    private DcMotor motorHDRightFront = null;
+    private DcMotor motorHDRightRear = null;
 
-    public Servo servo3;
-    public Servo servo4;
+    private DcMotor motorLeftArm = null;
+    private DcMotor motorRightArm = null;
+    private DcMotor motorSlides = null;
+    private Servo servoWrist = null;
+    private Servo servoLeftHand = null;
+    private Servo servoRightHand = null;
+    private Servo servoLauncher = null;
 
-    public void initialize(HardwareMap hardwareMap, Telemetry _telemetry)
+    public TouchSensor touchSensor = null;
+    public DistanceSensor distanceSensorL = null;
+    public DistanceSensor distanceSensorR = null;
+    public DistanceSensor distanceSensorClawL = null;
+    public DistanceSensor distanceSensorClawR = null;
+
+    // Auto mode
+    private ColorSensor colorSensor, colorSensor2;
+    private VisionPortal visionPortal;
+    private AprilTagProcessor tagProcessor;
+
+    private IMU imu;
+    private int default_red;
+    private int default_blue;
+
+
+    // Define a constructor that allows the OpMode to pass a reference to itself.
+    public MecanumRobot (LinearOpMode opmode) {
+        myOpMode = opmode;
+    }
+
+    public void initialize()
     {
-        telemetry = _telemetry;
-        motor1 = hardwareMap.dcMotor.get("motor1");
-        motor2 = hardwareMap.dcMotor.get("motor2");
-        motor3 = hardwareMap.dcMotor.get("motor3");
-        motor4 = hardwareMap.dcMotor.get("motor4");
-        motor1ex = hardwareMap.dcMotor.get("motor1ex");
-        motor2ex = hardwareMap.dcMotor.get("motor2ex");
-        motor3ex = hardwareMap.dcMotor.get("motor3ex");
-        servo1 = hardwareMap.get(Servo.class, "servo1");
-        servo2 = hardwareMap.get(Servo.class, "servo2");
-        servo3 = hardwareMap.get(Servo.class, "servo3");
-        servo4 = hardwareMap.get(Servo.class, "servo4");
+        // Mecanum Drivertrain Motors
 
-        colorSensor = hardwareMap.get(ColorSensor.class, "sensorColorRangeR");
-        colorSensor.enableLed(true);
-        colorSensor2 = hardwareMap.get(ColorSensor.class, "sensorColor2");
-        colorSensor2.enableLed(true);
+        motorHDLeftFront = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor2");
+        motorHDLeftRear = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor3");
+        motorHDRightFront = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor0");
+        motorHDRightRear = myOpMode.hardwareMap.get(DcMotor.class, "HDMotor1");
 
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
 
-        motor1ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor1ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor2ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor2ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor3ex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor3ex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorHDLeftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDLeftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDRightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDRightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motor1ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor3ex.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorHDLeftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorHDLeftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorHDRightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorHDRightRear.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor3.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor4.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor1ex.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor2ex.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor3ex.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        // Top Motors
+
+        motorLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmL");
+        motorRightArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmR");
+        motorSlides = myOpMode.hardwareMap.get(DcMotor.class, "CoreMotorSlide");
+
+        // Reset zero position
+        // sometimes randomly reverses directions when switched to STOP_AND_RESET_ENCODER mode (reverse -> forward and vice versa)
+        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+
+        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);;
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorLeftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorRightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motorSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Try both directions and choose the one that results in positive encoder ticks
+
+        motorLeftArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        myOpMode.telemetry.addData("direction of left arm motor","forward");
+        motorRightArm.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        myOpMode.telemetry.addData("direction of slide motor","reverse");
+
+        // Servos
+
+        servoWrist = myOpMode.hardwareMap.get(Servo.class, "ServoWrist");
+        servoLeftHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawL");
+        servoRightHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawR");
+        servoLauncher = myOpMode.hardwareMap.get(Servo.class, "ServoLauncher");
+        touchSensor = myOpMode.hardwareMap.get(TouchSensor.class, "touchSensor");
+        distanceSensorL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorL");
+        distanceSensorR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorR");
+        distanceSensorClawL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawL");
+        distanceSensorClawR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawR");
+        /*
+        * Auto mode initialization
+        */
+
+        /*
+        //By Bo
+        motor0core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor0core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor1core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor1core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor2core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor2core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        */
+
 
         // Retrieve the IMU from the hardware map
-        imu = hardwareMap.get(IMU.class, "imu");
+        imu = myOpMode.hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -107,70 +154,47 @@ public class MecanumRobot {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
+        colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorR");
+        colorSensor.enableLed(true);
+        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
+        colorSensor2.enableLed(true);
+
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
+
+        /* local variables
+        int myAprilTaIdCode = -1;
+        int targetAprilTag = 2;
+        boolean aprilTagRunning = false;
+        // mode 0 : scanning
+        // mode 1 : approaching
+        int aprilTagMode = 0;
+        double desiredDistance = 7;
+        boolean aprilTagDetected = false;
+        double distance = Double.MAX_VALUE;
+        */
     }
 
-    public void initializeVision(HardwareMap hardwareMap)
-    {
-
-        tfod = TfodProcessor.easyCreateWithDefaults();
-        tagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .build();
-
-        visionPortal = new VisionPortal.Builder()
-                .addProcessor(tagProcessor)
-                .addProcessor(tfod)
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .build();
-
+    /*
+    public void encoderReset() {
+        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // has to reset right arm, too
+        // then switch back to RUN_WITHOUT_ENCODER mode
     }
+    */
 
-    public void telemetryTfod() {
-
-        List<Recognition> currentRecognitions = tfod.getRecognitions();
-        telemetry.addData("# Objects Detected", currentRecognitions.size());
-
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2 ;
-            double y = (recognition.getTop()  + recognition.getBottom()) / 2 ;
-
-            telemetry.addData(""," ");
-            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-            telemetry.addData("- Position", "%.0f / %.0f", x, y);
-            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-        }   // end for() loop
-
-    }   // end method telemetryTfod()
-
-    public AprilTagDetection tryDetectApriTag(int idCode)
-    {
-        AprilTagDetection aprilTagDetection = null;
-        List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
-        for (int i = 0; i < myAprilTagDetections.size(); i++) {
-            AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
-
-            if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
-                int myAprilTagIdCode = myAprilTagDetection.id;
-                if (myAprilTagIdCode == idCode) {
-                    aprilTagDetection = myAprilTagDetection;
-                    telemetry.addData("y", myAprilTagDetection.ftcPose.y);
-                    telemetry.addData("z", myAprilTagDetection.ftcPose.z);
-                    telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
-                    telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
-                    telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
-                }
-            }
-        }
-        return aprilTagDetection;
-    }
-
+    /**
+     * Mecanum Drivetrain
+     * Calculates the left/right front/rear motor powers required to achieve the requested
+     * robot motions: ...
+     * Then sends these power levels to the motors.
+     *
+     * @param x
+     * @param y
+     * @param turn
+     * @param powerScale
+     */
     public void move(double x, double y, double turn, double powerScale) {
         double theta = Math.atan2(y,x);
         double power = Math.hypot(x,y);
@@ -190,19 +214,204 @@ public class MecanumRobot {
             leftFront /= power + Math.abs(turn);
             rightRear /= power + Math.abs(turn);
         }
-        motor1.setPower(leftFront * powerScale);
-        motor2.setPower(leftRear * powerScale);
-        motor3.setPower(rightFront * powerScale);
-        motor4.setPower(rightRear * powerScale);
+        motorHDLeftFront.setPower(leftFront * powerScale);
+        motorHDLeftRear.setPower(leftRear * powerScale);
+        motorHDRightFront.setPower(rightFront * powerScale);
+        motorHDRightRear.setPower(rightRear * powerScale);
 
-        telemetry.addData("Motor 1 Left Front",leftFront * powerScale);
-        telemetry.addData("Motor 2 Left Rear", leftRear * powerScale);
-        telemetry.addData("Motor 3 Right Front",rightFront * powerScale);
-        telemetry.addData("Motor 4 Right Rear", rightRear * powerScale);
+        myOpMode.telemetry.addData("Motor 0 Left Front",leftFront * powerScale);
+        myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
+        myOpMode.telemetry.addData("Motor 2 Right Front",rightFront * powerScale);
+        myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
     }
 
+    /**
+     * Arm movement
+     * Set both motor powers
+     * Then sends these power levels to the motors.
+     *
+     * @param powerScale
+     */
 
-    public void pickUpPixel() {
+    public void setMotorPowerArm(double powerScale) {
+        motorLeftArm.setPower(powerScale);
+        motorRightArm.setPower(powerScale);
+
+    }
+
+    public int getMotorPositionLeftArm(){
+        return motorLeftArm.getCurrentPosition();
+    }
+    public int getMotorPositionRightArm() { return motorRightArm.getCurrentPosition(); }
+    public int getMotorPositionSlide(){
+        return motorSlides.getCurrentPosition();
+    }
+    public DcMotorSimple.Direction getMotorDirectionSlide() { return motorSlides.getDirection(); }
+    public void setMotorPowerSlide(double powerScale) {
+        motorSlides.setPower(powerScale);
+    }
+
+    public double getServoPositionLeftHand() {
+        return servoLeftHand.getPosition();
+    }
+
+    public double getServoPositionRightHand() {
+
+        return servoRightHand.getPosition();
+    }
+
+    public void setServoPositionLeftHand(double position) {
+
+        servoLeftHand.setPosition(position);
+
+    }
+
+    public void setServoPositionRightHand(double position) {
+
+        servoRightHand.setPosition(position);
+
+    }
+
+    public double getServoPositionWrist() {
+        return servoWrist.getPosition();
+    }
+    public void setServoPositionWrist(double position) {
+        servoWrist.setPosition(position);
+    }
+    public void setServoPositionLauncher(double position) {
+        servoLauncher.setPosition(position);
+    }
+
+    public void AutoArmDown() {
+
+        // Wrist up to position 0
+        servoWrist.setPosition(0);
+
+        // Slide retracts to position 0
+        myOpMode.telemetry.addData("slide current position:",motorSlides.getCurrentPosition());
+
+        // With the external encoder, RUN_TO_POSITION does NOT work
+        //motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        //motorSlides.setTargetPosition(0);
+
+        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+        runtime.reset();
+        while (motorSlides.getCurrentPosition()>0 && runtime.seconds() < 0.5) {
+            motorSlides.setPower(0.3);
+        }
+        motorSlides.setPower(0); // IMPORTANT: brake
+        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
+
+        // Only for RUN_TO_POSITION mode:
+        // Reset the slide's encoder and direction as the initial settings
+        // so it won't affect another part of the program
+        //motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        // Arm down to position 0
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        while (motorLeftArm.getCurrentPosition()>0 && runtime2.seconds() < 5) {
+            setMotorPowerArm(0.2);
+        }
+        setMotorPowerArm(0); // IMPORTANT: brake
+    }
+
+    //////////////////////////// Automatic Arm Up
+    public void AutoArmUp() {
+
+        /* Raises the left arm to 3628 ticks
+         * The right arm motor needs to rotate at the reverse direction, too
+         */
+
+        // Extends the slide to slideMax ticks
+
+        // Puts down the wrist to position 0.6
+
+    }
+    /////////////////////////// Automatic Pixel Pick-up
+    // Happens at human player
+    public void AutoPickUp() {
+        // Opens claws
+        // Puts the wrist down
+        // Closes claws
+        // Puts the wrist up
+    }
+
+    // Happens in front of the backdrop and the human player
+    public void AutoParkAtLineForward() {
+        // While under a timer
+        // Moves forward until a color sensor detects blue or red
+        // Rotates the other side of drivetrain so another color sensor can also meet the line
+    }
+
+    public void intializeAprilTag()
+    {
+        tagProcessor = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .build();
+
+        visionPortal = new VisionPortal.Builder()
+                .addProcessor(tagProcessor)
+                .setCamera(myOpMode.hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .build();
+    }
+
+    public AprilTagDetection tryDetectApriTag(int idCode)
+    {
+        AprilTagDetection aprilTagDetection = null;
+        List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
+        for (int i = 0; i < myAprilTagDetections.size(); i++) {
+            AprilTagDetection myAprilTagDetection = myAprilTagDetections.get(i);
+
+            if (myAprilTagDetection.metadata != null) {  // This check for non-null Metadata is not needed for reading only ID code.
+                int myAprilTagIdCode = myAprilTagDetection.id;
+                if (myAprilTagIdCode == idCode) {
+                    aprilTagDetection = myAprilTagDetection;
+                    myOpMode.telemetry.addData("y", myAprilTagDetection.ftcPose.y);
+                    myOpMode.telemetry.addData("z", myAprilTagDetection.ftcPose.z);
+                    myOpMode.telemetry.addData("roll", myAprilTagDetection.ftcPose.roll);
+                    myOpMode.telemetry.addData("pitch", myAprilTagDetection.ftcPose.pitch);
+                    myOpMode.telemetry.addData("yaw", myAprilTagDetection.ftcPose.yaw);
+                }
+            }
+        }
+        return aprilTagDetection;
+    }
+
+    public int getDefaultBlue() {
+        return default_blue;
+    }
+
+    public int getDefaultRed() {
+        return default_red;
+    }
+    public int getColorSensorBlue() {
+        return colorSensor.blue();
+    }
+
+    public int getColorSensorRed() {
+        return colorSensor.red();
+    }
+
+    //public int getColorSensorGreen() { return colorSensor.green(); }
+
+    public int getDetectionSize() {
+        return tagProcessor.getDetections().size();
+    }
+
+    //public int getColorSensorAlpha() { return colorSensor.alpha(); }
+
+    //public int getColorSensorArgb() { return colorSensor.argb(); }
+
+    /*
+    // by Bo
+    private void pickUpPixel() {
         clawPosition = Constants.clawOpen;
         servo2.setPosition(clawPosition);
         servo3.setPosition(clawPosition);
@@ -218,7 +427,7 @@ public class MecanumRobot {
         servo1.setPosition(wristPosition);
     }
 
-    public void releasePixel() {
+    private void releasePixel() {
         clawPosition = Constants.clawOpen;
         servo2.setPosition(clawPosition);
         servo3.setPosition(clawPosition);
@@ -234,16 +443,16 @@ public class MecanumRobot {
         servo1.setPosition(wristPosition);
     }
 
-    public int getLeftArmPosition() {
-        return motor1ex.getCurrentPosition();
+    private int getLeftArmPosition() {
+        return motor0core.getCurrentPosition();
     }
 
-    public int getWristPosition() {
-        return motor3ex.getCurrentPosition();
+    private int getWristPosition() {
+        return motor2core.getCurrentPosition();
     }
+    */
 
-
-    public void RotateP90() {
+    private void RotateP90() {
         imu.resetYaw(); // set to 0 degree
         double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         currentAngle = currentAngle *  180 / Math.PI;
@@ -253,31 +462,31 @@ public class MecanumRobot {
         double sign;
         while (Math.abs(diff)>2){
             sign = diff/Math.abs(diff);
-            turn = sign*0.2;
+            turn = sign*0.2; //turn = sign*0.3; // by Bo
             leftFront =  turn;
             rightFront = -turn;
             leftRear =  turn;
             rightRear =  - turn;
 
-            motor1.setPower(leftFront);
-            motor2.setPower(leftRear);
-            motor3.setPower(rightFront);
-            motor4.setPower(rightRear);
+            motorHDLeftFront.setPower(leftFront);
+            motorHDLeftRear.setPower(leftRear);
+            motorHDRightFront.setPower(rightFront);
+            motorHDRightRear.setPower(rightRear);
 
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
             diff = (90+currentAngle);
-            telemetry.addData("current angle", currentAngle);
-            telemetry.addData("diff", diff);
-            telemetry.update();
+            //telemetry.addData("current angle", currentAngle);
+            //telemetry.addData("diff", diff);
+            //telemetry.update();
         }
-        motor1.setPower(0);
-        motor2.setPower(0);
-        motor3.setPower(0);
-        motor4.setPower(0);
+        motorHDLeftFront.setPower(0);
+        motorHDLeftRear.setPower(0);
+        motorHDRightFront.setPower(0);
+        motorHDRightRear.setPower(0);
     }
 
-    public void RotateM90() {
+    private void RotateM90() {
         imu.resetYaw(); // set to 0 degree
         double currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         currentAngle = currentAngle *  180 / Math.PI;
@@ -287,49 +496,28 @@ public class MecanumRobot {
         double sign;
         while (Math.abs(diff)>2){
             sign = diff/Math.abs(diff);
-            turn = -sign*0.2;
+            turn = -sign*0.2; //turn = -1*sign*0.3; // by Bo
             leftFront =  turn;
             rightFront = - turn;
             leftRear =  turn;
             rightRear = - turn;
 
-            motor1.setPower(leftFront);
-            motor2.setPower(leftRear);
-            motor3.setPower(rightFront);
-            motor4.setPower(rightRear);
+            motorHDLeftFront.setPower(leftFront);
+            motorHDLeftRear.setPower(leftRear);
+            motorHDRightFront.setPower(rightFront);
+            motorHDRightRear.setPower(rightRear);
 
             currentAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
             currentAngle = currentAngle *  180 / Math.PI;
             diff = (90-currentAngle);
-            telemetry.addData("current angle", currentAngle);
-            telemetry.addData("diff", diff);
-            telemetry.update();
+            //telemetry.addData("current angle", currentAngle);
+            //telemetry.addData("diff", diff);
+            //telemetry.update();
         }
-        motor1.setPower(0);
-        motor2.setPower(0);
-        motor3.setPower(0);
-        motor4.setPower(0);
-    }
-
-    public void ArmUp(double timeoutS, int difference) {
-        int LiftMax = 450;
-        ElapsedTime runtime = new ElapsedTime();
-        int current = motor1ex.getCurrentPosition();
-        telemetry.addData("Arm Pos",motor1ex.getCurrentPosition());
-        telemetry.addData("Arm Pos",motor2ex.getCurrentPosition());
-        telemetry.update();
-        motor2ex.setPower(0.3);
-        motor1ex.setPower(0.3);
-
-        runtime.reset();
-        while (runtime.milliseconds() < timeoutS && motor1ex.getCurrentPosition() < current + difference) {
-            telemetry.addData("Arm Pos",motor1ex.getCurrentPosition());
-            telemetry.addData("Arm Pos",motor2ex.getCurrentPosition());
-            telemetry.update();
-        }
-
-        motor1ex.setPower(0);
-        motor2ex.setPower(0);
+        motorHDLeftFront.setPower(0);
+        motorHDLeftRear.setPower(0);
+        motorHDRightFront.setPower(0);
+        motorHDRightRear.setPower(0);
     }
 }
 
