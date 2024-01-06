@@ -26,6 +26,8 @@ public class BlueClose extends LinearOpMode {
         boolean aprilTagRunning = true;
         boolean checkForBlue = true;
 
+        int teamPropLocation = 0;
+
         while (opModeInInit())
         {
             telemetry.update();
@@ -36,6 +38,8 @@ public class BlueClose extends LinearOpMode {
         sleep(1000);
         robot.move(0,0,0,0);
         sleep(1000);
+
+
         //move robot back
 
         robot.move(0,-1,0,0.4);

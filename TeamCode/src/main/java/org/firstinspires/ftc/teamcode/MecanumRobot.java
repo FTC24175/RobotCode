@@ -304,7 +304,7 @@ public class MecanumRobot {
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
         runtime.reset();
         while (motorSlides.getCurrentPosition()>0 && runtime.seconds() < 0.5) {
-            motorSlides.setPower(0.3);
+            motorSlides.setPower(0.5);
         }
         motorSlides.setPower(0); // IMPORTANT: brake
         myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
