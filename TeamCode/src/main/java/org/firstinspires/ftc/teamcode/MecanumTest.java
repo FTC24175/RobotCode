@@ -143,7 +143,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Touch Sensor", "Is Not Pressed");
                 armDown = false;
             }
-
+            /*
             // Arm movement by gamepad 1
             // up
             leftArmPosition = robot.getMotorPositionLeftArm();
@@ -164,8 +164,10 @@ public class MecanumTest extends LinearOpMode {
                     telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 }
             }
+            */
             // Arm movement gamepad 2
-            else if (gamepad2.right_stick_y > 0) { // Move arm down
+            leftArmPosition = robot.getMotorPositionLeftArm();
+            if (gamepad2.right_stick_y > 0) { // Move arm down
                 telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
                 if (leftArmPosition <= armMin) {
                     robot.setMotorPowerArm(0); // brake
@@ -329,7 +331,7 @@ public class MecanumTest extends LinearOpMode {
                 robot.AutoLinePark();
             }
 
-            if ((gamepad2.a) || (gamepad1.x)) {
+            if (gamepad1.x) {
                 robot.AutoPickUp();
             }
 
