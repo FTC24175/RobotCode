@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
 //import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
 
+import static android.os.SystemClock.sleep;
+
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -52,13 +54,15 @@ public class MecanumRobot {
     public DistanceSensor distanceSensorClawR = null;
 
     // Auto mode
-    private ColorSensor colorSensor, colorSensor2;
+    private ColorSensor colorSensor, colorSensorL;
     private VisionPortal visionPortal;
     private AprilTagProcessor tagProcessor;
 
     private IMU imu;
     private int default_red;
     private int default_blue;
+    private int default_red_left;
+    private int default_blue_left;
 
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
@@ -156,11 +160,13 @@ public class MecanumRobot {
 
         colorSensor = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorR");
         colorSensor.enableLed(true);
-        colorSensor2 = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
-        colorSensor2.enableLed(true);
+        colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
+        colorSensorL.enableLed(true);
 
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
+        default_red_left = colorSensorL.red();
+        default_blue_left = colorSensorL.blue();
 
         /* local variables
         int myAprilTaIdCode = -1;
@@ -298,7 +304,7 @@ public class MecanumRobot {
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
         runtime.reset();
         while (motorSlides.getCurrentPosition()>0 && runtime.seconds() < 0.5) {
-            motorSlides.setPower(0.3);
+            motorSlides.setPower(0.5);
         }
         motorSlides.setPower(0); // IMPORTANT: brake
         myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
@@ -321,29 +327,96 @@ public class MecanumRobot {
     //////////////////////////// Automatic Arm Up
     public void AutoArmUp() {
 
-        /* Raises the left arm to 3628 ticks
-         * The right arm motor needs to rotate at the reverse direction, too
-         */
+        //Raises the left arm to 3628 ticks
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        while (motorLeftArm.getCurrentPosition()<3629 && runtime2.seconds() < 5) {
+            setMotorPowerArm(-0.5);
+        }
+        setMotorPowerArm(0); // IMPORTANT: brake
 
         // Extends the slide to slideMax ticks
+        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+        runtime.reset();
+        while (motorSlides.getCurrentPosition()<10119 && runtime.seconds() < 3) {
+            motorSlides.setPower(-0.5);
+        }
+        motorSlides.setPower(0); // IMPORTANT: brake
+        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
 
         // Puts down the wrist to position 0.6
-
+        servoWrist.setPosition(0.6);
     }
     /////////////////////////// Automatic Pixel Pick-up
     // Happens at human player
     public void AutoPickUp() {
         // Opens claws
+        setServoPositionLeftHand(1);
+        setServoPositionRightHand(0);
         // Puts the wrist down
+        servoWrist.setPosition(1);
+        sleep(1500);
         // Closes claws
+        setServoPositionLeftHand(0);
+        setServoPositionRightHand(1);
+        sleep(1500);
         // Puts the wrist up
+        servoWrist.setPosition(0);
     }
 
-    // Happens in front of the backdrop and the human player
-    public void AutoParkAtLineForward() {
-        // While under a timer
-        // Moves forward until a color sensor detects blue or red
-        // Rotates the other side of drivetrain so another color sensor can also meet the line
+    /*
+    * Automatically parks at a red or blue line
+    *
+    * Happens in the manual mode in front of the backdrop and the human player
+    * and also in the auto mode before placing a purple pixel on the ground
+    *
+    * Algorithm:
+    * While under a timer
+    * Moves forward until a color sensor detects blue or red
+    * Rotates the other side of drivetrain so another color sensor can also meet the line
+     */
+    public void AutoLinePark() {
+        boolean leftDetected = false;
+        boolean rightDetected = false;
+
+        int blue;
+        int blueL;
+        int red;
+        int redL;
+
+        // Moves forward at power 0.2 until a line is detected
+
+        move(0,1,0,0.2);
+        while ((rightDetected == false) && (leftDetected == false)) {
+
+            blue = getColorSensorBlue();
+            blueL = getLeftColorSensorBlue();
+            red = getColorSensorRed();
+            redL = getLeftColorSensorRed();
+
+            if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) { // detects blue line
+                rightDetected = true;
+            }
+            if((blueL >= default_blue_left + 500) || (redL >= default_red_left + 500)) { // detects blue line
+                leftDetected = true;
+            }
+            myOpMode.telemetry.addData("Right Blue: ", blue);
+            myOpMode.telemetry.addData("Left Blue: ", blueL);
+            myOpMode.telemetry.addData("Right Red: ", red);
+            myOpMode.telemetry.addData("Left Red: ", redL);
+            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
+            myOpMode.telemetry.addData("initial red: ", getDefaultRed());
+            myOpMode.telemetry.update();
+        }
+        move(0,0,0,0);
+        if(leftDetected) {
+            move(0,0,90,-0.2);
+        }
+        if(rightDetected) {
+            move(0,0,90,0.2);
+        }
+
+
     }
 
     public void intializeAprilTag()
@@ -388,15 +461,26 @@ public class MecanumRobot {
         return default_blue;
     }
 
+    public int getLeftDefaultBlue() {
+        return default_blue_left;
+    }
     public int getDefaultRed() {
         return default_red;
     }
-    public int getColorSensorBlue() {
-        return colorSensor.blue();
+    public int getLeftDefaultRed() {
+        return default_red_left;
     }
-
+    public int getColorSensorBlue() {
+        return (colorSensor.blue());
+    }
+    public int getLeftColorSensorBlue() {
+        return colorSensorL.blue();
+    }
     public int getColorSensorRed() {
         return colorSensor.red();
+    }
+    public int getLeftColorSensorRed() {
+        return colorSensorL.red();
     }
 
     //public int getColorSensorGreen() { return colorSensor.green(); }
@@ -458,10 +542,11 @@ public class MecanumRobot {
         currentAngle = currentAngle *  180 / Math.PI;
         double leftFront, rightFront, leftRear, rightRear, turn;
         double diff =0;
-        diff = (90+currentAngle);
+        diff = (90+currentAngle); // needs to move this much: diff
         double sign;
-        while (Math.abs(diff)>2){
+        while (Math.abs(diff)>2){ // while there is more than 2 degree to move
             sign = diff/Math.abs(diff);
+            // increase the constant to increase turning speed
             turn = sign*0.2; //turn = sign*0.3; // by Bo
             leftFront =  turn;
             rightFront = -turn;
@@ -480,7 +565,7 @@ public class MecanumRobot {
             //telemetry.addData("diff", diff);
             //telemetry.update();
         }
-        motorHDLeftFront.setPower(0);
+        motorHDLeftFront.setPower(0); //brake
         motorHDLeftRear.setPower(0);
         motorHDRightFront.setPower(0);
         motorHDRightRear.setPower(0);

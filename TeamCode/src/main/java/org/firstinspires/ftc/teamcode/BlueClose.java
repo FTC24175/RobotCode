@@ -26,6 +26,8 @@ public class BlueClose extends LinearOpMode {
         boolean aprilTagRunning = true;
         boolean checkForBlue = true;
 
+        int teamPropLocation = 0;
+
         while (opModeInInit())
         {
             telemetry.update();
@@ -36,6 +38,8 @@ public class BlueClose extends LinearOpMode {
         sleep(1000);
         robot.move(0,0,0,0);
         sleep(1000);
+
+
         //move robot back
 
         robot.move(0,-1,0,0.4);
@@ -50,13 +54,15 @@ public class BlueClose extends LinearOpMode {
         //Move robot forward until it senses red
 
         robot.move(0,1,0,0.4);
-        sleep(1000);
+        sleep(1000); // move forward using power 0.4 for 1 second
         robot.move(0,1,0,0.2);
-        while (checkForBlue) {
+        while (checkForBlue) { // move forward using power 0.2 until blue line is detected
             blue = robot.getColorSensorBlue();
-            if(blue >= robot.getDefaultBlue() + 500) {
-                robot.move(0,0,0,0);
-                checkForBlue = false;
+            // default blue value in the gray (178)
+            // blue value in the blue line (245...increased by 67)
+            if(blue >= robot.getDefaultBlue() + 500) { // detects blue line
+                robot.move(0,0,0,0); // brakes
+                checkForBlue = false; // will break the while loop
             }
             telemetry.addData("Blue: ", blue);
             telemetry.addData("initial blue: ", robot.getDefaultBlue());
