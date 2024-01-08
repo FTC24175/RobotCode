@@ -6,6 +6,7 @@ import static java.lang.Math.abs;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Autonomous(name = "RedClose")
@@ -14,12 +15,13 @@ public class RedClose extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         MecanumRobot robot = new MecanumRobot(this);
         robot.initialize();
-
+        boolean debugMode = true;
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
         int targetAprilTag = 4;
         int alliance = 1;
         int red = robot.getColorSensorRed();
+        int i = 0;
         double desiredDistance = 7;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
@@ -27,16 +29,40 @@ public class RedClose extends LinearOpMode {
 
         while (opModeInInit())
         {
+            telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Right Distance Sensor", String.format("%.01f cm", robot.distanceSensorR.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
+
             telemetry.update();
         }
         //move robot to red lines
 
-        robot.move(0,1,0,0.4);
-        sleep(1000);
+        // object detection
+        for (i=0; i<50; i++) {
+            sleep(100);
+            if (robot.distanceSensorL.getDistance(DistanceUnit.CM) < 10) {
+                break;
+            }
+            else if (robot.distanceSensorR.getDistance(DistanceUnit.CM) < 10) {
+                break;
+            }
+            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 3) {
+                break;
+            }
+            if (debugMode == true) {
+                telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Right Distance Sensor", String.format("%.01f cm", robot.distanceSensorR.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
+            }
+            telemetry.update();
+        }
+        // once detected, stop the robot
         robot.move(0,0,0,0);
         sleep(1000);
-        //move robot back
 
+        //move robot back
         robot.move(0,-1,0,0.4);
         sleep(900);
         robot.move(0,0,0,0);

@@ -168,6 +168,7 @@ public class MecanumRobot {
         default_red_left = colorSensorL.red();
         default_blue_left = colorSensorL.blue();
 
+        intializeAprilTag();
         /* local variables
         int myAprilTaIdCode = -1;
         int targetAprilTag = 2;
