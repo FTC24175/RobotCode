@@ -296,10 +296,7 @@ public class MecanumRobot {
         // Slide retracts to position 0
         myOpMode.telemetry.addData("slide current position:",motorSlides.getCurrentPosition());
 
-        // With the external encoder, RUN_TO_POSITION does NOT work
-        //motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
-        //motorSlides.setTargetPosition(0);
+
 
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
         runtime.reset();
@@ -308,12 +305,6 @@ public class MecanumRobot {
         }
         motorSlides.setPower(0); // IMPORTANT: brake
         myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
-
-        // Only for RUN_TO_POSITION mode:
-        // Reset the slide's encoder and direction as the initial settings
-        // so it won't affect another part of the program
-        //motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Arm down to position 0
         ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
@@ -384,21 +375,27 @@ public class MecanumRobot {
         int red;
         int redL;
 
+        blue = getColorSensorBlue();
+        blueL = getLeftColorSensorBlue();
+        red = getColorSensorRed();
+        redL = getLeftColorSensorRed();
+
         // Moves forward at power 0.2 until a line is detected
 
         move(0,1,0,0.2);
         while ((rightDetected == false) && (leftDetected == false)) {
-
             blue = getColorSensorBlue();
             blueL = getLeftColorSensorBlue();
             red = getColorSensorRed();
             redL = getLeftColorSensorRed();
 
-            if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) { // detects blue line
+            if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
                 rightDetected = true;
             }
-            if((blueL >= default_blue_left + 500) || (redL >= default_red_left + 500)) { // detects blue line
+            if((blueL >= getLeftDefaultBlue() + 500) || (redL >= 1500)) {
                 leftDetected = true;
+                myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
+                myOpMode.telemetry.update();
             }
             myOpMode.telemetry.addData("Right Blue: ", blue);
             myOpMode.telemetry.addData("Left Blue: ", blueL);
@@ -409,13 +406,25 @@ public class MecanumRobot {
             myOpMode.telemetry.update();
         }
         move(0,0,0,0);
-        if(leftDetected) {
-            move(0,0,90,-0.2);
-        }
-        if(rightDetected) {
-            move(0,0,90,0.2);
-        }
 
+        if(leftDetected) {
+            move(0,0,-5,0.1);
+            while(!((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500))) {
+                blue = getColorSensorBlue();
+                red = getColorSensorRed();
+
+            }
+
+        }
+        else if(rightDetected) {
+            move(0,0,5,0.1);
+            while(!((blueL >= getLeftDefaultBlue() + 500) || (redL >= 1500))) {
+                blueL = getLeftColorSensorBlue();
+                redL = getLeftColorSensorRed();
+
+            }
+        }
+        move(0,0,0,0);
 
     }
 
@@ -457,9 +466,7 @@ public class MecanumRobot {
         return aprilTagDetection;
     }
 
-    public int getDefaultBlue() {
-        return default_blue;
-    }
+    public int getDefaultBlue() { return default_blue; }
 
     public int getLeftDefaultBlue() {
         return default_blue_left;
@@ -603,6 +610,16 @@ public class MecanumRobot {
         motorHDLeftRear.setPower(0);
         motorHDRightFront.setPower(0);
         motorHDRightRear.setPower(0);
+    }
+
+    public void turnRight(float power) {
+        motorHDLeftFront.setPower(power);
+        motorHDLeftRear.setPower(power);
+
+    }
+    public void turnLeft(float power) {
+        motorHDRightFront.setPower(power);
+        motorHDRightRear.setPower(power);
     }
 }
 

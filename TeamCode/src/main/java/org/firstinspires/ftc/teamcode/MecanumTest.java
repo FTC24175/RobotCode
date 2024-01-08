@@ -330,7 +330,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
                 telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
             }
-            telemetry.update();
+
 
             //Automatic Arm Down
             if (gamepad2.x) {
@@ -349,7 +349,8 @@ public class MecanumTest extends LinearOpMode {
             if (gamepad1.x) {
                 robot.AutoPickUp();
             }
-
+            telemetry.addData("Red Left Default: ", robot.getLeftDefaultRed());
+            telemetry.addData("Red Left: ", robot.getLeftColorSensorRed());
 ///////////////////////////////Automatic Arm Up
 
 ///////////////////////////////Automatic Pixel Pick-up
@@ -553,6 +554,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("distance", distance);
                 telemetry.update();
             }
+            telemetry.update();
         }
     }
 }
