@@ -12,7 +12,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.hardware.lynx.LynxModule;
 
 
 //import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -107,6 +106,7 @@ public class MecanumTest extends LinearOpMode {
         int servoPosition;
 
         while(opModeIsActive()) {
+
             for (LynxModule module : allHubs) {
                 module.clearBulkCache();
             }
@@ -152,16 +152,16 @@ public class MecanumTest extends LinearOpMode {
             telemetry.addData("Left Arm Position", leftArmPosition);
             if (gamepad1.y) {
                 if (leftArmPosition < armMax) {
-                    leftPower = -0.4;
-                    rightPower = -0.4;
+                    leftPower = 0.4;
+                    rightPower = 0.4;
                     robot.setMotorPowerArm(leftPower);
                     telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 }
             } //down
             else if (gamepad1.x) {
                 if (!armDown) {
-                    leftPower = 0.2;
-                    rightPower = 0.2;
+                    leftPower = -0.2;
+                    rightPower = -0.2;
                     robot.setMotorPowerArm(leftPower);
                     telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 }
@@ -177,10 +177,10 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode == true)
                         telemetry.addData("Lower arm. Brake arm motor", 0);
                 } else {
-                    leftPower = gamepad2.right_stick_y/3;
+                    leftPower = -gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
                     if (debugMode == true)
-                        telemetry.addData("Lower arm. Set Arm Power to ", leftPower);
+                        telemetry.addData("Lower arm. Set Arm Power to ", -leftPower);
                 }
             }
             else if (gamepad2.right_stick_y < 0) { // Move arm up
@@ -191,20 +191,22 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode == true)
                         telemetry.addData("Raise arm. Brake arm motor", 0);
                 } else {
-                    leftPower = gamepad2.right_stick_y/3;
+                    leftPower = -gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
                     if (debugMode == true)
-                        telemetry.addData("Raise arm. Set Arm Power to ", leftPower);
+                        telemetry.addData("Raise arm. Set Arm Power to ", -leftPower);
                 }
 
             }
             else { // when nothing is pressed, brake the arm motors
                 leftPower = 0;
                 rightPower = 0;
-                robot.setMotorPowerArm(leftPower);
+                robot.setMotorPowerArm(-leftPower);
                 if (debugMode == true)
-                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", -leftPower, -rightPower);
             }
+            if (debugMode == true)
+                telemetry.addData("Arm" + "" + " New Position", leftArmPosition);
             /*
             * Slide movement
             * It's against intuition that the joystick gives a negative value when it is pushed up
@@ -216,10 +218,10 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode == true)
                         telemetry.addData("Extend arm. Brake slide motor", 0);
                 } else {
-                    slidePower = gamepad2.left_stick_y/2;
+                    slidePower = -gamepad2.left_stick_y/2;
                     robot.setMotorPowerSlide(slidePower);
                     if (debugMode == true)
-                        telemetry.addData("Retract arm. Set Slide Power to ", slidePower);
+                        telemetry.addData("Retract arm. Set Slide Power to ", -slidePower);
                 }
             } else if (gamepad2.left_stick_y < 0) { // joystick up & extend
                 if (slidePosition >= slideMax) {
@@ -227,10 +229,10 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode == true)
                         telemetry.addData("Extend arm. Brake slide motor", 0);
                 } else {
-                    slidePower = gamepad2.left_stick_y/2;
+                    slidePower = -gamepad2.left_stick_y/2;
                     robot.setMotorPowerSlide(slidePower);
                     if (debugMode == true)
-                        telemetry.addData("Extend arm. Set Slide Power to ", slidePower);
+                        telemetry.addData("Extend arm. Set Slide Power to ", -slidePower);
                 }
 
             } else { // brake
@@ -250,56 +252,55 @@ public class MecanumTest extends LinearOpMode {
             leftPosition = robot.getServoPositionLeftHand();
             rightPosition = robot.getServoPositionRightHand();
             if (gamepad2.left_trigger > 0.3) {
-                if (leftPosition == 1) { //open
-                    leftPosition = 0; //close
-                    robot.setServoPositionLeftHand(leftPosition);
-                } else if (gamepad2.a) { //close
+                if ((leftPosition == 0) && (gamepad2.a)) { //close
                     leftPosition = 0.5; //open
                     robot.setServoPositionLeftHand(leftPosition);
+                    sleep(100);
                 }
-                if (debugMode == true)
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                else {
+                    leftPosition = 0; //close
+                    robot.setServoPositionLeftHand(leftPosition);
+                    sleep(100);
+                }
             }
-
             if (gamepad2.right_trigger > 0.3) {
-                if ((rightPosition == 1 || rightPosition == 0.5) && (gamepad2.a)) { //close
+                if ((rightPosition == 1) && (gamepad2.a)) { //close
                     rightPosition = 0.5; //open
                     robot.setServoPositionRightHand(rightPosition);
-                    if (debugMode == true)
-                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    sleep(100);
                 } else {
                     rightPosition = 1; //close
                     robot.setServoPositionRightHand(rightPosition);
-                    if (debugMode == true)
-                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    sleep(100);
                 }
             }
 
             if (gamepad1.left_trigger > 0.3) {
-                if (leftPosition == 1) { //close
-                    leftPosition = 0; //open
-                    robot.setServoPositionLeftHand(leftPosition);
-                } else if(gamepad1.y) { //close
+                if (leftPosition == 0) { //close
                     leftPosition = 0.5; //open
                     robot.setServoPositionLeftHand(leftPosition);
+                    sleep(100);
+                } else {
+                    leftPosition = 0; //close
+                    robot.setServoPositionLeftHand(leftPosition);
+                    sleep(100);
                 }
-                if (debugMode == true)
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
             }
-
             if (gamepad1.right_trigger > 0.3) {
-                if ((rightPosition == 1 || rightPosition == 0.5) && (gamepad1.y)) { //close
+                if (rightPosition == 1) {
                     rightPosition = 0.5; //open
                     robot.setServoPositionRightHand(rightPosition);
-                    if (debugMode == true)
-                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-                } else {
+                    sleep(100);
+                }
+                else {
                     rightPosition = 1; //close
                     robot.setServoPositionRightHand(rightPosition);
-                    if (debugMode == true)
-                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    sleep(100);
+
                 }
             }
+            if (debugMode == true)
+                telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
 
             // Wrist movement
             wristPosition = robot.getServoPositionWrist();
@@ -330,7 +331,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
                 telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
             }
-
+            telemetry.update();
 
             //Automatic Arm Down
             if (gamepad2.x) {
@@ -346,11 +347,12 @@ public class MecanumTest extends LinearOpMode {
                 robot.AutoLinePark();
             }
 
-            if (gamepad1.x) {
-                robot.AutoPickUp();
-            }
-            telemetry.addData("Red Left Default: ", robot.getLeftDefaultRed());
-            telemetry.addData("Red Left: ", robot.getLeftColorSensorRed());
+            if (gamepad1.x)
+                robot.AutoWristDown();
+            if (gamepad1.y)
+                robot.AutoWristUp();
+
+
 ///////////////////////////////Automatic Arm Up
 
 ///////////////////////////////Automatic Pixel Pick-up
@@ -554,7 +556,6 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("distance", distance);
                 telemetry.update();
             }
-            telemetry.update();
         }
     }
 }

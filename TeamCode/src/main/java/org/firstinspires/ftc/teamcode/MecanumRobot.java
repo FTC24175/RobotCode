@@ -117,10 +117,10 @@ public class MecanumRobot {
 
         // Try both directions and choose the one that results in positive encoder ticks
 
-        motorLeftArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorLeftArm.setDirection(DcMotorSimple.Direction.REVERSE);
         myOpMode.telemetry.addData("direction of left arm motor","forward");
-        motorRightArm.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorSlides.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorRightArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorSlides.setDirection(DcMotorSimple.Direction.FORWARD);
         myOpMode.telemetry.addData("direction of slide motor","reverse");
 
         // Servos
@@ -341,14 +341,16 @@ public class MecanumRobot {
     }
     /////////////////////////// Automatic Pixel Pick-up
     // Happens at human player
-    public void AutoPickUp() {
+    public void AutoWristDown() {
         // Opens claws
         setServoPositionLeftHand(1);
         setServoPositionRightHand(0);
         // Puts the wrist down
         servoWrist.setPosition(1);
-        sleep(1500);
         // Closes claws
+    }
+
+    public void AutoWristUp() {
         setServoPositionLeftHand(0);
         setServoPositionRightHand(1);
         sleep(1500);
