@@ -1,27 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static java.lang.Math.*;
 
-import android.transition.Slide;
-import android.util.Size;
-
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import com.qualcomm.hardware.lynx.LynxModule;
 
 //import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 //import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import static android.os.SystemClock.sleep;
+//import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+//import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
 import java.util.List;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name="MecanumTest")
 public class MecanumTest extends LinearOpMode {
@@ -32,6 +23,9 @@ public class MecanumTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         robot.initialize();
+        waitForStart();
+        //if (debugMode) return;
+
         telemetry.addData("Status", "Initialized");
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
         // manual mode
@@ -42,16 +36,8 @@ public class MecanumTest extends LinearOpMode {
         double rightPosition = 1;
         double wristPosition = 0;
         double launcherPosition = 0;
-        double slideMax = 10119;
-        double slideMin = 0;
-        double armMax = 16051;
-        double armMin = 0;
         boolean armDown = false;
 
-        robot.setServoPositionWrist(wristPosition);
-        robot.setServoPositionLeftHand(leftPosition);
-        robot.setServoPositionRightHand(rightPosition);
-        robot.setServoPositionLauncher(launcherPosition);
         /* Auto mode
         * April Tag
          */
@@ -80,30 +66,8 @@ public class MecanumTest extends LinearOpMode {
 
         double distance = Double.MAX_VALUE;
 
-        waitForStart();
-
-        //Calibrate arm & slide position - buggy
-        // (Rachel: Now the new encoder remembers the position from last time,
-        // So there no need to calibrate)
-        /*
-        if (opModeIsActive()) {
-            if (robot.touchSensor.isPressed()) {
-                telemetry.addData("Touch Sensor", "Is Pressed");
-                robot.setMotorPowerArm(0);
-                //robot.setMotorPowerSlide(0);
-                robot.encoderReset();
-                break;
-            } else {
-                telemetry.addData("Touch Sensor", "Is Not Pressed");
-                robot.setMotorPowerArm(-0.2);
-                //robot.setMotorPowerSlide(-0.2);
-            }
-            telemetry.update();
-        }
-        */
         int leftArmPosition;
         int slidePosition;
-        int servoPosition;
 
         while(opModeIsActive()) {
 
@@ -136,12 +100,12 @@ public class MecanumTest extends LinearOpMode {
             // Touch sensor
             // Cannot use port 0 on driver station
             if (robot.touchSensor.isPressed()) {
-                if (debugMode == true)
+                if (debugMode)
                     telemetry.addData("Touch Sensor", "Is Pressed");
                 armDown = true;
 
             } else {
-                if (debugMode == true)
+                if (debugMode)
                     telemetry.addData("Touch Sensor", "Is Not Pressed");
                 armDown = false;
             }
@@ -151,7 +115,7 @@ public class MecanumTest extends LinearOpMode {
             leftArmPosition = robot.getMotorPositionLeftArm();
             telemetry.addData("Left Arm Position", leftArmPosition);
             if (gamepad1.y) {
-                if (leftArmPosition < armMax) {
+                if (leftArmPosition < robot.armMax) {
                     leftPower = 0.4;
                     rightPower = 0.4;
                     robot.setMotorPowerArm(leftPower);
@@ -170,75 +134,75 @@ public class MecanumTest extends LinearOpMode {
             // Arm movement gamepad 2
             leftArmPosition = robot.getMotorPositionLeftArm();
             if (gamepad2.right_stick_y > 0) { // Move arm down
-                if (debugMode == true)
+                if (debugMode)
                     telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
-                if (leftArmPosition <= armMin) {
+                if (leftArmPosition <= MecanumRobot.armMin) {
                     robot.setMotorPowerArm(0); // brake
-                    if (debugMode == true)
+                    if (debugMode)
                         telemetry.addData("Lower arm. Brake arm motor", 0);
                 } else {
                     leftPower = -gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
-                    if (debugMode == true)
-                        telemetry.addData("Lower arm. Set Arm Power to ", -leftPower);
+                    if (debugMode)
+                        telemetry.addData("Lower arm. Set Arm Power to ", leftPower);
                 }
             }
             else if (gamepad2.right_stick_y < 0) { // Move arm up
-                if (debugMode == true)
+                if (debugMode)
                     telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
-                if (leftArmPosition >= armMax) {
+                if (leftArmPosition >= MecanumRobot.armMax) {
                     robot.setMotorPowerArm(0); // brake
-                    if (debugMode == true)
+                    if (debugMode)
                         telemetry.addData("Raise arm. Brake arm motor", 0);
                 } else {
                     leftPower = -gamepad2.right_stick_y/3;
                     robot.setMotorPowerArm(leftPower);
-                    if (debugMode == true)
-                        telemetry.addData("Raise arm. Set Arm Power to ", -leftPower);
+                    if (debugMode)
+                        telemetry.addData("Raise arm. Set Arm Power to ", leftPower);
                 }
 
             }
             else { // when nothing is pressed, brake the arm motors
                 leftPower = 0;
                 rightPower = 0;
-                robot.setMotorPowerArm(-leftPower);
-                if (debugMode == true)
-                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", -leftPower, -rightPower);
+                robot.setMotorPowerArm(leftPower);
+                if (debugMode)
+                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             }
-            if (debugMode == true)
-                telemetry.addData("Arm" + "" + " New Position", leftArmPosition);
+            if (debugMode)
+                telemetry.addData("Arm New Position", leftArmPosition);
             /*
             * Slide movement
             * It's against intuition that the joystick gives a negative value when it is pushed up
              */
             slidePosition = robot.getMotorPositionSlide();
             if (gamepad2.left_stick_y > 0) { // joystick down & retract
-                if (slidePosition <= slideMin) {
+                if (slidePosition <= MecanumRobot.slideMin) {
                     robot.setMotorPowerSlide(0); // brake
-                    if (debugMode == true)
+                    if (debugMode)
                         telemetry.addData("Extend arm. Brake slide motor", 0);
                 } else {
                     slidePower = -gamepad2.left_stick_y/2;
                     robot.setMotorPowerSlide(slidePower);
-                    if (debugMode == true)
-                        telemetry.addData("Retract arm. Set Slide Power to ", -slidePower);
+                    if (debugMode)
+                        telemetry.addData("Retract arm. Set Slide Power to ", slidePower);
                 }
             } else if (gamepad2.left_stick_y < 0) { // joystick up & extend
-                if (slidePosition >= slideMax) {
+                if (slidePosition >= MecanumRobot.slideMax) {
                     robot.setMotorPowerSlide(0); // brake
-                    if (debugMode == true)
+                    if (debugMode)
                         telemetry.addData("Extend arm. Brake slide motor", 0);
                 } else {
                     slidePower = -gamepad2.left_stick_y/2;
                     robot.setMotorPowerSlide(slidePower);
-                    if (debugMode == true)
-                        telemetry.addData("Extend arm. Set Slide Power to ", -slidePower);
+                    if (debugMode)
+                        telemetry.addData("Extend arm. Set Slide Power to ", slidePower);
                 }
 
             } else { // brake
                 robot.setMotorPowerSlide(0);
             }
-            if (debugMode == true)
+            if (debugMode)
                 telemetry.addData("Slide New Position", slidePosition);
 
 
@@ -262,6 +226,8 @@ public class MecanumTest extends LinearOpMode {
                     robot.setServoPositionLeftHand(leftPosition);
                     sleep(100);
                 }
+                if (debugMode)
+                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
             }
             if (gamepad2.right_trigger > 0.3) {
                 if ((rightPosition == 1) && (gamepad2.a)) { //close
@@ -285,6 +251,8 @@ public class MecanumTest extends LinearOpMode {
                     robot.setServoPositionLeftHand(leftPosition);
                     sleep(100);
                 }
+                if (debugMode)
+                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
             }
             if (gamepad1.right_trigger > 0.3) {
                 if (rightPosition == 1) {
@@ -296,7 +264,6 @@ public class MecanumTest extends LinearOpMode {
                     rightPosition = 1; //close
                     robot.setServoPositionRightHand(rightPosition);
                     sleep(100);
-
                 }
             }
             if (debugMode == true)
@@ -315,7 +282,7 @@ public class MecanumTest extends LinearOpMode {
                     robot.setServoPositionWrist(wristPosition);
                 }
             }
-            if (debugMode == true)
+            if (debugMode)
                 telemetry.addData("Wrist Servo", "%.2f", wristPosition);
 
             //Launcher
@@ -325,7 +292,7 @@ public class MecanumTest extends LinearOpMode {
             }
 
             //Distance Sensor
-            if (debugMode == true) {
+            if (debugMode) {
                 telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
                 telemetry.addData("Right Distance Sensor", String.format("%.01f cm", robot.distanceSensorR.getDistance(DistanceUnit.CM)));
                 telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
@@ -335,12 +302,15 @@ public class MecanumTest extends LinearOpMode {
 
             //Automatic Arm Down
             if (gamepad2.x) {
-                if (armDown != true)
+                if (!armDown) {
                     robot.AutoArmDown();
+                    robot.runWithoutEncoderArmSlide();
+                }
             }
-            if (gamepad2.y) {
 
+            if (gamepad2.y) {
                 robot.AutoArmUp();
+                robot.runWithoutEncoderArmSlide();
             }
 
             if ((gamepad2.right_bumper) && (gamepad2.left_bumper)) {

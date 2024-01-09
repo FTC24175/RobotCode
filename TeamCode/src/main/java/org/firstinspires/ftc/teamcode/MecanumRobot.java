@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-//import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.clawPosition;
-//import static org.firstinspires.ftc.teamcode.deprecated.teamTeleOpCode.wristPosition;
-
-import static android.os.SystemClock.sleep;
-
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -15,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 // Autonomous mode
 //import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
-        import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -24,7 +19,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+//import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
@@ -38,14 +33,29 @@ public class MecanumRobot {
     private DcMotor motorHDLeftRear = null;
     private DcMotor motorHDRightFront = null;
     private DcMotor motorHDRightRear = null;
-
     private DcMotor motorLeftArm = null;
     private DcMotor motorRightArm = null;
     private DcMotor motorSlides = null;
+
+    public final static int slideMax = 245;
+    public final static int slideMin = 0;
+    public final static int armMax = 2900;
+    public final static int armMin = 0;
+    public final static int dropPixelArmPosition = 1000;
+    public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.REVERSE;
+    public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
+    public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
+
     private Servo servoWrist = null;
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
     private Servo servoLauncher = null;
+
+    public final static int defaultLeftPosition = 0; // claw closed
+    public final static int defaultRightPosition = 1; // claw closed
+    public final static int defaultWristPosition = 0; // wrist up
+    public final static int defaultLauncherPosition = 0;
+    public final static double dropPixelWristPosition = 0.6;
 
     public TouchSensor touchSensor = null;
     public DistanceSensor distanceSensorL = null;
@@ -91,37 +101,24 @@ public class MecanumRobot {
         motorHDRightFront.setDirection(DcMotorSimple.Direction.FORWARD);
         motorHDRightRear.setDirection(DcMotorSimple.Direction.FORWARD);
 
-
         // Top Motors
 
         motorLeftArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmL");
         motorRightArm = myOpMode.hardwareMap.get(DcMotor.class, "HDMotorArmR");
         motorSlides = myOpMode.hardwareMap.get(DcMotor.class, "CoreMotorSlide");
 
-        // Reset zero position
-        // sometimes randomly reverses directions when switched to STOP_AND_RESET_ENCODER mode (reverse -> forward and vice versa)
-        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorRightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // If with external encoder:
+        // try both directions and choose the one that results in positive encoder ticks
+        motorLeftArm.setDirection(defaultDirectionLeftArm);
+        myOpMode.telemetry.addData("direction of left arm motor","reverse");
+        motorRightArm.setDirection(defaultDirectionRightArm);
+        motorSlides.setDirection(defaultDirectionSlide);
+        myOpMode.telemetry.addData("direction of slide motor","forward");
 
-        // RUN_WITHOUT_ENCODER mode - only set direction & power
-
-        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
-        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);;
-        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        // Merely brakes the arm when it's raised and stop falling to gravity
         motorLeftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorRightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        // Try both directions and choose the one that results in positive encoder ticks
-
-        motorLeftArm.setDirection(DcMotorSimple.Direction.REVERSE);
-        myOpMode.telemetry.addData("direction of left arm motor","forward");
-        motorRightArm.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorSlides.setDirection(DcMotorSimple.Direction.FORWARD);
-        myOpMode.telemetry.addData("direction of slide motor","reverse");
 
         // Servos
 
@@ -129,11 +126,34 @@ public class MecanumRobot {
         servoLeftHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawL");
         servoRightHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawR");
         servoLauncher = myOpMode.hardwareMap.get(Servo.class, "ServoLauncher");
+
+        AutoArmDown(); // includes wrist & claw actions
+        runWithoutEncoderArmSlide();
+
+        setServoPositionLauncher(defaultLauncherPosition);
+
         touchSensor = myOpMode.hardwareMap.get(TouchSensor.class, "touchSensor");
+        /*
+        // Calibrates arm position using touch sensor
+        // We don't need this because as long as robot is at 0 position when it's turned on
+        // the encoder will remember the position while power is on
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        setMotorPowerArm(-0.2);
+        while (runtime2.seconds()<2) {
+            if (touchSensor.isPressed()) {
+                myOpMode.telemetry.addData("Touch Sensor", "Is Pressed");
+                break;
+            }
+        }
+        setMotorPowerArm(0);
+        */
+
         distanceSensorL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorL");
         distanceSensorR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorR");
         distanceSensorClawL = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawL");
         distanceSensorClawR = myOpMode.hardwareMap.get(DistanceSensor.class, "distanceSensorClawR");
+
         /*
         * Auto mode initialization
         */
@@ -147,7 +167,6 @@ public class MecanumRobot {
         motor2core.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2core.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         */
-
 
         // Retrieve the IMU from the hardware map
         imu = myOpMode.hardwareMap.get(IMU.class, "imu");
@@ -182,14 +201,6 @@ public class MecanumRobot {
         */
     }
 
-    /*
-    public void encoderReset() {
-        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        // has to reset right arm, too
-        // then switch back to RUN_WITHOUT_ENCODER mode
-    }
-    */
 
     /**
      * Mecanum Drivetrain
@@ -237,27 +248,94 @@ public class MecanumRobot {
      * Set both motor powers
      * Then sends these power levels to the motors.
      *
-     * @param powerScale
+     * @param
      */
+    public void stopAndResetArmSlide() {
+        // Reset zero position
+        // sometimes randomly reverses directions when switched to STOP_AND_RESET_ENCODER mode (reverse -> forward and vice versa)
+        motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    public void runWithoutEncoderArmSlide(){
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+        // After using RUN_TO_POSITION or STOP_AND_RESET_ENCODER
+        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
+        // Before switching, make sure motors brake
+        // (We already brake after each call of runToPosition())
 
+        //motorLeftArm.setPower(0);
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //motorRightArm.setPower(0);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //motorSlides.setPower(0);
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
     public void setMotorPowerArm(double powerScale) {
         motorLeftArm.setPower(powerScale);
         motorRightArm.setPower(powerScale);
 
+    }
+    public void runToPositionArm(int position,double power) {
+        motorLeftArm.setTargetPosition(position);
+        motorRightArm.setTargetPosition(position);
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setMotorPowerArm(power);
+        while (motorLeftArm.isBusy() && motorRightArm.isBusy()) myOpMode.idle();
+        setMotorPowerArm(0);
+        /*
+        // With the external encoder, RUN_TO_POSITION does NOT work
+        // Arm down to position 0
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        setMotorPowerArm(0.2);
+        while (motorLeftArm.getCurrentPosition()>0 && runtime2.seconds() < 5);
+        setMotorPowerArm(0); // IMPORTANT: brake
+         */
     }
 
     public int getMotorPositionLeftArm(){
         return motorLeftArm.getCurrentPosition();
     }
     public int getMotorPositionRightArm() { return motorRightArm.getCurrentPosition(); }
-    public int getMotorPositionSlide(){
-        return motorSlides.getCurrentPosition();
-    }
-    public DcMotorSimple.Direction getMotorDirectionSlide() { return motorSlides.getDirection(); }
+    /**
+     * Slide movement
+     *
+     * @param powerScale
+     */
     public void setMotorPowerSlide(double powerScale) {
         motorSlides.setPower(powerScale);
     }
+    public void runToPositionSlide(int position, double power) {
 
+        motorSlides.setTargetPosition(position);
+        motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorSlides.setPower(power);
+        while (motorSlides.isBusy()) myOpMode.idle();
+        motorSlides.setPower(0);
+        /*
+        // With the external encoder, RUN_TO_POSITION does NOT work
+        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+        runtime.reset();
+        motorSlides.setPower(power);
+        if (motorSlides.getCurrentPosition()>position)
+            while (motorSlides.getCurrentPosition()>position && runtime.seconds() < 0.5) idle();
+        else if (position<motorSlides.getCurrentPosition())
+            while (position<motorSlides.getCurrentPosition() && runtime.seconds() < 0.5) idle();
+        motorSlides.setPower(0); // IMPORTANT: brake
+        */
+    }
+    public int getMotorPositionSlide(){
+        return motorSlides.getCurrentPosition();
+    }
+    //public DcMotorSimple.Direction getMotorDirectionSlide() { return motorSlides.getDirection(); }
+
+    /**
+     * Hand movement
+     *
+     * @param
+     */
     public double getServoPositionLeftHand() {
         return servoLeftHand.getPosition();
     }
@@ -266,78 +344,71 @@ public class MecanumRobot {
 
         return servoRightHand.getPosition();
     }
-
     public void setServoPositionLeftHand(double position) {
-
         servoLeftHand.setPosition(position);
-
     }
-
     public void setServoPositionRightHand(double position) {
-
         servoRightHand.setPosition(position);
-
     }
-
+    /**
+     * Wrist movement
+     * @param
+     */
     public double getServoPositionWrist() {
         return servoWrist.getPosition();
     }
     public void setServoPositionWrist(double position) {
         servoWrist.setPosition(position);
     }
+    /**
+     * Launcher
+     * @param
+     */
     public void setServoPositionLauncher(double position) {
         servoLauncher.setPosition(position);
     }
 
     public void AutoArmDown() {
+        // Wrist up
+        setServoPositionWrist(defaultWristPosition);
 
-        // Wrist up to position 0
-        servoWrist.setPosition(0);
+        // Claw closed
+        setServoPositionLeftHand(defaultLeftPosition);
+        setServoPositionRightHand(defaultRightPosition);
 
-        // Slide retracts to position 0
-        myOpMode.telemetry.addData("slide current position:",motorSlides.getCurrentPosition());
-
-
-
-        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
-        runtime.reset();
-        while (motorSlides.getCurrentPosition()>0 && runtime.seconds() < 0.5) {
-            motorSlides.setPower(0.5);
-        }
-        motorSlides.setPower(0); // IMPORTANT: brake
-        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
-
-        // Arm down to position 0
-        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
-        runtime2.reset();
-        while (motorLeftArm.getCurrentPosition()>0 && runtime2.seconds() < 5) {
-            setMotorPowerArm(0.2);
-        }
-        setMotorPowerArm(0); // IMPORTANT: brake
+        runToPositionSlide(0, -0.5);
+        runToPositionArm(0,-0.2);
     }
 
     //////////////////////////// Automatic Arm Up
     public void AutoArmUp() {
-
+        runToPositionArm(dropPixelArmPosition,0.5);
+        runToPositionSlide(slideMax, 0.5);
+        setServoPositionWrist(dropPixelWristPosition);
+        /*
         //Raises the left arm to 3628 ticks
         ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
         runtime2.reset();
+        setMotorPowerArm(0.5);
         while (motorLeftArm.getCurrentPosition()<3629 && runtime2.seconds() < 5) {
-            setMotorPowerArm(-0.5);
+            idle();
         }
         setMotorPowerArm(0); // IMPORTANT: brake
 
         // Extends the slide to slideMax ticks
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
         runtime.reset();
+        motorSlides.setPower(0.5);
         while (motorSlides.getCurrentPosition()<10119 && runtime.seconds() < 3) {
-            motorSlides.setPower(-0.5);
+            idle();
         }
         motorSlides.setPower(0); // IMPORTANT: brake
         myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
 
         // Puts down the wrist to position 0.6
         servoWrist.setPosition(0.6);
+        */
+
     }
     /////////////////////////// Automatic Pixel Pick-up
     // Happens at human player
@@ -347,13 +418,17 @@ public class MecanumRobot {
         setServoPositionRightHand(0);
         // Puts the wrist down
         servoWrist.setPosition(1);
-        // Closes claws
+        myOpMode.idle();
+        //sleep(1500);
+
     }
 
     public void AutoWristUp() {
+        // Closes claws
         setServoPositionLeftHand(0);
         setServoPositionRightHand(1);
-        sleep(1500);
+        myOpMode.idle();
+        //sleep(1500);
         // Puts the wrist up
         servoWrist.setPosition(0);
     }
@@ -386,7 +461,7 @@ public class MecanumRobot {
         // Moves forward at power 0.2 until a line is detected
 
         move(0,1,0,0.2);
-        while ((rightDetected == false) && (leftDetected == false)) {
+        while ((!rightDetected) && (!leftDetected)) {
             blue = getColorSensorBlue();
             blueL = getLeftColorSensorBlue();
             red = getColorSensorRed();
@@ -406,7 +481,7 @@ public class MecanumRobot {
             myOpMode.telemetry.addData("Left Red: ", redL);
             myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
             myOpMode.telemetry.addData("initial red: ", getDefaultRed());
-            myOpMode.telemetry.update();
+            //myOpMode.telemetry.update();
         }
         move(0,0,0,0);
 
