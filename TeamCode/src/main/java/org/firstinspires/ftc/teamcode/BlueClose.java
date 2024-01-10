@@ -53,7 +53,7 @@ public class BlueClose extends LinearOpMode {
             else if (robot.distanceSensorR.getDistance(DistanceUnit.CM) < 10) {
                 break;
             }
-            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 3) {
+            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 18) {
                 break;
             }
             if (debugMode == true) {

@@ -37,6 +37,8 @@ public class MecanumTest extends LinearOpMode {
         double wristPosition = 0;
         double launcherPosition = 0;
         boolean armDown = false;
+        int autoArmDownState = 0;
+        int autoArmUpState = 0;
 
         /* Auto mode
         * April Tag
@@ -109,181 +111,204 @@ public class MecanumTest extends LinearOpMode {
                     telemetry.addData("Touch Sensor", "Is Not Pressed");
                 armDown = false;
             }
-            /*
-            // Arm movement by gamepad 1
-            // up
-            leftArmPosition = robot.getMotorPositionLeftArm();
-            telemetry.addData("Left Arm Position", leftArmPosition);
-            if (gamepad1.y) {
-                if (leftArmPosition < robot.armMax) {
-                    leftPower = 0.4;
-                    rightPower = 0.4;
-                    robot.setMotorPowerArm(leftPower);
-                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-                }
-            } //down
-            else if (gamepad1.x) {
-                if (!armDown) {
-                    leftPower = -0.2;
-                    rightPower = -0.2;
-                    robot.setMotorPowerArm(leftPower);
-                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-                }
-            }
-            */
-            // Arm movement gamepad 2
-            leftArmPosition = robot.getMotorPositionLeftArm();
-            if (gamepad2.right_stick_y > 0) { // Move arm down
-                if (debugMode)
-                    telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
-                if (leftArmPosition <= MecanumRobot.armMin) {
-                    robot.setMotorPowerArm(0); // brake
-                    if (debugMode)
-                        telemetry.addData("Lower arm. Brake arm motor", 0);
-                } else {
-                    leftPower = -gamepad2.right_stick_y/3;
-                    robot.setMotorPowerArm(leftPower);
-                    if (debugMode)
-                        telemetry.addData("Lower arm. Set Arm Power to ", leftPower);
-                }
-            }
-            else if (gamepad2.right_stick_y < 0) { // Move arm up
-                if (debugMode)
-                    telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
-                if (leftArmPosition >= MecanumRobot.armMax) {
-                    robot.setMotorPowerArm(0); // brake
-                    if (debugMode)
-                        telemetry.addData("Raise arm. Brake arm motor", 0);
-                } else {
-                    leftPower = -gamepad2.right_stick_y/3;
-                    robot.setMotorPowerArm(leftPower);
-                    if (debugMode)
-                        telemetry.addData("Raise arm. Set Arm Power to ", leftPower);
-                }
 
-            }
-            else { // when nothing is pressed, brake the arm motors
-                leftPower = 0;
-                rightPower = 0;
-                robot.setMotorPowerArm(leftPower);
-                if (debugMode)
-                    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            }
-            if (debugMode)
-                telemetry.addData("Arm New Position", leftArmPosition);
             /*
-            * Slide movement
-            * It's against intuition that the joystick gives a negative value when it is pushed up
+            * If NOT running the auto mode, then allows to control the arm, slide, wrist & claw
              */
-            slidePosition = robot.getMotorPositionSlide();
-            if (gamepad2.left_stick_y > 0) { // joystick down & retract
-                if (slidePosition <= MecanumRobot.slideMin) {
-                    robot.setMotorPowerSlide(0); // brake
-                    if (debugMode)
-                        telemetry.addData("Extend arm. Brake slide motor", 0);
-                } else {
-                    slidePower = -gamepad2.left_stick_y/2;
-                    robot.setMotorPowerSlide(slidePower);
-                    if (debugMode)
-                        telemetry.addData("Retract arm. Set Slide Power to ", slidePower);
+            if (autoArmDownState==0 && autoArmUpState==0) {
+
+                /*
+                // Arm movement by gamepad 1
+                // up
+                leftArmPosition = robot.getMotorPositionLeftArm();
+                telemetry.addData("Left Arm Position", leftArmPosition);
+                if (gamepad1.y) {
+                    if (leftArmPosition < robot.armMax) {
+                        leftPower = 0.4;
+                        rightPower = 0.4;
+                        robot.setMotorPowerArm(leftPower);
+                        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                    }
+                } //down
+                else if (gamepad1.x) {
+                    if (!armDown) {
+                        leftPower = -0.2;
+                        rightPower = -0.2;
+                        robot.setMotorPowerArm(leftPower);
+                        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+                    }
                 }
-            } else if (gamepad2.left_stick_y < 0) { // joystick up & extend
-                if (slidePosition >= MecanumRobot.slideMax) {
-                    robot.setMotorPowerSlide(0); // brake
+                */
+
+                // Arm movement gamepad 2
+                leftArmPosition = robot.getMotorPositionLeftArm();
+                if (gamepad2.right_stick_y > 0) { // Move arm down
                     if (debugMode)
-                        telemetry.addData("Extend arm. Brake slide motor", 0);
-                } else {
-                    slidePower = -gamepad2.left_stick_y/2;
-                    robot.setMotorPowerSlide(slidePower);
+                        telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
+                    if (leftArmPosition <= MecanumRobot.armMin) {
+                        robot.setMotorPowerArm(0); // brake
+                        if (debugMode)
+                            telemetry.addData("Lower arm. Brake arm motor", 0);
+                    } else {
+                        leftPower = -gamepad2.right_stick_y / 3;
+                        robot.setMotorPowerArm(leftPower);
+                        if (debugMode)
+                            telemetry.addData("Lower arm. Set Arm Power to ", leftPower);
+                    }
+                } else if (gamepad2.right_stick_y < 0) { // Move arm up
                     if (debugMode)
-                        telemetry.addData("Extend arm. Set Slide Power to ", slidePower);
-                }
+                        telemetry.addData("Right Joystick:", gamepad2.right_stick_y);
+                    if (leftArmPosition >= MecanumRobot.armMax) {
+                        robot.setMotorPowerArm(0); // brake
+                        if (debugMode)
+                            telemetry.addData("Raise arm. Brake arm motor", 0);
+                    } else {
+                        leftPower = -gamepad2.right_stick_y / 3;
+                        robot.setMotorPowerArm(leftPower);
+                        if (debugMode)
+                            telemetry.addData("Raise arm. Set Arm Power to ", leftPower);
+                    }
 
-            } else { // brake
-                robot.setMotorPowerSlide(0);
-            }
-            if (debugMode)
-                telemetry.addData("Slide New Position", slidePosition);
-
-
-            // Hand movement
-
-//////////////// Make it harder to lose pixels
-//////////////// Only pressing both triggers will open the claws
-
-//////////////// Solve another problem: Two pixels need to fall next to each other on the backdrop
-//////////////// How to release pixels so the problem won't occur?
-            leftPosition = robot.getServoPositionLeftHand();
-            rightPosition = robot.getServoPositionRightHand();
-            if (gamepad2.left_trigger > 0.7) {
-                if ((leftPosition == 0) && (gamepad2.a)) { //close
-                    leftPosition = 0.5; //open
-                    robot.setServoPositionLeftHand(leftPosition);
-                    sleep(100);
-                }
-                else {
-                    leftPosition = 0; //close
-                    robot.setServoPositionLeftHand(leftPosition);
-                    sleep(100);
+                } else { // when nothing is pressed, brake the arm motors
+                    leftPower = 0;
+                    rightPower = 0;
+                    robot.setMotorPowerArm(leftPower);
+                    if (debugMode)
+                        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 }
                 if (debugMode)
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-            }
-            if (gamepad2.right_trigger > 0.7) {
-                if ((rightPosition == 1) && (gamepad2.a)) { //close
-                    rightPosition = 0.5; //open
-                    robot.setServoPositionRightHand(rightPosition);
-                    sleep(100);
-                } else {
-                    rightPosition = 1; //close
-                    robot.setServoPositionRightHand(rightPosition);
-                    sleep(100);
-                }
-            }
+                    telemetry.addData("Arm New Position", leftArmPosition);
 
-            if (gamepad1.left_trigger > 0.7) {
-                if (leftPosition == 0) { //close
-                    leftPosition = 0.5; //open
-                    robot.setServoPositionLeftHand(leftPosition);
-                    sleep(100);
-                } else {
-                    leftPosition = 0; //close
-                    robot.setServoPositionLeftHand(leftPosition);
-                    sleep(100);
+                /*
+                 * Slide movement
+                 * It's against intuition that the joystick gives a negative value when it is pushed up
+                 */
+                slidePosition = robot.getMotorPositionSlide();
+                if (gamepad2.left_stick_y > 0) { // joystick down & retract
+                    if (slidePosition <= MecanumRobot.slideMin) {
+                        robot.setMotorPowerSlide(0); // brake
+                        if (debugMode)
+                            telemetry.addData("Extend arm. Brake slide motor", 0);
+                    } else {
+                        slidePower = -gamepad2.left_stick_y / 2;
+                        robot.setMotorPowerSlide(slidePower);
+                        if (debugMode)
+                            telemetry.addData("Retract arm. Set Slide Power to ", slidePower);
+                    }
+                } else if (gamepad2.left_stick_y < 0) { // joystick up & extend
+                    if (slidePosition >= MecanumRobot.slideMax) {
+                        robot.setMotorPowerSlide(0); // brake
+                        if (debugMode)
+                            telemetry.addData("Extend arm. Brake slide motor", 0);
+                    } else {
+                        slidePower = -gamepad2.left_stick_y / 2;
+                        robot.setMotorPowerSlide(slidePower);
+                        if (debugMode)
+                            telemetry.addData("Extend arm. Set Slide Power to ", slidePower);
+                    }
+
+                } else { // brake
+                    robot.setMotorPowerSlide(0);
                 }
                 if (debugMode)
-                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
-            }
-            if (gamepad1.right_trigger > 0.7) {
-                if (rightPosition == 1) {
-                    rightPosition = 0.5; //open
-                    robot.setServoPositionRightHand(rightPosition);
-                    sleep(100);
-                }
-                else {
-                    rightPosition = 1; //close
-                    robot.setServoPositionRightHand(rightPosition);
-                    sleep(100);
-                }
-            }
-            if (debugMode == true)
-                telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                    telemetry.addData("Slide New Position", slidePosition);
 
-            // Wrist movement
-            wristPosition = robot.getServoPositionWrist();
-            if ((gamepad1.a) || (gamepad2.dpad_down)) { //wrist down
-                if (wristPosition < 1) {
-                    wristPosition += 0.05;
-                    robot.setServoPositionWrist(wristPosition);
+
+                // Hand movement
+
+                // Make it harder to lose pixels
+                // Only pressing unlock button plus a trigger will open the claws
+                // Two pixels need to fall next to each other on the backdrop
+                // So when releasing the pixels, the claws only half open
+                leftPosition = robot.getServoPositionLeftHand();
+                rightPosition = robot.getServoPositionRightHand();
+                if (gamepad2.left_trigger > 0.7) {
+                    if ((leftPosition == 0) && (gamepad2.a)) { //close
+                        leftPosition = 0.5; //open
+                        robot.setServoPositionLeftHand(leftPosition);
+                        sleep(100);
+                    } else {
+                        leftPosition = 0; //close
+                        robot.setServoPositionLeftHand(leftPosition);
+                        sleep(100);
+                    }
+                    if (debugMode)
+                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
                 }
-            } else if ((gamepad1.b) || (gamepad2.dpad_up)) { //wrist up
-                if (wristPosition > 0) {
-                    wristPosition -= 0.05;
-                    robot.setServoPositionWrist(wristPosition);
+                if (gamepad2.right_trigger > 0.7) {
+                    if ((rightPosition == 1) && (gamepad2.a)) { //close
+                        rightPosition = 0.5; //open
+                        robot.setServoPositionRightHand(rightPosition);
+                        sleep(100);
+                    } else {
+                        rightPosition = 1; //close
+                        robot.setServoPositionRightHand(rightPosition);
+                        sleep(100);
+                    }
                 }
+
+                if (gamepad1.left_trigger > 0.7) {
+                    if (leftPosition == 0) { //close
+                        leftPosition = 0.5; //open
+                        robot.setServoPositionLeftHand(leftPosition);
+                        sleep(100);
+                    } else {
+                        leftPosition = 0; //close
+                        robot.setServoPositionLeftHand(leftPosition);
+                        sleep(100);
+                    }
+                    if (debugMode)
+                        telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+                }
+                if (gamepad1.right_trigger > 0.7) {
+                    if (rightPosition == 1) {
+                        rightPosition = 0.5; //open
+                        robot.setServoPositionRightHand(rightPosition);
+                        sleep(100);
+                    } else {
+                        rightPosition = 1; //close
+                        robot.setServoPositionRightHand(rightPosition);
+                        sleep(100);
+                    }
+                }
+                if (debugMode == true)
+                    telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
+
+                // Wrist movement
+                wristPosition = robot.getServoPositionWrist();
+                if ((gamepad1.a) || (gamepad2.dpad_down)) { //wrist down
+                    if (wristPosition < 1) {
+                        wristPosition += 0.05;
+                        robot.setServoPositionWrist(wristPosition);
+                    }
+                } else if ((gamepad1.b) || (gamepad2.dpad_up)) { //wrist up
+                    if (wristPosition > 0) {
+                        wristPosition -= 0.05;
+                        robot.setServoPositionWrist(wristPosition);
+                    }
+                }
+                if (debugMode)
+                    telemetry.addData("Wrist Servo", "%.2f", wristPosition);
+
+                // Auto arm down to go back to driving
+                if (gamepad2.x) {
+                    if (!armDown) {
+                        //robot.AutoArmDown();
+                        //robot.runWithoutEncoderArmSlide();
+                        autoArmDownState=1;
+                    }
+                }
+                // Auto arm up to release pixels
+                if (gamepad2.y) {
+                    //robot.AutoArmUp();
+                    //robot.runWithoutEncoderArmSlide();
+                    autoArmUpState=1;
+                }
+                if (gamepad1.x)
+                    robot.AutoWristDown();
+                if (gamepad1.y)
+                    robot.AutoWristUp();
             }
-            if (debugMode)
-                telemetry.addData("Wrist Servo", "%.2f", wristPosition);
 
             //Launcher
             if ((gamepad1.back) || (gamepad2.back)) {
@@ -300,27 +325,63 @@ public class MecanumTest extends LinearOpMode {
             }
             telemetry.update();
 
-            //Automatic Arm Down
-            if (gamepad2.x) {
-                if (!armDown) {
-                    robot.AutoArmDown();
-                    robot.runWithoutEncoderArmSlide();
-                }
+            /*
+            * AUTOMATIC functions - finite state machine
+             */
+
+            // Auto arm down to go back to driving
+            switch (autoArmDownState) {
+                case 0:
+                    // do nothing
+                    break;
+                case 1:
+                    // Wrist up
+                    robot.setServoPositionWrist(MecanumRobot.defaultWristPosition);
+                    autoArmDownState = 2;
+                    break;
+                case 2:
+                    // Claw closed
+                    robot.setServoPositionLeftHand(MecanumRobot.defaultLeftPosition);
+                    robot.setServoPositionRightHand(MecanumRobot.defaultRightPosition);
+                    autoArmDownState = 3;
+                    break;
+                case 3:
+                    robot.runToPositionSlide(0, -0.5);
+                    robot.runWithoutEncoderSlide();
+                    autoArmDownState = 4;
+                    break;
+                case 4:
+                    robot.runToPositionArm(0,-0.2);
+                    robot.runWithoutEncoderArm();
+                    autoArmDownState = 0;
+                    break;
             }
 
-            if (gamepad2.y) {
-                robot.AutoArmUp();
-                robot.runWithoutEncoderArmSlide();
+            // Auto arm up to release pixels
+            switch (autoArmUpState) {
+                case 0:
+                    // do nothing
+                    break;
+                case 1:
+                    // Wrist up
+                    robot.runToPositionArm(MecanumRobot.dropPixelArmPosition,0.5);
+                    robot.runWithoutEncoderArm();
+                    autoArmUpState = 2;
+                    break;
+                case 2:
+                    robot.runToPositionSlide(MecanumRobot.slideMax, 0.5);
+                    robot.runWithoutEncoderSlide();
+                    autoArmUpState = 3;
+                    break;
+                case 3:
+                    robot.setServoPositionWrist(MecanumRobot.dropPixelWristPosition);
+                    autoArmUpState = 0;
+                    break;
             }
 
             if ((gamepad2.right_bumper) && (gamepad2.left_bumper)) {
                 robot.AutoLinePark();
             }
-
-            if (gamepad1.x)
-                robot.AutoWristDown();
-            if (gamepad1.y)
-                robot.AutoWristUp();
 
             /*
             // Intake wheels by Kush

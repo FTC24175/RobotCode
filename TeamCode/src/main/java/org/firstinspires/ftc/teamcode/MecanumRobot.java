@@ -271,10 +271,31 @@ public class MecanumRobot {
         //motorSlides.setPower(0);
         motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    public void runWithoutEncoderArm(){
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+        // After using RUN_TO_POSITION or STOP_AND_RESET_ENCODER
+        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
+        // Before switching, make sure motors brake
+        // (We already brake after each call of runToPosition())
+
+        //motorLeftArm.setPower(0);
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //motorRightArm.setPower(0);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    public void runWithoutEncoderSlide(){
+        // RUN_WITHOUT_ENCODER mode - only set direction & power
+        // After using RUN_TO_POSITION or STOP_AND_RESET_ENCODER
+        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
+        // Before switching, make sure motors brake
+        // (We already brake after each call of runToPosition())
+
+        //motorSlides.setPower(0);
+        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
     public void setMotorPowerArm(double powerScale) {
         motorLeftArm.setPower(powerScale);
         motorRightArm.setPower(powerScale);
-
     }
     public void runToPositionArm(int position,double power) {
         motorLeftArm.setTargetPosition(position);
