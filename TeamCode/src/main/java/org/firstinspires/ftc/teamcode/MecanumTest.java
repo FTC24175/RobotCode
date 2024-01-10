@@ -19,14 +19,85 @@ public class MecanumTest extends LinearOpMode {
 
     MecanumRobot robot = new MecanumRobot(this);
     boolean debugMode = true;
+
+    private class DriveThread extends Thread
+    {
+        public DriveThread()
+        {
+            this.setName("DriveThread");
+        }
+
+        // called when tread.start is called. thread stays in loop to do what it does until exit is
+        // signaled by main code calling thread.interrupt.
+        @Override
+        public void run()
+        {
+             try
+            {
+                while (!isInterrupted())
+                {
+                    /*
+                    // we record the Y values in the main class to make showing them in telemetry
+                    // easier.
+
+                    leftY = gamepad1.left_stick_y * -1;
+                    rightY = gamepad1.right_stick_y * -1;
+
+                    leftMotor.setPower(Range.clip(leftY, -1.0, 1.0));
+                    rightMotor.setPower(Range.clip(rightY, -1.0, 1.0));
+                    */
+                    // Mecanum Drivetrain By Kush & Derek 11/18-11/22
+
+                    double x = gamepad1.left_stick_x;
+                    double y = -gamepad1.left_stick_y;
+                    //make sure ^^ is negated
+                    double turn = gamepad1.right_stick_x;
+
+                    robot.move(x, y, turn, 1);
+
+                    if (gamepad1.dpad_up) {
+                        robot.move(0, 1, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_down) {
+                        robot.move(0, -1, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_left) {
+                        robot.move(-1, 0, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_right) {
+                        robot.move(1, 0, 0, 0.5);
+                    }
+
+                    idle();
+                }
+            }
+            // interrupted means time to shutdown. note we can stop by detecting isInterrupted = true
+            // or by the interrupted exception thrown from the sleep function.
+            //catch (InterruptedException e) {telemetry.addData("%s interrupted", this.getName());}
+            // an error occurred in the run loop.
+            catch (Exception e) {e.printStackTrace();}
+        }
+    }
     @Override
     public void runOpMode() throws InterruptedException {
 
         robot.initialize();
-        waitForStart();
-        //if (debugMode) return;
-
         telemetry.addData("Status", "Initialized");
+
+        Thread  driveThread = new DriveThread();
+
+        telemetry.addData("Mode", "waiting");
+
+        // wait for start button.
+
+        waitForStart();
+
+        telemetry.addData("Status", "Started");
+
+        // start the driving thread.
+
+        driveThread.start();
+
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
         // manual mode
         double leftPower = 0;
@@ -77,6 +148,7 @@ public class MecanumTest extends LinearOpMode {
                 module.clearBulkCache();
             }
 
+            /*
             // Mecanum Drivetrain By Kush & Derek 11/18-11/22
 
             double x = gamepad1.left_stick_x;
@@ -98,7 +170,7 @@ public class MecanumTest extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 robot.move(1, 0, 0, 0.5);
             }
-
+            */
             // Touch sensor
             // Cannot use port 0 on driver station
             if (robot.touchSensor.isPressed()) {
@@ -379,7 +451,7 @@ public class MecanumTest extends LinearOpMode {
                     break;
             }
 
-            if ((gamepad2.right_bumper) && (gamepad2.left_bumper)) {
+            if ((gamepad1.right_bumper) && (gamepad1.left_bumper)) {
                 robot.AutoLinePark();
             }
 
@@ -581,6 +653,9 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.update();
             }
         }
+
+        // stop the driving thread.
+        driveThread.interrupt();
     }
 }
 
