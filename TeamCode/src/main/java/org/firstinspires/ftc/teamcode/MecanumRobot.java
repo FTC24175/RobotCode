@@ -380,7 +380,6 @@ public class MecanumRobot {
         runToPositionArm(0,-0.2);
     }
 
-    //////////////////////////// Automatic Arm Up
     public void AutoArmUp() {
         runToPositionArm(dropPixelArmPosition,0.5);
         runToPositionSlide(slideMax, 0.5);
@@ -410,16 +409,14 @@ public class MecanumRobot {
         */
 
     }
-    /////////////////////////// Automatic Pixel Pick-up
-    // Happens at human player
+
     public void AutoWristDown() {
         // Opens claws
         setServoPositionLeftHand(1);
         setServoPositionRightHand(0);
         // Puts the wrist down
         servoWrist.setPosition(1);
-        myOpMode.idle();
-        //sleep(1500);
+        myOpMode.sleep(1500);
 
     }
 
@@ -427,8 +424,7 @@ public class MecanumRobot {
         // Closes claws
         setServoPositionLeftHand(0);
         setServoPositionRightHand(1);
-        myOpMode.idle();
-        //sleep(1500);
+        myOpMode.sleep( 1500);
         // Puts the wrist up
         servoWrist.setPosition(0);
     }

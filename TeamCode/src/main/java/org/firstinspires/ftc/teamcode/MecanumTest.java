@@ -215,7 +215,7 @@ public class MecanumTest extends LinearOpMode {
 //////////////// How to release pixels so the problem won't occur?
             leftPosition = robot.getServoPositionLeftHand();
             rightPosition = robot.getServoPositionRightHand();
-            if (gamepad2.left_trigger > 0.3) {
+            if (gamepad2.left_trigger > 0.7) {
                 if ((leftPosition == 0) && (gamepad2.a)) { //close
                     leftPosition = 0.5; //open
                     robot.setServoPositionLeftHand(leftPosition);
@@ -229,7 +229,7 @@ public class MecanumTest extends LinearOpMode {
                 if (debugMode)
                     telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
             }
-            if (gamepad2.right_trigger > 0.3) {
+            if (gamepad2.right_trigger > 0.7) {
                 if ((rightPosition == 1) && (gamepad2.a)) { //close
                     rightPosition = 0.5; //open
                     robot.setServoPositionRightHand(rightPosition);
@@ -241,7 +241,7 @@ public class MecanumTest extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.left_trigger > 0.3) {
+            if (gamepad1.left_trigger > 0.7) {
                 if (leftPosition == 0) { //close
                     leftPosition = 0.5; //open
                     robot.setServoPositionLeftHand(leftPosition);
@@ -254,7 +254,7 @@ public class MecanumTest extends LinearOpMode {
                 if (debugMode)
                     telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
             }
-            if (gamepad1.right_trigger > 0.3) {
+            if (gamepad1.right_trigger > 0.7) {
                 if (rightPosition == 1) {
                     rightPosition = 0.5; //open
                     robot.setServoPositionRightHand(rightPosition);
@@ -321,13 +321,6 @@ public class MecanumTest extends LinearOpMode {
                 robot.AutoWristDown();
             if (gamepad1.y)
                 robot.AutoWristUp();
-
-
-///////////////////////////////Automatic Arm Up
-
-///////////////////////////////Automatic Pixel Pick-up
-
-///////////////////////////////Automatic Park at Line - Moves Forward
 
             /*
             // Intake wheels by Kush
