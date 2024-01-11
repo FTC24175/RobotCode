@@ -69,17 +69,20 @@ public class MecanumRobot {
     private AprilTagProcessor tagProcessor;
 
     private IMU imu;
-    /*
-    public final static int default_red;
-    public final static int default_blue;
-    public final static int default_red_left;
-    public final static int default_blue_left;
-     */
-    public final static int red_threshold = 2800;
-    public final static int blue_threshold = 5400;
-    public final static int red_threshold_left = 1300;
-    public final static int blue_threshold_left = 3800;
 
+    public int default_red;
+    public int default_blue;
+    public int default_red_left;
+    public int default_blue_left;
+
+    public final static int red_diff = 800;
+    public final static int blue_diff = 1800;
+    public final static int red_diff_left = 300;
+    public final static int blue_diff_left = 1200;
+    public final static int red_threshold = 2800; // compared to 1900
+    public final static int blue_threshold = 5400; // compared to 3000
+    public final static int red_threshold_left = 1300; // compared to 1000
+    public final static int blue_threshold_left = 3800; // compared to 2100
     private boolean debugMode=true;
 
 
@@ -191,12 +194,11 @@ public class MecanumRobot {
         colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorSensorL.enableLed(true);
 
-        /*
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
         default_red_left = colorSensorL.red();
         default_blue_left = colorSensorL.blue();
-        */
+
         intializeAprilTag();
         /* local variables
         int myAprilTaIdCode = -1;
@@ -467,7 +469,7 @@ public class MecanumRobot {
     * 2. Moves forward until a color sensor detects the line
 
      */
-    public void AutoLinePark(boolean rightOrLeft) {
+    public void AutoLinePark(boolean findRightOrLeft) {
         boolean leftDetected = false;
         boolean rightDetected = false;
 
@@ -477,21 +479,22 @@ public class MecanumRobot {
         int redL=0;
 
         // First check once
-        // The robot might already be on the line
-        if (rightOrLeft) {
+        // The robot might already be * on the line *
+
+        if (findRightOrLeft) {
             blue = getColorSensorBlue();
             red = getColorSensorRed();
         } else {
             blueL = getLeftColorSensorBlue();
             redL = getLeftColorSensorRed();
         }
-
-        //if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
-        if((blue >= blue_threshold) ||  (red >= red_threshold)) {
+        if((blue >= getDefaultBlue() + blue_diff) ||  (red >= getDefaultRed() + red_diff)) {
+            //if((blue >= blue_threshold) ||  (red >= red_threshold)) {
             rightDetected = true;
             myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
         }
-        if((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+        if((blueL >= getLeftDefaultBlue() + blue_diff_left) ||  (redL >= getLeftDefaultRed() + red_diff_left)) {
+            //if((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
             leftDetected = true;
             myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
         }
@@ -500,18 +503,24 @@ public class MecanumRobot {
         myOpMode.telemetry.addData("Right Red: ", red);
         myOpMode.telemetry.addData("Left Blue: ", blueL);
         myOpMode.telemetry.addData("Left Red: ", redL);
+        myOpMode.telemetry.addData("Right Blue Default: ", default_blue);
+        myOpMode.telemetry.addData("Right Red Default: ", default_red);
+        myOpMode.telemetry.addData("Left Blue Default: ", default_blue_left);
+        myOpMode.telemetry.addData("Left Red Default: ", default_red_left);
+
+        /*
         myOpMode.telemetry.addData("Right Blue Threshold: ", blue_threshold);
         myOpMode.telemetry.addData("Right Red Threshold: ", red_threshold);
         myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
         myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
-
+        */
         myOpMode.telemetry.update();
 
         if ((!rightDetected) && (!leftDetected)) {
             // Moves forward at power 0.2 until a line is detected
             move(0, 1, 0, 0.1);
             while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected)) {
-                if (rightOrLeft) {
+                if (findRightOrLeft) {
                     blue = getColorSensorBlue();
                     red = getColorSensorRed();
                 } else {
@@ -519,12 +528,13 @@ public class MecanumRobot {
                     redL = getLeftColorSensorRed();
                 }
 
-                //if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
-                if ((blue >= blue_threshold) || (red >= red_threshold)) {
+                if((blue >= getDefaultBlue() + blue_diff) ||  (red >= getDefaultRed() + red_diff)) {
+                    //if ((blue >= blue_threshold) || (red >= red_threshold)) {
                     rightDetected = true;
                     myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
                 }
-                if ((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+                if((blueL >= getLeftDefaultBlue() + blue_diff_left) ||  (redL >= getLeftDefaultRed() + red_diff_left)) {
+                    //if ((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
                     leftDetected = true;
                     myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
                 }
@@ -533,11 +543,17 @@ public class MecanumRobot {
                 myOpMode.telemetry.addData("Right Red: ", red);
                 myOpMode.telemetry.addData("Left Blue: ", blueL);
                 myOpMode.telemetry.addData("Left Red: ", redL);
+                myOpMode.telemetry.addData("Right Blue Default: ", default_blue);
+                myOpMode.telemetry.addData("Right Red Default: ", default_red);
+                myOpMode.telemetry.addData("Left Blue Default: ", default_blue_left);
+                myOpMode.telemetry.addData("Left Red Default: ", default_red_left);
+
+                /*
                 myOpMode.telemetry.addData("Right Blue Threshold: ", blue_threshold);
                 myOpMode.telemetry.addData("Right Red Threshold: ", red_threshold);
                 myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
                 myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
-
+                */
                 myOpMode.sleep(10);
                 //myOpMode.idle();
             }
@@ -582,7 +598,7 @@ public class MecanumRobot {
         }
         return aprilTagDetection;
     }
-/*
+
     public int getDefaultBlue() { return default_blue; }
 
     public int getDefaultRed() {
@@ -593,7 +609,7 @@ public class MecanumRobot {
     public int getLeftDefaultRed() {
         return default_red_left;
     }
- */
+
     public int getColorSensorBlue() {
         return (colorSensor.blue());
     }
