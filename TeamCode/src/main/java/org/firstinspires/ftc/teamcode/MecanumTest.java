@@ -449,9 +449,10 @@ public class MecanumTest extends LinearOpMode {
                 }
                 // Auto arm up to release pixels
                 if (gamepad2.y) {
-                    //robot.AutoArmUp();
-                    //robot.runWithoutEncoderArmSlide();
-                    autoArmUpState=1;
+                    robot.AutoArmUp();
+                    robot.runWithoutEncoderSlide();
+                    robot.runWithoutEncoderArm();
+                    //autoArmUpState=1;
                 }
                 if (gamepad1.x)
                     robot.AutoWristDown();
@@ -463,12 +464,6 @@ public class MecanumTest extends LinearOpMode {
             if ((gamepad1.back) || (gamepad2.back)) {
                 launcherPosition = 1;
                 robot.setServoPositionLauncher(launcherPosition);
-            }
-
-            if (gamepad1.a) {
-                robot.AutoSlidePickup();
-                robot.runWithoutEncoderSlide();
-                robot.runWithoutEncoderArm();
             }
 
             /*
