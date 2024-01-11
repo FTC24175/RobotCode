@@ -449,11 +449,9 @@ public class MecanumTest extends LinearOpMode {
                 }
                 // Auto arm up to release pixels
                 if (gamepad2.y) {
-                    robot.AutoArmUp();
-                    //robot.AutoArmUpBack();
-                    robot.runWithoutEncoderSlide();
-                    robot.runWithoutEncoderArm();
-                    //autoArmUpState=1;
+                    //robot.AutoArmUp();
+                    //robot.runWithoutEncoderArmSlide();
+                    autoArmUpState=1;
                 }
                 if (gamepad1.x)
                     robot.AutoWristDown();

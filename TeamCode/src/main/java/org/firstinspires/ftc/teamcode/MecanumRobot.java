@@ -604,10 +604,8 @@ public class MecanumRobot {
         if ((!rightDetected) && (!leftDetected)) {
             // Moves forward at power 0.2 until a line is detected
             move(0, 1, 0, 0.1);
-            ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
-            runtime.reset();
-            while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected) && runtime.seconds()<2) {
-                if (findRightOrLeft) {
+            while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected)) {
+                if (rightOrLeft) {
                     blue = getColorSensorBlue();
                     red = getColorSensorRed();
                 } else {
@@ -696,6 +694,7 @@ public class MecanumRobot {
     public int getLeftDefaultRed() {
         return default_red_left;
     }
+ */
     public int getColorSensorBlue() {
         return (colorSensor.blue());
     }
