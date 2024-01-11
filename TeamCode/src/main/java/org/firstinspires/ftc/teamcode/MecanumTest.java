@@ -35,7 +35,7 @@ public class MecanumTest extends LinearOpMode {
              try
             {
                 double x,y,turn;
-                while (!isInterrupted())
+                while (opModeIsActive() && !isInterrupted())
                 {
                     /*
                     // we record the Y values in the main class to make showing them in telemetry
@@ -198,7 +198,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Left Blue: ", blueL);
                 telemetry.addData("Left Red: ", redL);
                 telemetry.addData("Right Blue Default: ", robot.getDefaultBlue());
-                telemetry.addData("Right Red Default: ", robot.getDefaultBlue());
+                telemetry.addData("Right Red Default: ", robot.getDefaultRed());
                 telemetry.addData("Left Blue Default: ", robot.getLeftDefaultBlue());
                 telemetry.addData("Left Red Default: ", robot.getLeftDefaultRed());
                 //telemetry.addData("Right Blue Threshold: ", MecanumRobot.blue_threshold);
@@ -473,11 +473,20 @@ public class MecanumTest extends LinearOpMode {
             }
             */
 
-            //if (gamepad1.right_bumper) robot.AutoLinePark(true);
-            //else if (gamepad1.left_bumper) robot.AutoLinePark(false);
-
-            if (gamepad1.right_bumper) robot.move(0,1,0,0.5);
-            if (gamepad1.left_bumper) robot.move(0,0,0,0);
+            if (gamepad1.right_bumper) {
+                // Whenever the arm thread needs the drivetrain,
+                // it needs to interrupt and pause the drivetrain
+                driveThread.interrupt();
+                robot.AutoLinePark(true);
+                driveThread.run();
+            }
+            else if (gamepad1.left_bumper) {
+                // Whenever the arm thread needs the drivetrain,
+                // it needs to interrupt and pause the drivetrain
+                driveThread.interrupt();
+                robot.AutoLinePark(false);
+                driveThread.run();
+            }
 
             /*
             if ((gamepad1.right_bumper) && (gamepad1.left_bumper)) {

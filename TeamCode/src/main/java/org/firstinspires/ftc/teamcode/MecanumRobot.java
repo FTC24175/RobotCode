@@ -249,12 +249,14 @@ public class MecanumRobot {
         motorHDRightFront.setPower(rightFront * powerScale);
         motorHDRightRear.setPower(rightRear * powerScale);
 
+        /*
         if (debugMode) {
             myOpMode.telemetry.addData("Motor 0 Left Front", leftFront * powerScale);
             myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
             myOpMode.telemetry.addData("Motor 2 Right Front", rightFront * powerScale);
             myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
         }
+         */
     }
 
     /**
