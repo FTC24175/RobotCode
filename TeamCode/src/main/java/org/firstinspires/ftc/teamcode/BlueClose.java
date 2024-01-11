@@ -86,12 +86,12 @@ public class BlueClose extends LinearOpMode {
             blue = robot.getColorSensorBlue();
             // default blue value in the gray (178)
             // blue value in the blue line (245...increased by 67)
-            if(blue >= robot.getDefaultBlue() + 500) { // detects blue line
+            if(blue >= MecanumRobot.blue_threshold) { // detects blue line
                 robot.move(0,0,0,0); // brakes
                 checkForBlue = false; // will break the while loop
             }
             telemetry.addData("Blue: ", blue);
-            telemetry.addData("initial blue: ", robot.getDefaultBlue());
+            telemetry.addData("Blue threshold: ", MecanumRobot.blue_threshold);
             telemetry.update();
             sleep(10);
         }

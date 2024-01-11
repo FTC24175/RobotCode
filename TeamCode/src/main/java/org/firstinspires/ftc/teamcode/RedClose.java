@@ -79,12 +79,12 @@ public class RedClose extends LinearOpMode {
         robot.move(0,1,0,0.2);
         while (checkForRed) {
             red = robot.getColorSensorRed();
-            if(red >= robot.getDefaultRed() + 500) {
+            if(red >= MecanumRobot.red_threshold) {
                 robot.move(0,0,0,0);
                 checkForRed = false;
             }
             telemetry.addData("Red: ", red);
-            telemetry.addData("initial red: ", robot.getDefaultRed());
+            telemetry.addData("Red threshold: ", MecanumRobot.red_threshold);
             telemetry.update();
             sleep(10);
         }

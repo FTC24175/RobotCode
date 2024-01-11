@@ -34,6 +34,7 @@ public class MecanumTest extends LinearOpMode {
         {
              try
             {
+                double x,y,turn;
                 while (!isInterrupted())
                 {
                     /*
@@ -48,10 +49,10 @@ public class MecanumTest extends LinearOpMode {
                     */
                     // Mecanum Drivetrain By Kush & Derek 11/18-11/22
 
-                    double x = gamepad1.left_stick_x;
-                    double y = -gamepad1.left_stick_y;
+                    x = gamepad1.left_stick_x;
+                    y = -gamepad1.left_stick_y;
                     //make sure ^^ is negated
-                    double turn = gamepad1.right_stick_x;
+                    turn = gamepad1.right_stick_x;
 
                     robot.move(x, y, turn, 1);
 
@@ -67,7 +68,6 @@ public class MecanumTest extends LinearOpMode {
                     if (gamepad1.dpad_right) {
                         robot.move(1, 0, 0, 0.5);
                     }
-
                     idle();
                 }
             }
@@ -110,6 +110,8 @@ public class MecanumTest extends LinearOpMode {
         boolean armDown = false;
         int autoArmDownState = 0;
         int autoArmUpState = 0;
+        int leftArmPosition;
+        int slidePosition;
 
         /* Auto mode
         * April Tag
@@ -136,11 +138,10 @@ public class MecanumTest extends LinearOpMode {
         // 1 : red
         int red = 0;
         int blue = 0;
+        int redL = 0;
+        int blueL = 0;
 
         double distance = Double.MAX_VALUE;
-
-        int leftArmPosition;
-        int slidePosition;
 
         while(opModeIsActive()) {
 
@@ -148,7 +149,7 @@ public class MecanumTest extends LinearOpMode {
                 module.clearBulkCache();
             }
 
-            /*
+/*
             // Mecanum Drivetrain By Kush & Derek 11/18-11/22
 
             double x = gamepad1.left_stick_x;
@@ -170,7 +171,8 @@ public class MecanumTest extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 robot.move(1, 0, 0, 0.5);
             }
-            */
+*/
+
             // Touch sensor
             // Cannot use port 0 on driver station
             if (robot.touchSensor.isPressed()) {
@@ -183,6 +185,30 @@ public class MecanumTest extends LinearOpMode {
                     telemetry.addData("Touch Sensor", "Is Not Pressed");
                 armDown = false;
             }
+
+            if (debugMode) {
+                // Color Sensor
+                blue = robot.getColorSensorBlue();
+                blueL = robot.getLeftColorSensorBlue();
+                red = robot.getColorSensorRed();
+                redL = robot.getLeftColorSensorRed();
+
+                telemetry.addData("Right Blue: ", blue);
+                telemetry.addData("Right Red: ", red);
+                telemetry.addData("Left Blue: ", blueL);
+                telemetry.addData("Left Red: ", redL);
+                telemetry.addData("Right Blue Threshold: ", MecanumRobot.blue_threshold);
+                telemetry.addData("Right Red Threshold: ", MecanumRobot.red_threshold);
+                telemetry.addData("Left Blue Threshold: ", MecanumRobot.blue_threshold_left);
+                telemetry.addData("Left Red Threshold: ", MecanumRobot.red_threshold_left);
+
+                // Distance Sensor
+                telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Right Distance Sensor", String.format("%.01f cm", robot.distanceSensorR.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
+                telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
+            }
+
 
             /*
             * If NOT running the auto mode, then allows to control the arm, slide, wrist & claw
@@ -245,8 +271,6 @@ public class MecanumTest extends LinearOpMode {
                     leftPower = 0;
                     rightPower = 0;
                     robot.setMotorPowerArm(leftPower);
-                    if (debugMode)
-                        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
                 }
                 if (debugMode)
                     telemetry.addData("Arm New Position", leftArmPosition);
@@ -366,7 +390,8 @@ public class MecanumTest extends LinearOpMode {
                 if (gamepad2.x) {
                     if (!armDown) {
                         //robot.AutoArmDown();
-                        //robot.runWithoutEncoderArmSlide();
+                        //runWithoutEncoderSlide();
+                        //runWithoutEncoderArm();
                         autoArmDownState=1;
                     }
                 }
@@ -387,15 +412,6 @@ public class MecanumTest extends LinearOpMode {
                 launcherPosition = 1;
                 robot.setServoPositionLauncher(launcherPosition);
             }
-
-            //Distance Sensor
-            if (debugMode) {
-                telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
-                telemetry.addData("Right Distance Sensor", String.format("%.01f cm", robot.distanceSensorR.getDistance(DistanceUnit.CM)));
-                telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
-                telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
-            }
-            telemetry.update();
 
             /*
             * AUTOMATIC functions - finite state machine
@@ -423,7 +439,7 @@ public class MecanumTest extends LinearOpMode {
                     autoArmDownState = 4;
                     break;
                 case 4:
-                    robot.runToPositionArm(0,-0.2);
+                    robot.runToPositionArm(0,-0.3);
                     robot.runWithoutEncoderArm();
                     autoArmDownState = 0;
                     break;
@@ -451,10 +467,13 @@ public class MecanumTest extends LinearOpMode {
                     break;
             }
 
+            if (gamepad1.right_bumper) robot.AutoLinePark(true);
+            else if (gamepad1.left_bumper) robot.AutoLinePark(false);
+            /*
             if ((gamepad1.right_bumper) && (gamepad1.left_bumper)) {
                 robot.AutoLinePark();
             }
-
+            */
             /*
             // Intake wheels by Kush
 
@@ -589,7 +608,6 @@ public class MecanumTest extends LinearOpMode {
             if (gamepad1.right_bumper) {
                 aprilTagRunning = true;
             }
-            */
             if (aprilTagRunning) {
                 if (gamepad1.x) {
                     checkForRed = true;
@@ -650,10 +668,10 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Checking for Red: ", checkForRed);
                 telemetry.addData("Checking for Blue: ", checkForBlue);
                 telemetry.addData("distance", distance);
-                telemetry.update();
             }
+            */
+            telemetry.update();
         }
-
         // stop the driving thread.
         driveThread.interrupt();
     }

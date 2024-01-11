@@ -41,7 +41,7 @@ public class MecanumRobot {
     public final static int slideMin = 0;
     public final static int armMax = 2900;
     public final static int armMin = 0;
-    public final static int dropPixelArmPosition = 1000;
+    public final static int dropPixelArmPosition = 700;
     public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.REVERSE;
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
@@ -69,10 +69,18 @@ public class MecanumRobot {
     private AprilTagProcessor tagProcessor;
 
     private IMU imu;
-    private int default_red;
-    private int default_blue;
-    private int default_red_left;
-    private int default_blue_left;
+    /*
+    public final static int default_red;
+    public final static int default_blue;
+    public final static int default_red_left;
+    public final static int default_blue_left;
+     */
+    public final static int red_threshold = 2800;
+    public final static int blue_threshold = 5400;
+    public final static int red_threshold_left = 1300;
+    public final static int blue_threshold_left = 3800;
+
+    private boolean debugMode=true;
 
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
@@ -128,7 +136,8 @@ public class MecanumRobot {
         servoLauncher = myOpMode.hardwareMap.get(Servo.class, "ServoLauncher");
 
         AutoArmDown(); // includes wrist & claw actions
-        runWithoutEncoderArmSlide();
+        runWithoutEncoderSlide();
+        runWithoutEncoderArm();
 
         setServoPositionLauncher(defaultLauncherPosition);
 
@@ -182,11 +191,12 @@ public class MecanumRobot {
         colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorSensorL.enableLed(true);
 
+        /*
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
         default_red_left = colorSensorL.red();
         default_blue_left = colorSensorL.blue();
-
+        */
         intializeAprilTag();
         /* local variables
         int myAprilTaIdCode = -1;
@@ -237,10 +247,12 @@ public class MecanumRobot {
         motorHDRightFront.setPower(rightFront * powerScale);
         motorHDRightRear.setPower(rightRear * powerScale);
 
-        myOpMode.telemetry.addData("Motor 0 Left Front",leftFront * powerScale);
-        myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
-        myOpMode.telemetry.addData("Motor 2 Right Front",rightFront * powerScale);
-        myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
+        if (debugMode) {
+            myOpMode.telemetry.addData("Motor 0 Left Front", leftFront * powerScale);
+            myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
+            myOpMode.telemetry.addData("Motor 2 Right Front", rightFront * powerScale);
+            myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
+        }
     }
 
     /**
@@ -256,20 +268,6 @@ public class MecanumRobot {
         motorSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorLeftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorRightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-    public void runWithoutEncoderArmSlide(){
-        // RUN_WITHOUT_ENCODER mode - only set direction & power
-        // After using RUN_TO_POSITION or STOP_AND_RESET_ENCODER
-        // Must change to the WITHOUT ENCODER mode; otherwise, the core motor won't move when set power
-        // Before switching, make sure motors brake
-        // (We already brake after each call of runToPosition())
-
-        //motorLeftArm.setPower(0);
-        motorLeftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //motorRightArm.setPower(0);
-        motorRightArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //motorSlides.setPower(0);
-        motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void runWithoutEncoderArm(){
         // RUN_WITHOUT_ENCODER mode - only set direction & power
@@ -290,7 +288,7 @@ public class MecanumRobot {
         // Before switching, make sure motors brake
         // (We already brake after each call of runToPosition())
 
-        //motorSlides.setPower(0);
+        motorSlides.setPower(0);
         motorSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void setMotorPowerArm(double powerScale) {
@@ -333,8 +331,8 @@ public class MecanumRobot {
         motorSlides.setTargetPosition(position);
         motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorSlides.setPower(power);
-        while (motorSlides.isBusy()) myOpMode.idle();
-        motorSlides.setPower(0);
+        //while (motorSlides.isBusy()) myOpMode.idle();
+        //motorSlides.setPower(0);
         /*
         // With the external encoder, RUN_TO_POSITION does NOT work
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
@@ -398,7 +396,7 @@ public class MecanumRobot {
         setServoPositionRightHand(defaultRightPosition);
 
         runToPositionSlide(0, -0.5);
-        runToPositionArm(0,-0.2);
+        runToPositionArm(0,-0.3);
     }
 
     public void AutoArmUp() {
@@ -457,70 +455,94 @@ public class MecanumRobot {
     * and also in the auto mode before placing a purple pixel on the ground
     *
     * Algorithm:
+    * (Wrong)
     * While under a timer
     * Moves forward until a color sensor detects blue or red
     * Rotates the other side of drivetrain so another color sensor can also meet the line
+    *
+    * Moves forward until a color sensor detects the line
+    * (Be aware the case that robot is already on the line)
+    * While under a timer & NOT BOTH color sensors detect the line
+    * 1. Rotates a little bit, which will always goes backward, because it rotates around the center
+    * 2. Moves forward until a color sensor detects the line
+
      */
-    public void AutoLinePark() {
+    public void AutoLinePark(boolean rightOrLeft) {
         boolean leftDetected = false;
         boolean rightDetected = false;
 
-        int blue;
-        int blueL;
-        int red;
-        int redL;
+        int blue=0;
+        int blueL=0;
+        int red=0;
+        int redL=0;
 
-        blue = getColorSensorBlue();
-        blueL = getLeftColorSensorBlue();
-        red = getColorSensorRed();
-        redL = getLeftColorSensorRed();
-
-        // Moves forward at power 0.2 until a line is detected
-
-        move(0,1,0,0.2);
-        while ((!rightDetected) && (!leftDetected)) {
+        // First check once
+        // The robot might already be on the line
+        if (rightOrLeft) {
             blue = getColorSensorBlue();
-            blueL = getLeftColorSensorBlue();
             red = getColorSensorRed();
+        } else {
+            blueL = getLeftColorSensorBlue();
             redL = getLeftColorSensorRed();
+        }
 
-            if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
-                rightDetected = true;
-            }
-            if((blueL >= getLeftDefaultBlue() + 500) || (redL >= 1500)) {
-                leftDetected = true;
-                myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
+        //if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
+        if((blue >= blue_threshold) ||  (red >= red_threshold)) {
+            rightDetected = true;
+            myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
+        }
+        if((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+            leftDetected = true;
+            myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
+        }
+
+        myOpMode.telemetry.addData("Right Blue: ", blue);
+        myOpMode.telemetry.addData("Right Red: ", red);
+        myOpMode.telemetry.addData("Left Blue: ", blueL);
+        myOpMode.telemetry.addData("Left Red: ", redL);
+        myOpMode.telemetry.addData("Right Blue Threshold: ", blue_threshold);
+        myOpMode.telemetry.addData("Right Red Threshold: ", red_threshold);
+        myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
+        myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
+
+        myOpMode.telemetry.update();
+
+        if ((!rightDetected) && (!leftDetected)) {
+            // Moves forward at power 0.2 until a line is detected
+            move(0, 1, 0, 0.1);
+            while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected)) {
+                if (rightOrLeft) {
+                    blue = getColorSensorBlue();
+                    red = getColorSensorRed();
+                } else {
+                    blueL = getLeftColorSensorBlue();
+                    redL = getLeftColorSensorRed();
+                }
+
+                //if((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500)) {
+                if ((blue >= blue_threshold) || (red >= red_threshold)) {
+                    rightDetected = true;
+                    myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
+                }
+                if ((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+                    leftDetected = true;
+                    myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
+                }
                 myOpMode.telemetry.update();
+                myOpMode.telemetry.addData("Right Blue: ", blue);
+                myOpMode.telemetry.addData("Right Red: ", red);
+                myOpMode.telemetry.addData("Left Blue: ", blueL);
+                myOpMode.telemetry.addData("Left Red: ", redL);
+                myOpMode.telemetry.addData("Right Blue Threshold: ", blue_threshold);
+                myOpMode.telemetry.addData("Right Red Threshold: ", red_threshold);
+                myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
+                myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
+
+                myOpMode.sleep(10);
+                //myOpMode.idle();
             }
-            myOpMode.telemetry.addData("Right Blue: ", blue);
-            myOpMode.telemetry.addData("Left Blue: ", blueL);
-            myOpMode.telemetry.addData("Right Red: ", red);
-            myOpMode.telemetry.addData("Left Red: ", redL);
-            myOpMode.telemetry.addData("initial blue: ", getDefaultBlue());
-            myOpMode.telemetry.addData("initial red: ", getDefaultRed());
-            //myOpMode.telemetry.update();
+            move(0, 0, 0, 0);
         }
-        move(0,0,0,0);
-
-        if(leftDetected) {
-            move(0,0,-5,0.1);
-            while(!((blue >= getDefaultBlue() + 500) ||  (red >= getDefaultRed() + 500))) {
-                blue = getColorSensorBlue();
-                red = getColorSensorRed();
-
-            }
-
-        }
-        else if(rightDetected) {
-            move(0,0,5,0.1);
-            while(!((blueL >= getLeftDefaultBlue() + 500) || (redL >= 1500))) {
-                blueL = getLeftColorSensorBlue();
-                redL = getLeftColorSensorRed();
-
-            }
-        }
-        move(0,0,0,0);
-
     }
 
     public void intializeAprilTag()
@@ -560,18 +582,18 @@ public class MecanumRobot {
         }
         return aprilTagDetection;
     }
-
+/*
     public int getDefaultBlue() { return default_blue; }
 
-    public int getLeftDefaultBlue() {
-        return default_blue_left;
-    }
     public int getDefaultRed() {
         return default_red;
     }
+    public int getLeftDefaultBlue() { return default_blue_left; }
+
     public int getLeftDefaultRed() {
         return default_red_left;
     }
+ */
     public int getColorSensorBlue() {
         return (colorSensor.blue());
     }
