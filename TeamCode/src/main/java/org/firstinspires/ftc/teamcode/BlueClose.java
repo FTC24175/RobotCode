@@ -42,6 +42,7 @@ public class BlueClose extends LinearOpMode {
 
             telemetry.update();
         }
+        //move robot to center spike mark
         robot.move(0,1,0,0.4);
         sleep(1000);
         robot.move(0,0,0,0);
@@ -164,6 +165,7 @@ public class BlueClose extends LinearOpMode {
         //start scanning for april tag
         telemetry.addData("target tag" , targetAprilTag);
         telemetry.update();
+
         // april tag start
         if (alliance == 0)
         {
@@ -219,6 +221,8 @@ public class BlueClose extends LinearOpMode {
 
                 aprilTagRunning = false;
             }
+
+
             telemetry.update();
             sleep(10);
         }

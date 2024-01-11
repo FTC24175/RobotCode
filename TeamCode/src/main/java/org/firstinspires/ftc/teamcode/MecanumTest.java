@@ -32,11 +32,50 @@ public class MecanumTest extends LinearOpMode {
         @Override
         public void run()
         {
+             try
+            {
+                double x,y,turn;
+                while (!isInterrupted())
+                {
+                    /*
+                    // we record the Y values in the main class to make showing them in telemetry
+                    // easier.
 
-///////////// Kush/Derek/Caden please fill in.
-// Remember to comment out the drivetrain code at runOpMode()
-// And uncomment the three thread related calls at runOpMode() ////////////
-// Please refer to https://stemrobotics.cs.pdx.edu/node/5185%3Froot=4196.html
+                    leftY = gamepad1.left_stick_y * -1;
+                    rightY = gamepad1.right_stick_y * -1;
+
+                    leftMotor.setPower(Range.clip(leftY, -1.0, 1.0));
+                    rightMotor.setPower(Range.clip(rightY, -1.0, 1.0));
+                    */
+                    // Mecanum Drivetrain By Kush & Derek 11/18-11/22
+
+                    x = gamepad1.left_stick_x;
+                    y = -gamepad1.left_stick_y;
+                    //make sure ^^ is negated
+                    turn = gamepad1.right_stick_x;
+
+                    robot.move(x, y, turn, 1);
+
+                    if (gamepad1.dpad_up) {
+                        robot.move(0, 1, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_down) {
+                        robot.move(0, -1, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_left) {
+                        robot.move(-1, 0, 0, 0.5);
+                    }
+                    if (gamepad1.dpad_right) {
+                        robot.move(1, 0, 0, 0.5);
+                    }
+                    idle();
+                }
+            }
+            // interrupted means time to shutdown. note we can stop by detecting isInterrupted = true
+            // or by the interrupted exception thrown from the sleep function.
+            //catch (InterruptedException e) {telemetry.addData("%s interrupted", this.getName());}
+            // an error occurred in the run loop.
+            catch (Exception e) {e.printStackTrace();}
         }
     }
     @Override
@@ -45,7 +84,7 @@ public class MecanumTest extends LinearOpMode {
         robot.initialize();
         telemetry.addData("Status", "Initialized");
 
-        //Thread  driveThread = new DriveThread();
+        Thread  driveThread = new DriveThread();
 
         telemetry.addData("Mode", "waiting");
 
@@ -57,7 +96,7 @@ public class MecanumTest extends LinearOpMode {
 
         // start the driving thread.
 
-        //driveThread.start();
+        driveThread.start();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
         // manual mode
@@ -110,6 +149,7 @@ public class MecanumTest extends LinearOpMode {
                 module.clearBulkCache();
             }
 
+/*
             // Mecanum Drivetrain By Kush & Derek 11/18-11/22
 
             double x = gamepad1.left_stick_x;
@@ -131,6 +171,7 @@ public class MecanumTest extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 robot.move(1, 0, 0, 0.5);
             }
+*/
 
             // Touch sensor
             // Cannot use port 0 on driver station
@@ -156,17 +197,10 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Right Red: ", red);
                 telemetry.addData("Left Blue: ", blueL);
                 telemetry.addData("Left Red: ", redL);
-                telemetry.addData("Right Blue Default: ", robot.getDefaultBlue());
-                telemetry.addData("Right Red Default: ", robot.getDefaultRed());
-                telemetry.addData("Left Blue Default: ", robot.getLeftDefaultBlue());
-                telemetry.addData("Left Red Default: ", robot.getLeftDefaultRed());
-
-        /*
-        myOpMode.telemetry.addData("Right Blue Threshold: ", blue_threshold);
-        myOpMode.telemetry.addData("Right Red Threshold: ", red_threshold);
-        myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
-        myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
-        */
+                telemetry.addData("Right Blue Threshold: ", MecanumRobot.blue_threshold);
+                telemetry.addData("Right Red Threshold: ", MecanumRobot.red_threshold);
+                telemetry.addData("Left Blue Threshold: ", MecanumRobot.blue_threshold_left);
+                telemetry.addData("Left Red Threshold: ", MecanumRobot.red_threshold_left);
 
                 // Distance Sensor
                 telemetry.addData("Left Distance Sensor", String.format("%.01f cm", robot.distanceSensorL.getDistance(DistanceUnit.CM)));
@@ -356,24 +390,22 @@ public class MecanumTest extends LinearOpMode {
                 if (gamepad2.x) {
                     if (!armDown) {
                         robot.AutoArmDown();
-                        robot.runWithoutEncoderSlide();
-                        robot.runWithoutEncoderArm();
+                        runWithoutEncoderSlide();
+                        runWithoutEncoderArm();
                         //autoArmDownState=1;
                     }
                 }
                 // Auto arm up to release pixels
-                else if (gamepad2.y) {
+                if (gamepad2.y) {
                     robot.AutoArmUp();
-
-///////////// Kush/Derek/Caden please fill in ////////////
-
+                    robot.runWithoutEncoderArmSlide();
                     //autoArmUpState=1;
                 }
                 if (gamepad1.x)
                     robot.AutoWristDown();
                 if (gamepad1.y)
                     robot.AutoWristUp();
-            //}
+            }
 
             //Launcher
             if ((gamepad1.back) || (gamepad2.back)) {
@@ -383,9 +415,7 @@ public class MecanumTest extends LinearOpMode {
 
             /*
             * AUTOMATIC functions - finite state machine
-            * May not have effect at all since every minute has thousands of cycles
              */
-
             /*
             // Auto arm down to go back to driving
             switch (autoArmDownState) {
@@ -417,9 +447,24 @@ public class MecanumTest extends LinearOpMode {
 
             // Auto arm up to release pixels
             switch (autoArmUpState) {
-
-///////////// Kush/Derek/Caden please fill in ////////////
-
+                case 0:
+                    // do nothing
+                    break;
+                case 1:
+                    // Wrist up
+                    robot.runToPositionArm(MecanumRobot.dropPixelArmPosition,0.5);
+                    robot.runWithoutEncoderArm();
+                    autoArmUpState = 2;
+                    break;
+                case 2:
+                    robot.runToPositionSlide(MecanumRobot.slideMax, 0.5);
+                    robot.runWithoutEncoderSlide();
+                    autoArmUpState = 3;
+                    break;
+                case 3:
+                    robot.setServoPositionWrist(MecanumRobot.dropPixelWristPosition);
+                    autoArmUpState = 0;
+                    break;
             }
             */
             if (gamepad1.right_bumper) robot.AutoLinePark(true);
@@ -628,7 +673,7 @@ public class MecanumTest extends LinearOpMode {
             telemetry.update();
         }
         // stop the driving thread.
-        //driveThread.interrupt();
+        driveThread.interrupt();
     }
 }
 

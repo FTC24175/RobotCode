@@ -18,6 +18,7 @@ public class RedClose extends LinearOpMode {
     MecanumRobot robot = new MecanumRobot(this);
     @Override
     public void runOpMode() throws InterruptedException {
+        MecanumRobot robot = new MecanumRobot(this);
         robot.initialize();
         boolean debugMode = true;
         boolean aprilTagDetected = false;
@@ -132,12 +133,12 @@ public class RedClose extends LinearOpMode {
         robot.move(0,1,0,0.2);
         while (checkForRed) { // move forward using power 0.2 until red line is detected
             red = robot.getColorSensorRed();
-            if(red >= robot.getDefaultRed()+MecanumRobot.red_diff) { // detects red line
-                robot.move(0,0,0,0); // brakes
-                checkForRed = false; // will break the while loop
+            if(red >= MecanumRobot.red_threshold) {
+                robot.move(0,0,0,0);
+                checkForRed = false;
             }
             telemetry.addData("Red: ", red);
-            telemetry.addData("Red Threshold: ", MecanumRobot.red_threshold);
+            telemetry.addData("Red threshold: ", MecanumRobot.red_threshold);
             telemetry.update();
             sleep(10);
         }
@@ -157,7 +158,7 @@ public class RedClose extends LinearOpMode {
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.reset();
 
-        while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < 6000) {
+        while (aprilTagRunning && opModeIsActive()) {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
