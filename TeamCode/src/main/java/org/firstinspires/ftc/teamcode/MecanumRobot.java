@@ -75,9 +75,9 @@ public class MecanumRobot {
     public int default_red_left;
     public int default_blue_left;
 
-    public final static int red_diff = 800;
+    public final static int red_diff = 500;
     public final static int blue_diff = 1800;
-    public final static int red_diff_left = 300;
+    public final static int red_diff_left = 250;
     public final static int blue_diff_left = 1200;
     public final static int red_threshold = 2800; // compared to 1900
     public final static int blue_threshold = 5400; // compared to 3000
@@ -335,8 +335,8 @@ public class MecanumRobot {
         motorSlides.setTargetPosition(position);
         motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorSlides.setPower(power);
-        //while (motorSlides.isBusy()) myOpMode.idle();
-        //motorSlides.setPower(0);
+        while (motorSlides.isBusy()) myOpMode.idle();
+        motorSlides.setPower(0);
         /*
         // With the external encoder, RUN_TO_POSITION does NOT work
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
