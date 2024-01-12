@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-//import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
@@ -521,7 +521,9 @@ public class MecanumRobot {
         if ((!rightDetected) && (!leftDetected)) {
             // Moves forward at power 0.2 until a line is detected
             move(0, 1, 0, 0.1);
-            while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected)) {
+            ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
+            runtime.reset();
+            while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected) && runtime.seconds()<2) {
                 if (findRightOrLeft) {
                     blue = getColorSensorBlue();
                     red = getColorSensorRed();
