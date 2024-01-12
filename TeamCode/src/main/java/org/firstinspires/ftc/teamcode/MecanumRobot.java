@@ -46,7 +46,7 @@ public class MecanumRobot {
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
 
-    private Servo servoWrist = null;
+    public Servo servoWrist = null;
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
     private Servo servoLauncher = null;
