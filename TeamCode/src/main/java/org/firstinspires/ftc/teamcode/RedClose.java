@@ -42,12 +42,15 @@ public class RedClose extends LinearOpMode {
         for (i=0; i<50; i++) {
             sleep(100);
             if (robot.distanceSensorL.getDistance(DistanceUnit.CM) < 10) {
+                //Left
                 break;
             }
             else if (robot.distanceSensorR.getDistance(DistanceUnit.CM) < 10) {
+                //Right
                 break;
             }
-            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 3) {
+            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 18) {
+                //Center
                 break;
             }
             if (debugMode == true) {
