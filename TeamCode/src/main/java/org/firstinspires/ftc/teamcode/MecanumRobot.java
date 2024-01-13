@@ -442,13 +442,12 @@ public class MecanumRobot {
     }
 
     public void AutoWristDown() {
-        // Opens claws
-        setServoPositionLeftHand(1);
-        setServoPositionRightHand(0);
         // Puts the wrist down
         servoWrist.setPosition(1);
         myOpMode.sleep(1500);
-
+        // Opens claws
+        setServoPositionLeftHand(1);
+        setServoPositionRightHand(0);
     }
 
     public void AutoWristUp() {
