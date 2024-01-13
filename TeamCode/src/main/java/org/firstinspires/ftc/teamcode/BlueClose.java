@@ -62,16 +62,19 @@ public class BlueClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.move(0,1,0,0.1);
                 sleep(300);
-                robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
+                robot.move(1,0,0,0.2);
                 sleep(400);
+                robot.move(0,0,0,0);
+                robot.runToPositionArm(202,0.3);
+                sleep(1000);
+                robot.servoWrist.setPosition(0.85);
+                sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,1,0.4);
-                sleep(1300);
+                sleep(1700);
                 targetAprilTag = 1;
                 break;
             }
@@ -86,11 +89,12 @@ public class BlueClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
+                robot.runToPositionArm(202,0.3);
+                sleep(1000);
+                robot.servoWrist.setPosition(0.85);
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,-1,0.4);
@@ -98,12 +102,24 @@ public class BlueClose extends LinearOpMode {
                 targetAprilTag = 3;
                 break;
             }
-            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 10) {
+            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 26)
+            {
                 //Center
-                robot.servoWrist.setPosition(0.5);
-                sleep(400);
-                robot.setServoPositionLeftHand(0);
+                robot.move(0,0,0,0);
+                robot.runToPositionArm(202,0.3);
                 sleep(1000);
+                robot.servoWrist.setPosition(0.85);
+                sleep(400);
+                robot.move(1,0,0,0.2);
+                sleep(400);
+                robot.move(0,1,0,0.2);
+                sleep(200);
+                robot.move(0,0,0,0);
+                sleep(1000);
+
+                robot.setServoPositionLeftHand(1);
+                sleep(1000);
+
                 targetAprilTag = 2;
                 break;
             }
@@ -115,7 +131,6 @@ public class BlueClose extends LinearOpMode {
             }
             telemetry.update();
         }
-
         // once detected, stop the robot
         robot.move(0,-1,0,0.3);
         robot.AutoWristUp();
@@ -124,18 +139,20 @@ public class BlueClose extends LinearOpMode {
 
         //turn to face backdrop
         robot.move(0,0,-1,0.4);
-        sleep(1300);
+        sleep(1500);
         robot.move(0,0,0,0);
         //Move robot forward until it senses blue
 
         robot.move(0,1,0,0.4);
-        sleep(1000); // move forward using power 0.4 for 1 second
-        robot.move(0,1,0,0.2);
+        sleep(1500); // move forward using power 0.4 for 1 second
+        robot.move(0,0,0,0);
+        sleep(100);
+        robot.move(0,1,0,0.1);
         while (checkForBlue) { // move forward using power 0.2 until blue line is detected
             blue = robot.getColorSensorBlue();
             // default blue value in the gray (178)
             // blue value in the blue line (245...increased by 67)
-            if(blue >= robot.getDefaultBlue()+MecanumRobot.blue_diff) { // detects blue line
+            if(blue >= robot.getDefaultBlue()+500) { // detects blue line
                 robot.move(0,0,0,0); // brakes
                 checkForBlue = false; // will break the while loop
             }
