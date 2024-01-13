@@ -7,6 +7,7 @@ import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -44,7 +45,7 @@ public class BlueClose extends LinearOpMode {
         robot.move(0,1,0,0.4);
         sleep(1000);
         robot.move(0,0,0,0);
-        sleep(1500);
+        sleep(500);
         //move robot to center spike mark
         robot.move(0,1,0,0.2);
 
@@ -53,7 +54,7 @@ public class BlueClose extends LinearOpMode {
             sleep(100);
             if (robot.distanceSensorL.getDistance(DistanceUnit.CM) < 10) {
                 //Left
-                robot.move(-1,0,0,0.2);
+                robot.move(1,0,0,0.2);
                 sleep(1000);
                 robot.move(0,0,0,0);
                 robot.move(0,0,-1,0.4);
@@ -66,11 +67,12 @@ public class BlueClose extends LinearOpMode {
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
+                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,1,0.4);
                 sleep(1300);
-
+                targetAprilTag = 1;
                 break;
             }
             else if (robot.distanceSensorR.getDistance(DistanceUnit.CM) < 10) {
@@ -88,11 +90,12 @@ public class BlueClose extends LinearOpMode {
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
+                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,-1,0.4);
                 sleep(1300);
-
+                targetAprilTag = 3;
                 break;
             }
             else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 10) {
@@ -101,7 +104,7 @@ public class BlueClose extends LinearOpMode {
                 sleep(400);
                 robot.setServoPositionLeftHand(0);
                 sleep(1000);
-
+                targetAprilTag = 2;
                 break;
             }
             if (debugMode == true) {
@@ -116,8 +119,7 @@ public class BlueClose extends LinearOpMode {
         // once detected, stop the robot
         robot.move(0,-1,0,0.3);
         robot.AutoWristUp();
-        robot.setServoPositionLeftHand(0);
-        sleep(1800);
+        sleep(300);
         robot.move(0,0,0,0);
 
         //turn to face backdrop
@@ -143,7 +145,8 @@ public class BlueClose extends LinearOpMode {
             sleep(10);
         }
         //start scanning for april tag
-
+        telemetry.addData("target tag" , targetAprilTag);
+        telemetry.update();
         // april tag start
         if (alliance == 0)
         {
@@ -153,16 +156,22 @@ public class BlueClose extends LinearOpMode {
         {
             robot.move(-1,0,0,0.2);
         }
-        while (aprilTagRunning && opModeIsActive()) {
+
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
+        while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < 6000) {
 
             aprilTagDetected = false;
             AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
+            telemetry.addData("target tag" , targetAprilTag);
             telemetry.addData("April Tag detected: ", robot.getDetectionSize());
 
             if (myAprilTagDetection != null)
             {
                 distance = myAprilTagDetection.ftcPose.y;
                 aprilTagDetected = true;
+                telemetry.addData("distance", distance);
+                telemetry.addLine("target april tag detected");
             }
 
             if (aprilTagDetected && aprilTagMode == 0) {
@@ -181,7 +190,7 @@ public class BlueClose extends LinearOpMode {
 /////////////////////////going down
                     sleep((long) (170 * abs(difference)));
                 }
-                aprilTagMode = 0;
+                aprilTagMode = 2;
 
                 if (alliance == 0) {
                     robot.move(1, 0, 0, 0.3);
@@ -193,14 +202,18 @@ public class BlueClose extends LinearOpMode {
 
                 aprilTagRunning = false;
             }
-
-
             telemetry.update();
             sleep(10);
         }
-        robot.move(0,0,-1,0.4);
+        robot.move(0,0, 0, 0);
+        if (aprilTagMode == 2)
+        {
+            robot.AutoArmUp();
+            robot.move(0,1,0,0.2);
+            sleep(100);
+            robot.setServoPositionLeftHand(0.5);
+            robot.setServoPositionRightHand(0.5);
+        }
         sleep(2400);
-
-
     }
 }
