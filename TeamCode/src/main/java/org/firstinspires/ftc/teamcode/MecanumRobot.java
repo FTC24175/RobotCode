@@ -303,8 +303,18 @@ public class MecanumRobot {
 
 ///////////// Kush/Derek/Caden please fill in and replace the code below ////////////
 // Please refer to https://docs.google.com/document/d/1R7OXEbjb4L0bf-PC4Mc0G4GEzWzBPEjHFRGQvTE977w/edit?usp=sharing
+        motorLeftArm.setTargetPosition(position);
+        motorRightArm.setTargetPosition(position);
+        motorLeftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorRightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorLeftArm.setPower(power);
+        motorRightArm.setPower(power);
 
-        setMotorPowerArm(0);
+        while (motorLeftArm.isBusy() && motorRightArm.isBusy()) myOpMode.idle();
+        motorRightArm.setPower(0);
+        motorLeftArm.setPower(0);
+
+        /*setMotorPowerArm(0);
 
         // With the external encoder, RUN_TO_POSITION does NOT work
         // Arm down to position 0
@@ -321,7 +331,7 @@ public class MecanumRobot {
                 myOpMode.idle();
         }
         setMotorPowerArm(0); // IMPORTANT: brake
-
+        */
     }
 
     public int getMotorPositionLeftArm(){
