@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import static java.lang.Math.*;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -113,6 +114,8 @@ public class MecanumTest extends LinearOpMode {
         int leftArmPosition;
         int slidePosition;
 
+        double dl,dr;
+
         /* Auto mode
         * April Tag
          */
@@ -198,7 +201,7 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Left Blue: ", blueL);
                 telemetry.addData("Left Red: ", redL);
                 telemetry.addData("Right Blue Default: ", robot.getDefaultBlue());
-                telemetry.addData("Right Red Default: ", robot.getDefaultBlue());
+                telemetry.addData("Right Red Default: ", robot.getDefaultRed());
                 telemetry.addData("Left Blue Default: ", robot.getLeftDefaultBlue());
                 telemetry.addData("Left Red Default: ", robot.getLeftDefaultRed());
                 //telemetry.addData("Right Blue Threshold: ", MecanumRobot.blue_threshold);
@@ -212,8 +215,52 @@ public class MecanumTest extends LinearOpMode {
                 telemetry.addData("Left Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawL.getDistance(DistanceUnit.CM)));
                 telemetry.addData("Right Claw Distance Sensor", String.format("%.01f cm", robot.distanceSensorClawR.getDistance(DistanceUnit.CM)));
             }
-
-
+            dl = robot.distanceSensorClawL.getDistance(DistanceUnit.CM);
+            dr = robot.distanceSensorClawR.getDistance(DistanceUnit.CM); // middle
+            if (dr > 30) {
+                if (dl <= 26) {
+                    if (wristPosition != MecanumRobot.wristDown) {
+                        telemetry.addData("Pixel detected, change pattern", 0);
+                        if (!robot.getPattern().equals(MecanumRobot.greenPattern)) {
+                            robot.displayPattern(MecanumRobot.greenPattern);
+                            telemetry.addData("Change pattern to", "green");
+                        }
+                    }
+                } else {
+                    telemetry.addData("Nothing detected", 0);
+                    if (!robot.getPattern().equals(MecanumRobot.defaultPattern)) {
+                        robot.displayPattern(MecanumRobot.defaultPattern);
+                        telemetry.addData("Change pattern to", "default");
+                    }// what?
+                }
+            }
+            /*
+            else if (dr < 15) { // incorrect
+                if (wristPosition != MecanumRobot.wristDown) {
+                    telemetry.addData("Too close, change pattern", 0);
+                    if (!robot.getPattern().equals(MecanumRobot.redPattern)) {
+                        robot.displayPattern(MecanumRobot.redPattern);
+                        telemetry.addData("Change pattern to", "red");
+                    }
+                }
+            }
+            else if (dr >= 20 && dr <= 30)  { // incorrect
+                if (wristPosition != MecanumRobot.wristDown) {
+                    telemetry.addData("Close, change pattern", 0);
+                    if (!robot.getPattern().equals(MecanumRobot.yellowPattern)) {
+                        robot.displayPattern(MecanumRobot.yellowPattern);
+                        telemetry.addData("Change pattern to", "yellow");
+                    }
+                }
+            }
+            */
+            else {
+                telemetry.addData("Nothing detected", 0);
+                if (!robot.getPattern().equals(MecanumRobot.defaultPattern)) {
+                    robot.displayPattern(MecanumRobot.defaultPattern);
+                    telemetry.addData("Change pattern to", "default");
+                }
+            }
             /*
             * If NOT running the auto mode, then allows to control the arm, slide, wrist & claw
              */
@@ -322,9 +369,9 @@ public class MecanumTest extends LinearOpMode {
                 // So when releasing the pixels, the claws only half open
                 leftPosition = robot.getServoPositionLeftHand();
                 rightPosition = robot.getServoPositionRightHand();
-                if (gamepad2.left_trigger > 0.7) {
+                if (gamepad2.left_trigger > 0.9) {
                     if ((leftPosition == 0) && (gamepad2.a)) { //close
-                        leftPosition = 0.5; //open
+                        leftPosition = 0.4; //open
                         robot.setServoPositionLeftHand(leftPosition);
                         sleep(100);
                     } else {
@@ -335,9 +382,9 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode)
                         telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
                 }
-                if (gamepad2.right_trigger > 0.7) {
+                if (gamepad2.right_trigger > 0.9) {
                     if ((rightPosition == 1) && (gamepad2.a)) { //close
-                        rightPosition = 0.5; //open
+                        rightPosition = 0.6; //open
                         robot.setServoPositionRightHand(rightPosition);
                         sleep(100);
                     } else {
@@ -347,9 +394,9 @@ public class MecanumTest extends LinearOpMode {
                     }
                 }
 
-                if (gamepad1.left_trigger > 0.7) {
+                if (gamepad1.left_trigger > 0.9) {
                     if (leftPosition == 0) { //close
-                        leftPosition = 0.5; //open
+                        leftPosition = 0.4; //open
                         robot.setServoPositionLeftHand(leftPosition);
                         sleep(100);
                     } else {
@@ -360,9 +407,9 @@ public class MecanumTest extends LinearOpMode {
                     if (debugMode)
                         telemetry.addData("Claw Servos", "left (%.2f), right (%.2f)", leftPosition, rightPosition);
                 }
-                if (gamepad1.right_trigger > 0.7) {
+                if (gamepad1.right_trigger > 0.9) {
                     if (rightPosition == 1) {
-                        rightPosition = 0.5; //open
+                        rightPosition = 0.6; //open
                         robot.setServoPositionRightHand(rightPosition);
                         sleep(100);
                     } else {
@@ -376,12 +423,13 @@ public class MecanumTest extends LinearOpMode {
 
                 // Wrist movement
                 wristPosition = robot.getServoPositionWrist();
-                if ((gamepad1.a) || (gamepad2.dpad_down)) { //wrist down
+                if (gamepad2.dpad_down) { //wrist down
                     if (wristPosition < 1) {
                         wristPosition += 0.05;
                         robot.setServoPositionWrist(wristPosition);
                     }
-                } else if ((gamepad1.b) || (gamepad2.dpad_up)) { //wrist up
+                }
+                else if (gamepad2.dpad_up) { //wrist up
                     if (wristPosition > 0) {
                         wristPosition -= 0.05;
                         robot.setServoPositionWrist(wristPosition);
@@ -402,6 +450,7 @@ public class MecanumTest extends LinearOpMode {
                 // Auto arm up to release pixels
                 if (gamepad2.y) {
                     robot.AutoArmUp();
+                    //robot.AutoArmUpBack();
                     robot.runWithoutEncoderSlide();
                     robot.runWithoutEncoderArm();
                     //autoArmUpState=1;
@@ -416,6 +465,12 @@ public class MecanumTest extends LinearOpMode {
             if ((gamepad1.back) || (gamepad2.back)) {
                 launcherPosition = 1;
                 robot.setServoPositionLauncher(launcherPosition);
+            }
+
+            if (gamepad1.a) {
+                robot.AutoSlidePickup();
+                robot.runWithoutEncoderSlide();
+                robot.runWithoutEncoderArm();
             }
 
             /*
@@ -472,13 +527,15 @@ public class MecanumTest extends LinearOpMode {
                     break;
             }
             */
-/*
+
+            /*
             if (gamepad1.right_bumper) {
                 // Whenever the arm thread needs the drivetrain,
                 // it needs to interrupt and pause the drivetrain
                 driveThread.interrupt();
                 robot.AutoLinePark(true);
                 driveThread.run();
+                telemetry.addData("leaving right bumper",0);
             }
             else if (gamepad1.left_bumper) {
                 // Whenever the arm thread needs the drivetrain,
@@ -486,8 +543,9 @@ public class MecanumTest extends LinearOpMode {
                 driveThread.interrupt();
                 robot.AutoLinePark(false);
                 driveThread.run();
+                telemetry.addData("leaving left bumper",0);
             }
-*/
+            */
             /*
             if ((gamepad1.right_bumper) && (gamepad1.left_bumper)) {
                 robot.AutoLinePark();

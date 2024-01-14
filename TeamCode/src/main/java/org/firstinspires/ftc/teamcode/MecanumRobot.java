@@ -2,16 +2,24 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import java.util.concurrent.TimeUnit;
+
 
 // Autonomous mode
 //import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.external.samples.SampleRevBlinkinLedDriver;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -22,6 +30,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MecanumRobot {
 
@@ -41,11 +50,13 @@ public class MecanumRobot {
     public final static int slideMin = 0;
     public final static int armMax = 2900;
     public final static int armMin = 0;
-    public final static int dropPixelArmPosition = 700;
+    public final static int autoArmUpArm = 700;
+    public final static int autoArmUpBackArm = 2793; //2397;
     public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.REVERSE;
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
 
+    public final static int autoArmUpBackSlide = 186; //0;
     private Servo servoWrist = null;
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
@@ -54,8 +65,16 @@ public class MecanumRobot {
     public final static int defaultLeftPosition = 0; // claw closed
     public final static int defaultRightPosition = 1; // claw closed
     public final static int defaultWristPosition = 0; // wrist up
+    public final static int wristUp = 0;
+    public final static int wristDown = 1;
+    public final static double autoArmUpBackWrist = 0.35; //0.2;
+
+    public final static double autoArmUpWrist = 0.6;
+
+    public final static int slidePickupArm = 135;
+
     public final static int defaultLauncherPosition = 0;
-    public final static double dropPixelWristPosition = 0.6;
+
 
     public TouchSensor touchSensor = null;
     public DistanceSensor distanceSensorL = null;
@@ -63,31 +82,46 @@ public class MecanumRobot {
     public DistanceSensor distanceSensorClawL = null;
     public DistanceSensor distanceSensorClawR = null;
 
-    // Auto mode
     private ColorSensor colorSensor, colorSensorL;
+
+    /*
+     * Change the pattern every 10 seconds in AUTO mode.
+     */
+    private final static int LED_PERIOD = 10;
+
+    /*
+     * Rate limit gamepad button presses to every 500ms.
+     */
+    private final static int GAMEPAD_LOCKOUT = 500;
+
+    RevBlinkinLedDriver blinkinLedDriver;
+    public final static RevBlinkinLedDriver.BlinkinPattern defaultPattern = RevBlinkinLedDriver.BlinkinPattern.CONFETTI;
+    public final static RevBlinkinLedDriver.BlinkinPattern greenPattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
+    public final static RevBlinkinLedDriver.BlinkinPattern yellowPattern = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+    public final static RevBlinkinLedDriver.BlinkinPattern redPattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+    private String currentPattern;
+    private MecanumRobot.DisplayKind displayKind;
+    Deadline ledCycleDeadline;
+    Deadline gamepadRateLimit;
+    protected enum DisplayKind {
+        MANUAL,
+        AUTO
+    }
+
+    // Auto mode
     private VisionPortal visionPortal;
     private AprilTagProcessor tagProcessor;
 
     private IMU imu;
-    /*
-    public final static int default_red;
-    public final static int default_blue;
-    public final static int default_red_left;
-    public final static int default_blue_left;
-     */
-    public final static int red_threshold = 2800;
-    public final static int blue_threshold = 5400;
-    public final static int red_threshold_left = 1300;
-    public final static int blue_threshold_left = 3800;
 
     public int default_red;
     public int default_blue;
     public int default_red_left;
     public int default_blue_left;
 
-    public final static int red_diff = 800;
+    public final static int red_diff = 500;
     public final static int blue_diff = 1800;
-    public final static int red_diff_left = 300;
+    public final static int red_diff_left = 250;
     public final static int blue_diff_left = 1200;
     public final static int red_threshold = 2800; // compared to 1900
     public final static int blue_threshold = 5400; // compared to 3000
@@ -209,6 +243,18 @@ public class MecanumRobot {
         default_red_left = colorSensorL.red();
         default_blue_left = colorSensorL.blue();
 
+        displayKind = MecanumRobot.DisplayKind.MANUAL;
+
+        blinkinLedDriver = myOpMode.hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+        currentPattern = defaultPattern.toString();
+        blinkinLedDriver.setPattern(defaultPattern);
+
+        myOpMode.telemetry.addData("Display Kind: ", displayKind.toString());
+        myOpMode.telemetry.addData("Pattern: ", defaultPattern.toString());
+
+
+        ledCycleDeadline = new Deadline(LED_PERIOD, TimeUnit.SECONDS);
+        gamepadRateLimit = new Deadline(GAMEPAD_LOCKOUT, TimeUnit.MILLISECONDS);
         intializeAprilTag();
         /* local variables
         int myAprilTaIdCode = -1;
@@ -411,12 +457,29 @@ public class MecanumRobot {
 
         runToPositionSlide(0, -0.5);
         runToPositionArm(0,-0.3);
+
+
+        // Calibrates arm position using touch sensor
+        // We don't need this because as long as robot is at 0 position when it's turned on
+        // the encoder will remember the position while power is on
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        setMotorPowerArm(-0.2);
+        while (runtime2.seconds()<0.5) {
+            if (touchSensor.isPressed()) {
+                myOpMode.telemetry.addData("Touch Sensor", "Is Pressed");
+                break;
+            }
+        }
+        setMotorPowerArm(0);
+        stopAndResetArmSlide();
+
     }
 
     public void AutoArmUp() {
-        runToPositionArm(dropPixelArmPosition,0.5);
+        runToPositionArm(autoArmUpArm,0.5);
         runToPositionSlide(slideMax, 0.5);
-        setServoPositionWrist(dropPixelWristPosition);
+        setServoPositionWrist(autoArmUpWrist);
         /*
         //Raises the left arm to 3628 ticks
         ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
@@ -443,12 +506,23 @@ public class MecanumRobot {
 
     }
 
+    public void AutoSlidePickup() {
+        runToPositionArm(slidePickupArm,0.5);
+        runToPositionSlide(slideMax, 0.5);
+        setServoPositionWrist(wristDown);
+    }
+    public void AutoArmUpBack() {
+        runToPositionArm(autoArmUpBackArm, 0.5);
+        runToPositionSlide(autoArmUpBackSlide, 0.5);
+        setServoPositionWrist(autoArmUpBackWrist);
+
+    }
     public void AutoWristDown() {
         // Opens claws
         setServoPositionLeftHand(1);
         setServoPositionRightHand(0);
         // Puts the wrist down
-        servoWrist.setPosition(1);
+        servoWrist.setPosition(wristDown);
         //myOpMode.sleep(1500);
 
     }
@@ -459,7 +533,7 @@ public class MecanumRobot {
         setServoPositionRightHand(1);
         myOpMode.sleep( 1000);
         // Puts the wrist up
-        servoWrist.setPosition(0);
+        servoWrist.setPosition(wristUp);
     }
 
     /*
@@ -590,7 +664,7 @@ public class MecanumRobot {
                 .build();
     }
 
-    public AprilTagDetection tryDetectApriTag(int idCode)
+    public AprilTagDetection tryDetectAprilTag(int idCode)
     {
         AprilTagDetection aprilTagDetection = null;
         List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();
