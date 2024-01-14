@@ -109,7 +109,7 @@ public class BlueClose extends LinearOpMode {
         while (aprilTagRunning && opModeIsActive()) {
 
             aprilTagDetected = false;
-            AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
+            AprilTagDetection myAprilTagDetection = robot.tryDetectAprilTag(targetAprilTag);
             telemetry.addData("April Tag detected: ", robot.getDetectionSize());
 
             if (myAprilTagDetection != null)
