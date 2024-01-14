@@ -64,11 +64,13 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.setServoPositionWrist(0.5);
-                sleep(400);
-                robot.setServoPositionLeftHand(1);
+                robot.runToPositionArm(202,0.3);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
+                robot.setServoPositionWrist(0.85);
+                sleep(400);
+                //robot.setServoPositionLeftHand(0);
+                //sleep(1000);
+                robot.setServoPositionRightHand(1);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,1,0.4);
@@ -87,11 +89,12 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.setServoPositionWrist(0.5);
-                sleep(400);
-                robot.setServoPositionLeftHand(1);
+                robot.runToPositionArm(202,0.3);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
+                robot.setServoPositionWrist(0.85);
+                //robot.setServoPositionLeftHand(0);
+                sleep(400);
+                robot.setServoPositionRightHand(1);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,-1,0.4);
@@ -101,9 +104,11 @@ public class RedClose extends LinearOpMode {
             }
             else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 10) {
                 //Center
-                robot.setServoPositionWrist(0.5);
+                robot.runToPositionArm(202,0.3);
+                sleep(1000);
+                robot.setServoPositionWrist(0.85);
                 sleep(400);
-                robot.setServoPositionLeftHand(0);
+                robot.setServoPositionRightHand(1);
                 sleep(1000);
                 targetAprilTag = 5;
                 break;

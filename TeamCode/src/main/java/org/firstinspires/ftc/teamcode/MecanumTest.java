@@ -183,7 +183,9 @@ public class MecanumTest extends LinearOpMode {
                 if (debugMode)
                     telemetry.addData("Touch Sensor", "Is Pressed");
                 armDown = true;
-
+                robot.stopAndResetArmSlide();
+                robot.runWithoutEncoderArm();
+                robot.runWithoutEncoderSlide();
             } else {
                 if (debugMode)
                     telemetry.addData("Touch Sensor", "Is Not Pressed");

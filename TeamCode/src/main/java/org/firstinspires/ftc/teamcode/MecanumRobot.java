@@ -52,7 +52,7 @@ public class MecanumRobot {
     public final static int armMin = 0;
     public final static int autoArmUpArm = 700;
     public final static int autoArmUpBackArm = 2793; //2397;
-    public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.REVERSE;
+    public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
 
@@ -95,7 +95,7 @@ public class MecanumRobot {
     private final static int GAMEPAD_LOCKOUT = 500;
 
     RevBlinkinLedDriver blinkinLedDriver;
-    public final static RevBlinkinLedDriver.BlinkinPattern defaultPattern = RevBlinkinLedDriver.BlinkinPattern.CONFETTI;
+    public final static RevBlinkinLedDriver.BlinkinPattern defaultPattern = RevBlinkinLedDriver.BlinkinPattern.DARK_GRAY;
     public final static RevBlinkinLedDriver.BlinkinPattern greenPattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
     public final static RevBlinkinLedDriver.BlinkinPattern yellowPattern = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
     public final static RevBlinkinLedDriver.BlinkinPattern redPattern = RevBlinkinLedDriver.BlinkinPattern.RED;
@@ -182,13 +182,13 @@ public class MecanumRobot {
         servoRightHand = myOpMode.hardwareMap.get(Servo.class, "ServoClawR");
         servoLauncher = myOpMode.hardwareMap.get(Servo.class, "ServoLauncher");
 
+        touchSensor = myOpMode.hardwareMap.get(TouchSensor.class, "touchSensor");
+
         AutoArmDown(); // includes wrist & claw actions
         runWithoutEncoderSlide();
         runWithoutEncoderArm();
 
         setServoPositionLauncher(defaultLauncherPosition);
-
-        touchSensor = myOpMode.hardwareMap.get(TouchSensor.class, "touchSensor");
         /*
         // Calibrates arm position using touch sensor
         // We don't need this because as long as robot is at 0 position when it's turned on
@@ -531,7 +531,7 @@ public class MecanumRobot {
         // Closes claws
         setServoPositionLeftHand(0);
         setServoPositionRightHand(1);
-        myOpMode.sleep( 1000);
+        myOpMode.sleep( 1500);
         // Puts the wrist up
         servoWrist.setPosition(wristUp);
     }
