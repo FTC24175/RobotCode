@@ -605,7 +605,7 @@ public class MecanumRobot {
             // Moves forward at power 0.2 until a line is detected
             move(0, 1, 0, 0.1);
             while (myOpMode.opModeIsActive() && (!rightDetected) && (!leftDetected)) {
-                if (rightOrLeft) {
+                if (findRightOrLeft) {
                     blue = getColorSensorBlue();
                     red = getColorSensorRed();
                 } else {
@@ -702,7 +702,7 @@ public class MecanumRobot {
     public int getLeftDefaultRed() {
         return default_red_left;
     }
- */
+
     public int getColorSensorBlue() {
         return (colorSensor.blue());
     }
