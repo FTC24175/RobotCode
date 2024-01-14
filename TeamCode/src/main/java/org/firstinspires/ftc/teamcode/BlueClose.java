@@ -136,7 +136,7 @@ public class BlueClose extends LinearOpMode {
         // once detected, stop the robot
         robot.move(0,-1,0,0.3);
         robot.AutoWristUp();
-        sleep(700);
+        sleep(300);
         robot.move(0,0,0,0);
 
         //turn to face backdrop
