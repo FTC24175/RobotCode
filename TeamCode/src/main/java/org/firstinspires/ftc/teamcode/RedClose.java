@@ -64,7 +64,7 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
+                robot.setServoPositionWrist(0.5);
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -87,7 +87,7 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
+                robot.setServoPositionWrist(0.5);
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -101,7 +101,7 @@ public class RedClose extends LinearOpMode {
             }
             else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 10) {
                 //Center
-                robot.servoWrist.setPosition(0.5);
+                robot.setServoPositionWrist(0.5);
                 sleep(400);
                 robot.setServoPositionLeftHand(0);
                 sleep(1000);

@@ -68,7 +68,7 @@ public class BlueClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.runToPositionArm(202,0.3);
                 sleep(1000);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -92,7 +92,7 @@ public class BlueClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.runToPositionArm(202,0.3);
                 sleep(1000);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(400);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -109,7 +109,7 @@ public class BlueClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.runToPositionArm(202,0.3);
                 sleep(1000);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(400);
                 robot.move(1,0,0,0.2);
                 sleep(400);
