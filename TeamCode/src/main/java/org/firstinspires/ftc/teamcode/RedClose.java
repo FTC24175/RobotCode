@@ -68,7 +68,7 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.runToPositionArm(202,0.3);
                 sleep(200);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -92,7 +92,7 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.runToPositionArm(202,0.3);
                 sleep(200);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
@@ -111,7 +111,7 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,-1,0,0.2);
                 sleep(300);
                 robot.move(0, 0, 0, 0);
-                robot.servoWrist.setPosition(0.85);
+                robot.setServoPositionWrist(0.85);
                 sleep(400);
                 robot.move(1,0,0,0.2);
                 sleep(400);
@@ -134,7 +134,7 @@ public class RedClose extends LinearOpMode {
         // once detected, stop the robot
         robot.move(0,-1,0,0.3);
         robot.AutoWristUp();
-        sleep(300);
+        sleep(700);
         robot.move(0,0,0,0);
 
         //turn to face backdrop
@@ -185,7 +185,7 @@ public class RedClose extends LinearOpMode {
             while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < (6000 + (6 - targetAprilTag) * 1500)) {
 
                 aprilTagDetected = false;
-                AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
+                AprilTagDetection myAprilTagDetection = robot.tryDetectAprilTag(targetAprilTag);
                 telemetry.addData("April Tag detected: ", robot.getDetectionSize());
                 telemetry.addData("target tag" , targetAprilTag);
                 if (myAprilTagDetection != null)
