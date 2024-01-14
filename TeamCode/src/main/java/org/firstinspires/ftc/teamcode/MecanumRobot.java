@@ -42,7 +42,7 @@ public class MecanumRobot {
     public final static int armMax = 2900;
     public final static int armMin = 0;
     public final static int dropPixelArmPosition = 700;
-    public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.REVERSE;
+    public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
 
@@ -75,7 +75,7 @@ public class MecanumRobot {
     public int default_red_left;
     public int default_blue_left;
 
-    public final static int red_diff = 800;
+    public final static int red_diff = 700;
     public final static int blue_diff = 1800;
     public final static int red_diff_left = 300;
     public final static int blue_diff_left = 1200;
@@ -426,7 +426,13 @@ public class MecanumRobot {
 
 ///////////// Kush/Derek/Caden please fill in. Replace it with RUN_TO_POSITION ////////////
 // Please refer to https://docs.google.com/document/d/1R7OXEbjb4L0bf-PC4Mc0G4GEzWzBPEjHFRGQvTE977w/edit?usp=sharing
+// Wrist up
 
+        runToPositionArm(dropPixelArmPosition,0.3);
+        runToPositionSlide(slideMax, 0.5);
+        setServoPositionWrist(0.6);
+
+        /*
         //Raises the left arm
         ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
         runtime2.reset();
@@ -447,7 +453,7 @@ public class MecanumRobot {
 
         // Puts down the wrist to position 0.6
         servoWrist.setPosition(0.6);
-
+        */
 
     }
 

@@ -22,11 +22,11 @@ public class RedClose extends LinearOpMode {
         boolean debugMode = true;
         boolean aprilTagDetected = false;
         int aprilTagMode = 0;
-        int targetAprilTag = 4;
+        int targetAprilTag = 5;
         int alliance = 1;
         int red = robot.getColorSensorRed();
         int i = 0;
-        double desiredDistance = 7;
+        double desiredDistance = 4;
         double distance = Double.MAX_VALUE;
         boolean aprilTagRunning = true;
         boolean checkForRed = true;
@@ -62,12 +62,15 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,0,0,0);
                 robot.move(0,1,0,0.1);
                 sleep(300);
-                robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
+                robot.move(1,0,0,0.2);
                 sleep(400);
+                robot.move(0,0,0,0);
+                robot.runToPositionArm(202,0.3);
+                sleep(200);
+                robot.servoWrist.setPosition(0.85);
+                sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,1,0.4);
@@ -86,11 +89,12 @@ public class RedClose extends LinearOpMode {
                 robot.move(0,1,0,0.1);
                 sleep(300);
                 robot.move(0,0,0,0);
-                robot.servoWrist.setPosition(0.5);
-                sleep(400);
+                robot.runToPositionArm(202,0.3);
+                sleep(200);
+                robot.servoWrist.setPosition(0.85);
+                sleep(1000);
                 robot.setServoPositionLeftHand(1);
                 sleep(1000);
-                robot.setServoPositionLeftHand(0);
                 robot.move(0,1,0,0.3);
                 sleep(50);
                 robot.move(0,0,-1,0.4);
@@ -98,12 +102,23 @@ public class RedClose extends LinearOpMode {
                 targetAprilTag = 6;
                 break;
             }
-            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 10) {
+            else if (robot.distanceSensorClawR.getDistance(DistanceUnit.CM) < 19) {
                 //Center
-                robot.servoWrist.setPosition(0.5);
+                robot.move(0,0,0,0);
+                robot.runToPositionArm(202,0.3);
                 sleep(400);
-                robot.setServoPositionLeftHand(0);
-                sleep(1000);
+                robot.move(0,-1,0,0.2);
+                sleep(300);
+                robot.move(0, 0, 0, 0);
+                robot.servoWrist.setPosition(0.85);
+                sleep(400);
+                robot.move(1,0,0,0.2);
+                sleep(400);
+                robot.move(0,0,0,0);
+                sleep(200);
+
+                robot.setServoPositionLeftHand(1);
+                sleep(800);
                 targetAprilTag = 5;
                 break;
             }
@@ -123,95 +138,122 @@ public class RedClose extends LinearOpMode {
 
         //turn to face backdrop
         robot.move(0,0,1,0.4);
-        sleep(1300);
+        sleep(1350);
         robot.move(0,0,0,0);
         //Move robot forward until it senses red
 
         robot.move(0,1,0,0.4);
-        sleep(1000); // move forward using power 0.4 for 1 second
-        robot.move(0,1,0,0.2);
-        while (checkForRed) { // move forward using power 0.2 until red line is detected
+        sleep(1400); // move forward using power 0.4 for 1 second
+        robot.move(0,0,0,0);
+        sleep(100);
+        robot.move(0,1,0,0.15);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        boolean redDetected = false;
+        while (checkForRed && runtime.milliseconds()<4000) { // move forward using power 0.2 until red line is detected
             red = robot.getColorSensorRed();
-            if(red >= robot.getDefaultRed()+MecanumRobot.red_diff) { // detects red line
-                robot.move(0,0,0,0); // brakes
-                checkForRed = false; // will break the while loop
-            }
             telemetry.addData("Red: ", red);
             telemetry.addData("Red Threshold: ", MecanumRobot.red_threshold);
             telemetry.update();
+            if(red >= robot.getDefaultRed()+MecanumRobot.red_diff) { // detects red line
+                robot.move(0,0,0,0); // brakes
+                checkForRed = false; // will break the while loop
+                redDetected = true;
+            }
             sleep(10);
         }
         //start scanning for april tag
         telemetry.addData("target tag" , targetAprilTag);
         telemetry.update();
 
-        // april tag start
-        if (alliance == 0)
+        if (redDetected == true)
         {
-            robot.move(1,0,0,0.2);
-        }
-        else if (alliance == 1)
-        {
-            robot.move(-1,0,0,0.2);
-        }
-        ElapsedTime elapsedTime = new ElapsedTime();
-        elapsedTime.reset();
-
-        while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < 6000) {
-
-            aprilTagDetected = false;
-            AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
-            telemetry.addData("April Tag detected: ", robot.getDetectionSize());
-            telemetry.addData("target tag" , targetAprilTag);
-            if (myAprilTagDetection != null)
+            // april tag start
+            if (alliance == 0)
             {
-                distance = myAprilTagDetection.ftcPose.y;
-                aprilTagDetected = true;
-                telemetry.addData("distance", distance);
-                telemetry.addLine("target april tag detected");
+                robot.move(1,0,0,0.20);
             }
-
-            if (aprilTagDetected && aprilTagMode == 0) {
-                aprilTagMode = 1;
+            else if (alliance == 1)
+            {
+                robot.move(-1,0,0,0.20);
             }
-            else if (aprilTagDetected && aprilTagMode == 1) {
-                double difference = distance - desiredDistance;
-                // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
-                if (difference > 0.1) {
-                    robot.move(0, 1, 0, 0.15);
-/////////////////////////going up
+            ElapsedTime elapsedTime = new ElapsedTime();
+            elapsedTime.reset();
 
-                    sleep((long) (170 * difference));
-                } else if (difference < -0.1) {
-                    robot.move(0, -1, 0, 0.15);
-/////////////////////////going down
-                    sleep((long) (170 * abs(difference)));
-                }
-                aprilTagMode = 2;
+            while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < (6000 + (6 - targetAprilTag) * 1500)) {
 
-                if (alliance == 0) {
-                    robot.move(1, 0, 0, 0.3);
-                    sleep(750);
-                } else if (alliance == 1) {
-                    robot.move(1, 0, 0, 0.3);
-                    sleep(300);
+                aprilTagDetected = false;
+                AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
+                telemetry.addData("April Tag detected: ", robot.getDetectionSize());
+                telemetry.addData("target tag" , targetAprilTag);
+                if (myAprilTagDetection != null)
+                {
+                    distance = myAprilTagDetection.ftcPose.y;
+                    aprilTagDetected = true;
+                    telemetry.addData("distance", distance);
+                    telemetry.addLine("target april tag detected");
                 }
 
-                aprilTagRunning = false;
-            }
-            telemetry.update();
-            sleep(10);
-        }
-        robot.move(0,0, 0, 0);
-        if (aprilTagMode == 2)
-        {
-            robot.AutoArmUp();
-            robot.move(0,1,0,0.2);
-            sleep(100);
-            robot.setServoPositionLeftHand(0.5);
-            robot.setServoPositionRightHand(0.5);
-        }
+                if (aprilTagDetected && aprilTagMode == 0) {
+                    aprilTagMode = 1;
+                }
+                else if (aprilTagDetected && aprilTagMode == 1) {
+                    double difference = distance - desiredDistance;
+                    // estimating that it takes 170 ms for robot to move 1 inch forward (power 0.15)
+                    if (difference > 0.1) {
+                        robot.move(0, 1, 0, 0.15);
+                        /////////////////////////going up
 
-        sleep(2400);
+                        sleep((long) (170 * difference));
+                    } else if (difference < -0.1) {
+                        robot.move(0, -1, 0, 0.15);
+                        /////////////////////////going down
+                        sleep((long) (170 * abs(difference)));
+                    }
+                    aprilTagMode = 2;
+
+                    if (alliance == 0) {
+                        robot.move(1, 0, 0, 0.3);
+                        sleep(750);
+                    } else if (alliance == 1) {
+                        robot.move(1, 0, 0, 0.3);
+                        sleep(300);
+                    }
+
+                    aprilTagRunning = false;
+                }
+                telemetry.update();
+                sleep(10);
+            }
+            robot.move(0,0, 0, 0);
+            if (aprilTagMode == 2)
+            {
+                robot.AutoArmUp();
+
+                robot.move(0,1,0,0.4);
+                sleep(550);
+                robot.move(0, 0, 0, 0);
+                sleep(500);
+                robot.setServoPositionLeftHand(0.5);
+                robot.setServoPositionRightHand(0.5);
+                sleep(400);
+
+                robot.move(0, -1, 0, 0.3);
+                sleep(200);
+                robot.move(0, 0, 0, 0);
+                robot.AutoArmDown();
+
+                if (alliance == 0)
+                {
+                    robot.move(1,0,0,0.25);
+                }
+                else if (alliance == 1)
+                {
+                    robot.move(-1,0,0,0.25);
+                }
+                sleep(500);
+                robot.move(0, 0, 0, 0);
+            }
+        }
     }
 }
