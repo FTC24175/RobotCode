@@ -238,6 +238,7 @@ public class MecanumRobot {
         colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorSensorL.enableLed(true);
 
+        /*
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
         default_red_left = colorSensorL.red();
@@ -522,8 +523,8 @@ public class MecanumRobot {
         setServoPositionLeftHand(1);
         setServoPositionRightHand(0);
         // Puts the wrist down
-        servoWrist.setPosition(wristDown);
-        //myOpMode.sleep(1500);
+        servoWrist.setPosition(1);
+        myOpMode.sleep(1500);
 
     }
 
@@ -566,7 +567,7 @@ public class MecanumRobot {
 
         // First check once
         // The robot might already be on the line
-        if (findRightOrLeft) {
+        if (rightOrLeft) {
             blue = getColorSensorBlue();
             red = getColorSensorRed();
         } else {
