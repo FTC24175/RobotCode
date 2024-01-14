@@ -2,16 +2,24 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import java.util.concurrent.TimeUnit;
+
 
 // Autonomous mode
 //import com.google.blocks.ftcrobotcontroller.runtime.AprilTagAccess;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.external.samples.SampleRevBlinkinLedDriver;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -22,6 +30,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MecanumRobot {
 
@@ -41,12 +50,15 @@ public class MecanumRobot {
     public final static int slideMin = 0;
     public final static int armMax = 2900;
     public final static int armMin = 0;
-    public final static int dropPixelArmPosition = 700;
+    
+    public final static int autoArmUpArm = 700;
+    public final static int autoArmUpBackArm = 2793; //2397;
     public final static DcMotorSimple.Direction defaultDirectionLeftArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionRightArm = DcMotorSimple.Direction.FORWARD;
     public final static DcMotorSimple.Direction defaultDirectionSlide = DcMotorSimple.Direction.FORWARD;
 
-    public Servo servoWrist = null;
+    public final static int autoArmUpBackSlide = 186; //0;
+    private Servo servoWrist = null;
     private Servo servoLeftHand = null;
     private Servo servoRightHand = null;
     private Servo servoLauncher = null;
@@ -54,8 +66,16 @@ public class MecanumRobot {
     public final static int defaultLeftPosition = 0; // claw closed
     public final static int defaultRightPosition = 1; // claw closed
     public final static int defaultWristPosition = 0; // wrist up
+    public final static int wristUp = 0;
+    public final static int wristDown = 1;
+    public final static double autoArmUpBackWrist = 0.35; //0.2;
+
+    public final static double autoArmUpWrist = 0.6;
+
+    public final static int slidePickupArm = 135;
+
     public final static int defaultLauncherPosition = 0;
-    public final static double dropPixelWristPosition = 0.6;
+
 
     public TouchSensor touchSensor = null;
     public DistanceSensor distanceSensorL = null;
@@ -63,8 +83,33 @@ public class MecanumRobot {
     public DistanceSensor distanceSensorClawL = null;
     public DistanceSensor distanceSensorClawR = null;
 
-    // Auto mode
     private ColorSensor colorSensor, colorSensorL;
+
+    /*
+     * Change the pattern every 10 seconds in AUTO mode.
+     */
+    private final static int LED_PERIOD = 10;
+
+    /*
+     * Rate limit gamepad button presses to every 500ms.
+     */
+    private final static int GAMEPAD_LOCKOUT = 500;
+
+    RevBlinkinLedDriver blinkinLedDriver;
+    public final static RevBlinkinLedDriver.BlinkinPattern defaultPattern = RevBlinkinLedDriver.BlinkinPattern.CONFETTI;
+    public final static RevBlinkinLedDriver.BlinkinPattern greenPattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
+    public final static RevBlinkinLedDriver.BlinkinPattern yellowPattern = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+    public final static RevBlinkinLedDriver.BlinkinPattern redPattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+    private String currentPattern;
+    private MecanumRobot.DisplayKind displayKind;
+    Deadline ledCycleDeadline;
+    Deadline gamepadRateLimit;
+    protected enum DisplayKind {
+        MANUAL,
+        AUTO
+    }
+
+    // Auto mode
     private VisionPortal visionPortal;
     private AprilTagProcessor tagProcessor;
 
@@ -77,13 +122,12 @@ public class MecanumRobot {
 
     public final static int red_diff = 700;
     public final static int blue_diff = 1800;
-    public final static int red_diff_left = 300;
+    public final static int red_diff_left = 250;
     public final static int blue_diff_left = 1200;
     public final static int red_threshold = 2800; // compared to 1900
     public final static int blue_threshold = 5400; // compared to 3000
     public final static int red_threshold_left = 1300; // compared to 1000
     public final static int blue_threshold_left = 3800; // compared to 2100
-
     private boolean debugMode=true;
 
 
@@ -195,12 +239,23 @@ public class MecanumRobot {
         colorSensorL = myOpMode.hardwareMap.get(ColorSensor.class, "colorSensorL");
         colorSensorL.enableLed(true);
 
-
         default_red = colorSensor.red();
         default_blue = colorSensor.blue();
         default_red_left = colorSensorL.red();
         default_blue_left = colorSensorL.blue();
 
+        displayKind = MecanumRobot.DisplayKind.MANUAL;
+
+        blinkinLedDriver = myOpMode.hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+        currentPattern = defaultPattern.toString();
+        blinkinLedDriver.setPattern(defaultPattern);
+
+        myOpMode.telemetry.addData("Display Kind: ", displayKind.toString());
+        myOpMode.telemetry.addData("Pattern: ", defaultPattern.toString());
+
+
+        ledCycleDeadline = new Deadline(LED_PERIOD, TimeUnit.SECONDS);
+        gamepadRateLimit = new Deadline(GAMEPAD_LOCKOUT, TimeUnit.MILLISECONDS);
         intializeAprilTag();
         /* local variables
         int myAprilTaIdCode = -1;
@@ -251,12 +306,14 @@ public class MecanumRobot {
         motorHDRightFront.setPower(rightFront * powerScale);
         motorHDRightRear.setPower(rightRear * powerScale);
 
+        /*
         if (debugMode) {
             myOpMode.telemetry.addData("Motor 0 Left Front", leftFront * powerScale);
             myOpMode.telemetry.addData("Motor 1 Left Rear", leftRear * powerScale);
             myOpMode.telemetry.addData("Motor 2 Right Front", rightFront * powerScale);
             myOpMode.telemetry.addData("Motor 3 Right Rear", rightRear * powerScale);
         }
+         */
     }
 
     /**
@@ -300,38 +357,22 @@ public class MecanumRobot {
         motorRightArm.setPower(powerScale);
     }
     public void runToPositionArm(int position,double power) {
-
-///////////// Kush/Derek/Caden please fill in and replace the code below ////////////
-// Please refer to https://docs.google.com/document/d/1R7OXEbjb4L0bf-PC4Mc0G4GEzWzBPEjHFRGQvTE977w/edit?usp=sharing
         motorLeftArm.setTargetPosition(position);
         motorRightArm.setTargetPosition(position);
         motorLeftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorRightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorLeftArm.setPower(power);
-        motorRightArm.setPower(power);
-
+        setMotorPowerArm(power);
         while (motorLeftArm.isBusy() && motorRightArm.isBusy()) myOpMode.idle();
-        motorRightArm.setPower(0);
-        motorLeftArm.setPower(0);
-
-        /*setMotorPowerArm(0);
-
+        setMotorPowerArm(0);
+        /*
         // With the external encoder, RUN_TO_POSITION does NOT work
         // Arm down to position 0
-
-        ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
-        runtime.reset();
-        if (motorLeftArm.getCurrentPosition()>position) {
-            setMotorPowerArm(-0.3);
-            while (motorLeftArm.getCurrentPosition() > position && runtime.seconds() < 3)
-                myOpMode.idle();
-        } else if (position<motorLeftArm.getCurrentPosition()) {
-            setMotorPowerArm(0.3);
-            while (position < motorLeftArm.getCurrentPosition() && runtime.seconds() < 3)
-                myOpMode.idle();
-        }
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        setMotorPowerArm(0.2);
+        while (motorLeftArm.getCurrentPosition()>0 && runtime2.seconds() < 5);
         setMotorPowerArm(0); // IMPORTANT: brake
-        */
+         */
     }
 
     public int getMotorPositionLeftArm(){
@@ -351,11 +392,8 @@ public class MecanumRobot {
         motorSlides.setTargetPosition(position);
         motorSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorSlides.setPower(power);
-
         while (motorSlides.isBusy()) myOpMode.idle();
         motorSlides.setPower(0);
-
-
         /*
         // With the external encoder, RUN_TO_POSITION does NOT work
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
@@ -420,25 +458,34 @@ public class MecanumRobot {
 
         runToPositionSlide(0, -0.5);
         runToPositionArm(0,-0.3);
+        // Calibrates arm position using touch sensor
+        // We don't need this because as long as robot is at 0 position when it's turned on
+        // the encoder will remember the position while power is on
+        ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
+        runtime2.reset();
+        setMotorPowerArm(-0.2);
+        while (runtime2.seconds()<0.5) {
+            if (touchSensor.isPressed()) {
+                myOpMode.telemetry.addData("Touch Sensor", "Is Pressed");
+                break;
+            }
+        }
+        setMotorPowerArm(0);
+        stopAndResetArmSlide();
+
     }
 
     public void AutoArmUp() {
-
-///////////// Kush/Derek/Caden please fill in. Replace it with RUN_TO_POSITION ////////////
-// Please refer to https://docs.google.com/document/d/1R7OXEbjb4L0bf-PC4Mc0G4GEzWzBPEjHFRGQvTE977w/edit?usp=sharing
-// Wrist up
-
-        runToPositionArm(dropPixelArmPosition,0.3);
+        runToPositionArm(autoArmUpArm,0.5);
         runToPositionSlide(slideMax, 0.5);
-        setServoPositionWrist(0.6);
-
+        setServoPositionWrist(autoArmUpWrist);
         /*
-        //Raises the left arm
+        //Raises the left arm to 3628 ticks
         ElapsedTime runtime2 = new ElapsedTime(); // prevent infinite loop
         runtime2.reset();
         setMotorPowerArm(0.5);
-        while (motorLeftArm.getCurrentPosition()<dropPixelArmPosition && runtime2.seconds() < 5) {
-            myOpMode.idle();
+        while (motorLeftArm.getCurrentPosition()<3629 && runtime2.seconds() < 5) {
+            idle();
         }
         setMotorPowerArm(0); // IMPORTANT: brake
 
@@ -446,33 +493,45 @@ public class MecanumRobot {
         ElapsedTime runtime = new ElapsedTime(); // prevent infinite loop
         runtime.reset();
         motorSlides.setPower(0.5);
-        while (motorSlides.getCurrentPosition()<slideMax && runtime.seconds() < 3) {
-            myOpMode.idle();
+        while (motorSlides.getCurrentPosition()<10119 && runtime.seconds() < 3) {
+            idle();
         }
         motorSlides.setPower(0); // IMPORTANT: brake
+        myOpMode.telemetry.addData("slide new position:",motorSlides.getCurrentPosition());
 
         // Puts down the wrist to position 0.6
         servoWrist.setPosition(0.6);
         */
-
     }
 
+    public void AutoSlidePickup() {
+        runToPositionArm(slidePickupArm,0.5);
+        runToPositionSlide(slideMax, 0.5);
+        setServoPositionWrist(wristDown);
+    }
+    public void AutoArmUpBack() {
+        runToPositionArm(autoArmUpBackArm, 0.5);
+        runToPositionSlide(autoArmUpBackSlide, 0.5);
+        setServoPositionWrist(autoArmUpBackWrist);
+
+    }
     public void AutoWristDown() {
-        // Puts the wrist down
-        servoWrist.setPosition(1);
-        myOpMode.sleep(1500);
         // Opens claws
         setServoPositionLeftHand(1);
         setServoPositionRightHand(0);
+        // Puts the wrist down
+        servoWrist.setPosition(wristDown);
+        //myOpMode.sleep(1500);
+
     }
 
     public void AutoWristUp() {
         // Closes claws
         setServoPositionLeftHand(0);
         setServoPositionRightHand(1);
-        myOpMode.sleep( 1500);
+        myOpMode.sleep( 1000);
         // Puts the wrist up
-        servoWrist.setPosition(0);
+        servoWrist.setPosition(wristUp);
     }
 
     /*
@@ -481,21 +540,17 @@ public class MecanumRobot {
     * Happens in the manual mode in front of the backdrop and the human player
     * and also in the auto mode before placing a purple pixel on the ground
     *
-    * (Wrong) Algorithm:
-    *
+    * Algorithm:
+    * (Wrong)
     * While under a timer
     * Moves forward until a color sensor detects blue or red
     * Rotates the other side of drivetrain so another color sensor can also meet the line
     *
-    * Algorithm to do if having time:
-    *
     * Moves forward until a color sensor detects the line
     * (Be aware the case that robot is already on the line)
-    *
     * While under a timer & NOT BOTH color sensors detect the line
     * 1. Rotates a little bit, which will always goes backward, because it rotates around the center
     * 2. Moves forward until a color sensor detects the line
-    * 3. Repeat
 
      */
     public void AutoLinePark(boolean findRightOrLeft) {
@@ -508,8 +563,7 @@ public class MecanumRobot {
         int redL=0;
 
         // First check once
-        // The robot might already be * on the line *
-
+        // The robot might already be on the line
         if (findRightOrLeft) {
             blue = getColorSensorBlue();
             red = getColorSensorRed();
@@ -518,12 +572,12 @@ public class MecanumRobot {
             redL = getLeftColorSensorRed();
         }
         if((blue >= getDefaultBlue() + blue_diff) ||  (red >= getDefaultRed() + red_diff)) {
-        //if((blue >= blue_threshold) ||  (red >= red_threshold)) {
+            //if((blue >= blue_threshold) ||  (red >= red_threshold)) {
             rightDetected = true;
             myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
         }
         if((blueL >= getLeftDefaultBlue() + blue_diff_left) ||  (redL >= getLeftDefaultRed() + red_diff_left)) {
-        //if((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+            //if((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
             leftDetected = true;
             myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
         }
@@ -558,12 +612,12 @@ public class MecanumRobot {
                 }
 
                 if((blue >= getDefaultBlue() + blue_diff) ||  (red >= getDefaultRed() + red_diff)) {
-                //if ((blue >= blue_threshold) || (red >= red_threshold)) {
+                    //if ((blue >= blue_threshold) || (red >= red_threshold)) {
                     rightDetected = true;
                     myOpMode.telemetry.addData("RIGHT LINE DETECTED", "");
                 }
                 if((blueL >= getLeftDefaultBlue() + blue_diff_left) ||  (redL >= getLeftDefaultRed() + red_diff_left)) {
-                //if ((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
+                    //if ((blueL >= blue_threshold_left) || (redL >= red_threshold_left)) {
                     leftDetected = true;
                     myOpMode.telemetry.addData("LEFT LINE DETECTED", "");
                 }
@@ -583,13 +637,21 @@ public class MecanumRobot {
                 myOpMode.telemetry.addData("Left Blue Threshold: ", blue_threshold_left);
                 myOpMode.telemetry.addData("Left Red Threshold: ", red_threshold_left);
                 */
-                myOpMode.sleep(100);
+                myOpMode.sleep(10);
                 //myOpMode.idle();
             }
             move(0, 0, 0, 0);
         }
     }
 
+    public String getPattern() {
+        return currentPattern;
+    }
+    protected void displayPattern(RevBlinkinLedDriver.BlinkinPattern pattern)
+    {
+        blinkinLedDriver.setPattern(pattern);
+        currentPattern = currentPattern.toString();
+    }
     public void intializeAprilTag()
     {
         tagProcessor = new AprilTagProcessor.Builder()
@@ -606,7 +668,7 @@ public class MecanumRobot {
                 .build();
     }
 
-    public AprilTagDetection tryDetectApriTag(int idCode)
+    public AprilTagDetection tryDetectAprilTag(int idCode)
     {
         AprilTagDetection aprilTagDetection = null;
         List<AprilTagDetection> myAprilTagDetections = tagProcessor.getDetections();

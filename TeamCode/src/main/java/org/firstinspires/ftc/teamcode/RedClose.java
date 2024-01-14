@@ -18,6 +18,7 @@ public class RedClose extends LinearOpMode {
     MecanumRobot robot = new MecanumRobot(this);
     @Override
     public void runOpMode() throws InterruptedException {
+        MecanumRobot robot = new MecanumRobot(this);
         robot.initialize();
         boolean debugMode = true;
         boolean aprilTagDetected = false;
@@ -160,6 +161,7 @@ public class RedClose extends LinearOpMode {
                 checkForRed = false; // will break the while loop
                 redDetected = true;
             }
+
             sleep(10);
         }
         //start scanning for april tag

@@ -42,6 +42,7 @@ public class BlueClose extends LinearOpMode {
 
             telemetry.update();
         }
+        //move robot to center spike mark
         robot.move(0,1,0,0.4);
         sleep(1000);
         robot.move(0,0,0,0);
@@ -154,7 +155,7 @@ public class BlueClose extends LinearOpMode {
             blue = robot.getColorSensorBlue();
             // default blue value in the gray (178)
             // blue value in the blue line (245...increased by 67)
-            if(blue >= robot.getDefaultBlue()+500) { // detects blue line
+            if(blue >= robot.getDefaultBlue() + MecanumRobot.blue_diff) { // detects blue line
                 robot.move(0,0,0,0); // brakes
                 checkForBlue = false; // will break the while loop\
                 blueDetected = true;
@@ -182,7 +183,6 @@ public class BlueClose extends LinearOpMode {
             ElapsedTime elapsedTime = new ElapsedTime();
             elapsedTime.reset();
             while (aprilTagRunning && opModeIsActive() && elapsedTime.milliseconds() < (6000 + (targetAprilTag - 1) * 1500)) {
-
                 aprilTagDetected = false;
                 AprilTagDetection myAprilTagDetection = robot.tryDetectApriTag(targetAprilTag);
                 telemetry.addData("target tag" , targetAprilTag);
