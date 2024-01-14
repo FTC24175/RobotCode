@@ -567,7 +567,7 @@ public class MecanumRobot {
 
         // First check once
         // The robot might already be on the line
-        if (rightOrLeft) {
+        if (findRightOrLeft) {
             blue = getColorSensorBlue();
             red = getColorSensorRed();
         } else {
