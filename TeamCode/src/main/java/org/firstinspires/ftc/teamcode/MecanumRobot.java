@@ -649,6 +649,14 @@ public class MecanumRobot {
         }
     }
 
+    public String getPattern() {
+        return currentPattern;
+    }
+    protected void displayPattern(RevBlinkinLedDriver.BlinkinPattern pattern)
+    {
+        blinkinLedDriver.setPattern(pattern);
+        currentPattern = currentPattern.toString();
+    }
     public void intializeAprilTag()
     {
         tagProcessor = new AprilTagProcessor.Builder()
